@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "donbosco-connect"
+version = "1.0.0"
+description = "Don Bosco Connect - Educational Platform API"
+authors = ["Don Bosco Tunis"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.0"
+djangorestframework = "^3.14"
+django-cors-headers = "^4.3"
+psycopg2-binary = "^2.9"
+python-dotenv = "^1.0"
+pydantic = "^2.5"
+httpx = "^0.26"
+pillow = "^10.2"
+django-filter = "^23.5"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.1"
+pytest = "^8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

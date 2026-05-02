@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+web/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+*.egg-info/
+db.sqlite3
+
+# Mobile (Expo)
+.expo/
+.expo-shared/
+*.jks
+*.keystore
+*.hbc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.log
