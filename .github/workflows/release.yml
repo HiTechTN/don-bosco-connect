@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      GH_TOKEN: ${{ github.token }}
     
     steps:
       - uses: actions/checkout@v4
@@ -44,12 +45,8 @@ jobs:
       - name: Upload artifacts to Release
         run: |
           gh release create "${{ github.ref_name }}" \
-            --title "Don Bosco Connect ${{ github.ref_name }}" \
+            --title "Don Bosco Connect v${{ github.ref_name }}" \
             --notes "Release v${{ github.ref_name }}" \
             --draft \
             don-bosco-connect-web.zip \
             don-bosco-connect-mobile.zip
-
-      - name: List Release
-        run: |
-          gh release list
