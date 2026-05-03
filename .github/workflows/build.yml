@@ -8,12 +8,17 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 1
+          
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -24,11 +29,6 @@ jobs:
           cd backend
           pip install -r requirements.txt
           
-      - name: Run migrations check
-        run: |
-          cd backend
-          python manage.py makemigrations --check || true
-          
       - name: Check Django
         run: |
           cd backend
@@ -38,11 +38,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 1
+          
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           
       - name: Install dependencies
         run: |
@@ -65,11 +67,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 1
+          
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           
       - name: Install dependencies
         run: |
