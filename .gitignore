@@ -1,43 +1,35 @@
-# Dependencies
-node_modules/
-.npm
-
-# Build outputs
-dist/
-build/
-*.egg-info/
-web/dist/
+# Build artifacts
+releases/
+mobile-release/
+web-release/
+*.zip
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
 venv/
-ENV/
 env/
 *.egg-info/
-db.sqlite3
 
-# Mobile (Expo)
+# Node
+node_modules/
+dist/
+build/
+
+# Mobile
 .expo/
-.expo-shared/
 *.jks
 *.keystore
-*.hbc
 
 # IDE
 .vscode/
 .idea/
 *.swp
-*.swo
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Environment
+# Env
 .env
 .env.local
-*.log
