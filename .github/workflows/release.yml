@@ -6,37 +6,61 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  build-and-release:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          path: artifacts
-
-      - name: Display structure
-        run: ls -R artifacts/
-
+          node-version: '22'
+          
+      - name: Build Web
+        run: |
+          cd web
+          npm install
+          npm run build
+          
+      - name: Build Mobile
+        run: |
+          cd mobile
+          npm install
+          npx expo export --platform web
+          
+      - name: Zip Web
+        run: |
+          cd web/dist
+          zip -r ../../don-bosco-connect-web.zip .
+          
+      - name: Zip Mobile
+        run: |
+          cd mobile/dist
+          zip -r ../../don-bosco-connect-mobile.zip .
+          
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*.zip
-          generate_release_notes: true
+          files: |
+            don-bosco-connect-web.zip
+            don-bosco-connect-mobile.zip
           name: ${{ github.ref_name }}
           body: |
-            ##Release Don Bosco Connect v${{ github.ref_name }}
+            Don Bosco Connect v${{ github.ref_name }}
             
-            ### Included:
-            - Web frontend (production build)
-            - Mobile web bundle
+            ## Web
+            Extract and serve:
+            ```bash
+            unzip don-bosco-connect-web.zip
+            cd dist
+            npx serve
+            ```
             
-            ### Installation:
-            
-            Web: Extract and serve with any web server
-            
-            Mobile (Web): Host the mobile/dist folder
+            ## Mobile (Web)
+            Host mobile folder or use with Expo Go
             
           draft: true
         env:
