@@ -32,6 +32,28 @@
 
 ---
 
+## 📸 Captures d'écran
+
+### Page d'accueil
+![Page d'accueil](screenshots/00-landing.png)
+
+### Connexion
+![Page de connexion](screenshots/02-login.png)
+
+### Tableau de bord Admin
+![Admin Dashboard](screenshots/03-admin.png)
+
+### Tableau de bord Professeur
+![Prof Dashboard](screenshots/04-prof.png)
+
+### Tableau de bord Étudiant
+![Student Dashboard](screenshots/07-student.png)
+
+### Tableau de bord Parent
+![Parent Dashboard](screenshots/06-parent.png)
+
+---
+
 ## 🖼️ Simulation du Projet
 
 ### 📱 Application Mobile
