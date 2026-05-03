@@ -111,12 +111,18 @@ jobs:
           name: mobile-web
           path: mobile/dist
           
+      - name: Zip artifacts
+        run: |
+          cd web/dist && zip -r ../../don-bosco-web.zip .
+          cd mobile/dist && zip -r ../../don-bosco-mobile.zip .
+          
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            web/dist/**/*
-            mobile/dist/**/*
-          generate_release_notes: true
+            don-bosco-web.zip
+            don-bosco-mobile.zip
+          name: ${{ github.ref_name }}
+          body: "Don Bosco Connect v${{ github.ref_name }} - Web & Mobile builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
