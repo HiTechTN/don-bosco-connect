@@ -2,15 +2,9 @@
 
 <div align="center">
 
-![Don Bosco Connect](https://img.shields.io/badge/Version-1.0.0-blue)
-![Python](https://img.shields.io/badge/Python-5.0+-3776AB?style=flat&logo=python&logoColor=white)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
-![Django](https://img.shields.io/badge/Django-5.0-092E20?style=flat&logo=django&logoColor=white)
-![License](https://img.shields.io/badge/License-Private-green)
-
 **La Plateforme Éducative Intégrée pour l'École Moderne**
 
-[English](README.md) · [Français](README.md) · [العربية](README.ar.md)
+[English](README.md) · [Français](README.fr.md) · [العربية](README.ar.md)
 
 </div>
 
@@ -22,8 +16,8 @@
 
 ### ✨ Fonctionnalités Principales
 
-| Feature | Description |
-|---------|-------------|
+| Fonctionnalité | Description |
+|----------------|-------------|
 | 🤖 **Apprentissage Adaptatif** | Contenu IA qui s'ajuste au niveau de chaque élève |
 | 👨‍🏫 **Collaboration** | Connecte élèves, profs et parents |
 | 🎮 **Gamification** | XP, badges, niveaux pour rester motivé |
@@ -85,7 +79,7 @@
 │          │  │ ⚠️ Ali Ben Ali - Risque élevé  │   │
 │          │  │ • Absences: 15/20              │   │
 │          │  │ • Notes: 8.5/20               │   │
-│          │  │ [Contacter la famille]          │   │
+│          │  │ [Contacter la familie]          │   │
 │          │  └────────────────────────────────┘   │
 │          │                                          │
 │  Sortie │  DERNIÈRES ACTIVITÉS                    │
@@ -127,11 +121,11 @@
 ### 👨‍🏫 Dashboard Professor
 
 ```
-┌──────────────────────────────────────���─────────────────────────┐
+┌────────────────────────────────────────────────────────────────┐
 │  Don Bosco Connect                   Prof. Martin | Maths     │
 ├──────────┬─────────────────────────────────────────────────┤
 │          │                                             │
-│ 📊 Dash │  MES COURS                                   │
+│ ���� Dash │  MES COURS                                   │
 │ 📚 Cours│  ┌─────────────────────────────────┐       │
 │ 📝 Dev  │  │ 📚 Mathématiques 3ème           │       │
 │ 📊 Analyt│  │ ████████████░░░░  75%         │       │
@@ -140,7 +134,7 @@
 │          │  └─────────────────────────────────┘       │
 │          │  ┌─────────────────────────────────┐       │
 │          │  │ 📚 Mathématiques Terminale       │       │
-│          │  │ ████░░░░░░░░░░░  25%         │       │
+│          │  │ ████░░░░░░░░░░░  25%        │       │
 │          │  │ 8 élèves / 25                  │       │
 │          │  └─────────────────────────────────┘       │
 │          │                                          │
@@ -168,29 +162,29 @@
 │                                                          │
 │   ┌─────────────────────────────────────────────────┐    │
 │   │              FRONTEND (Shared)                  │    │
-│   │  ┌─────────┐  ┌──────────┐  ┌──────────┐  │    │
-│   │  │  Web    │  │Electron  │  │  Mobile │  │    │
-│   │  │React.js │  │ Desktop │  │  Expo   │  │    │
-│   │  └─────────┘  └──────────┘  └──────────┘  │    │
+│   │  ┌─────────┐  ┌──────────┐  ┌──────────┐      │    │
+│   │  │  Web    │  │Electron  │  │  Mobile │      │    │
+│   │  │React.js │  │ Desktop │  │  Expo   │      │    │
+│   │  └─────────┘  └──────────┘  └──────────┘      │    │
 │   └─────────────────────────────────────────────────┘    │
 │                         │                            │
 │                         ▼                            │
 │   ┌─────────────────────────────────────────────────┐    │
 │   │              API REST (Django)                │    │
-│   │  ┌────────┐ ┌───────┐ ┌────────┐ ┌─────┐  │    │
-│   │  │Accounts│ │Courses│ │AI     │ │Assign│  │    │
-│   │  │  API   │ │ API  │ │ RAG   │ │ments│  │    │
-│   │  └────────┘ └───────┘ └────────┘ └─────┘  │    │
+│   │  ┌────────┐ ┌───────┐ ��─��──────┐ ┌─────┐   │    │
+│   │  │Accounts│ │Courses│ │AI     │ │Assign│   │    │
+│   │  │  API   │ │ API  │ │ RAG   │ │ments│   │    │
+│   │  └────────┘ └───────┘ └────────┘ └─────┘   │    │
 │   └─────────────────────────────────────────────────┘    │
 │                         │                            │
 │                         ▼                            │
 │   ┌─────────────────────────────────────────────────┐    │
 │   │              DATABASE & AI                       │    │
-│   │  ┌──────────────┐        ┌────────���─────┐      │    │
+│   │  ┌──────────────┐        ┌──────────────┐      │    │
 │   │  │ PostgreSQL  │        │   Ollama   │      │    │
 │   │  │  + pgvector │        │  (Qwen)    │      │    │
 │   │  └──────────────┘        └──────────────┘      │    │
-│   └─────────────────────────────────────────────────┘    │
+│   └─────────────────────��───────────────────────────┘    │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -261,7 +255,7 @@ Niveau = (Score_Quiz × 0.6) + (Vitesse_Réponse × 0.4)
 
 | Rôle | Permissions |
 |------|------------|
-| 👑 **Admin** | Gestion complète, analytiques, alertes déchet |
+| 👑 **Admin** | Gestion complète, analytiques, alertes décrochage |
 | 👨‍🏫 **Prof** | Cours, devoirs, notes, IA assistant |
 | 🎓 **Élève** | Cours, devoirs, mentor IA, gamification |
 | 👪 **Parent** | Suivi enfant, messaging |
