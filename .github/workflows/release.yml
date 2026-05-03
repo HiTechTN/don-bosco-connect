@@ -41,27 +41,15 @@ jobs:
           cd mobile/dist
           zip -r ../../don-bosco-connect-mobile.zip .
           
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            don-bosco-connect-web.zip
+      - name: Upload artifacts to Release
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "Don Bosco Connect ${{ github.ref_name }}" \
+            --notes "Release v${{ github.ref_name }}" \
+            --draft \
+            don-bosco-connect-web.zip \
             don-bosco-connect-mobile.zip
-          name: ${{ github.ref_name }}
-          body: |
-            Don Bosco Connect v${{ github.ref_name }}
-            
-            ## Web
-            Extract and serve:
-            ```bash
-            unzip don-bosco-connect-web.zip
-            cd dist
-            npx serve
-            ```
-            
-            ## Mobile (Web)
-            Host mobile folder or use with Expo Go
-            
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List Release
+        run: |
+          gh release list
