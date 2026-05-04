@@ -22,12 +22,9 @@ services:
 
   ollama:
     image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-    command: >
-      bash -c "ollama serve & sleep 5 && ollama pull qwen2.5:3b && wait"
+    command: ollama serve
     restart: unless-stopped
 
   backend:
@@ -36,10 +33,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    command: >
-      sh -c "python manage.py migrate &&
-      python manage.py collectstatic --noinput &&
-      gunicorn donbosco_connect.wsgi:application --bind 0.0.0.0:8000"
     environment:
       - DATABASE_URL=postgresql://donbosco:donbosco123@db:5432/don_bosco
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -50,10 +43,9 @@ services:
       - static_volume:/app/static
       - media_volume:/app/media
     depends_on:
-      db:
-        condition: service_healthy
-      ollama:
-        condition: service_started
+      - db
+      - ollama
+    command: sh -c "sleep 10 && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn donbosco_connect.wsgi:application --bind 0.0.0.0:8000"
     restart: unless-stopped
 
   web:
