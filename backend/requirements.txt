@@ -6,4 +6,4 @@ python-dotenv>=1.0
 pydantic>=2.5
 httpx>=0.26
 pillow>=10.2
-django-filter>=23.5
+django-filter>=23.5dj-database-url>=2.0
