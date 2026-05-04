@@ -34,6 +34,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
+      gunicorn donbosco_connect.wsgi:application --bind 0.0.0.0:8000"
     environment:
       - DATABASE_URL=postgresql://donbosco:donbosco123@db:5432/don_bosco
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -54,6 +60,8 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
+    ports:
+      - "3000:80"
     environment:
       - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api}
     depends_on:
