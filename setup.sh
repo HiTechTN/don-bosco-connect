@@ -43,8 +43,8 @@ install_local() {
     
     # Migrations
     info "Migrations Django..."
-    python manage.py migrate
-    python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn 2>/dev/null || true
+    python3 manage.py migrate
+    python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn 2>/dev/null || true
     
     # Ollama
     info "Installation Ollama..."
@@ -67,10 +67,10 @@ install_local() {
     
     succes "Installation locale terminée!"
     echo ""
-    echo "Pour démarrer:"
-    echo "  Backend: cd backend && python manage.py runserver"
-    echo "  Web: cd web && npm run dev"
-    echo "  Mobile: cd mobile && npx expo start"
+     echo "Pour démarrer:"
+     echo "  Backend: cd backend && python3 manage.py runserver"
+     echo "  Web: cd web && npm run dev"
+     echo "  Mobile: cd mobile && npx expo start"
 }
 
 # Installation Docker
@@ -90,20 +90,20 @@ OLLAMA_URL=http://ollama:11434
 OLLAMA_MODEL=qwen2.5:3b
 EOL
     
-    info "Démarrage des containeurs..."
-    docker-compose up -d --build
-    
-    # Attendre que les services soient prêts
-    info "Attente des services..."
-    sleep 30
-    
-    # Migrations
-    info "Migrations..."
-    docker-compose exec -T backend python manage.py migrate
-    
-    # Création superuser
-    info "Création superutilisateur..."
-    docker-compose exec -T backend python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn || true
+     info "Démarrage des containeurs..."
+     docker-compose up -d --build 2>/dev/null || docker compose up -d --build
+     
+     # Attendre que les services soient prêts
+     info "Attente des services..."
+     sleep 30
+     
+     # Migrations
+     info "Migrations..."
+     docker-compose exec -T backend python3 manage.py migrate 2>/dev/null || docker compose exec -T backend python3 manage.py migrate
+     
+     # Création superuser
+     info "Création superutilisateur..."
+     docker-compose exec -T backend python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn 2>/dev/null || docker compose exec -T backend python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn || true
     
     succes "Installation Docker terminée!"
     echo ""
