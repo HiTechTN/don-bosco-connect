@@ -27,7 +27,6 @@ services:
     command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn donbosco_connect.wsgi:application --bind 0.0.0.0:8000"
     environment:
       - DATABASE_URL=postgresql://donbosco:donbosco123@db:5432/don_bosco
-      - OLLAMA_BASE_URL=http://ollama:11434
       - DJANGO_SETTINGS_MODULE=donbosco_connect.settings
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-default-secret-key-change-me}
       - DEBUG=False
