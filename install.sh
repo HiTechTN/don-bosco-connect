@@ -1,6 +1,8 @@
 #!/bin/bash
 # Don Bosco Connect - Installation Automatique
-# Usage: curl -fsSL https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/master/install.sh | bash
+# Usage: curl -fsSL https://donbosco.tn/install.sh | bash
+# Or: gh repo clone HiTechTN/don-bosco-connect && cd don-bosco-connect && ./install.sh
+# For private repos: GITHUB_TOKEN=xxx curl -fsSL https://donbosco.tn/install.sh | bash
 
 set -e
 
@@ -41,7 +43,14 @@ if [[ -d "don-bosco-connect" ]]; then
     info "Mise à jour..."
     cd don-bosco-connect && git pull && cd ..
 else
-    git clone https://github.com/HiTechTN/don-bosco-connect.git
+    # Check for token
+    if [[ -n "$GITHUB_TOKEN" ]]; then
+        git clone https://${GITHUB_TOKEN}@github.com/HiTechTN/don-bosco-connect.git
+    elif command -v gh >/dev/null 2>&1; then
+        gh repo clone HiTechTN/don-bosco-connect
+    else
+        git clone https://github.com/HiTechTN/don-bosco-connect.git
+    fi
 fi
 success "Projet cloné!"
 
@@ -54,12 +63,11 @@ read -p "Votre choix (1/2): " choice
 
 cd don-bosco-connect
 
-case $choice in
-    1)
-        info "Installation via Docker..."
-        
-        # Création .env
-        cat > .env.docker << EOL
+# Auto-detect: use Docker if available, else local
+if command -v docker >/dev/null 2>&1 && (command -v docker-compose >/dev/null 2>&1 || docker compose version >/dev/null 2>&1); then
+    info "Docker détecté - Installation via Docker..."
+    
+    cat > .env.docker << EOL
 DB_NAME=don_bosco
 DB_USER=donbosco
 DB_PASSWORD=donbosco123
@@ -68,82 +76,52 @@ DB_PORT=5432
 OLLAMA_URL=http://ollama:11434
 OLLAMA_MODEL=qwen2.5:3b
 EOL
-        
-        info "Construction des images..."
-        docker-compose -f docker-compose.yml build
-        
-        info "Démarrage des services..."
-        docker-compose -f docker-compose.yml up -d
-        
-        info "Attente que les services soient prêts..."
-        sleep 30
-        
-        info "Migrations..."
-        docker-compose -f docker-compose.yml exec -T backend python manage.py migrate
-        
-        info "Création superutilisateur..."
-        docker-compose -f docker-compose.yml exec -T backend python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn --password admin123 || true
-        
-        success "Installation Docker terminée!"
-        echo ""
-        echo "Services disponibles:"
-        echo "  - Backend API: http://localhost:8000"
-        echo "  - Web: http://localhost:3000"
-        echo "  - Admin: http://localhost:8000/admin"
-        echo "  - API Docs: http://localhost:8000/api/"
-        ;;
-    2)
-        info "Installation locale..."
-        
-        # Backend
-        info "Configuration Backend..."
-        cd backend
-        cp env.example .env 2>/dev/null || true
-        pip install -r requirements.txt || pip3 install -r requirements.txt
-        
-        # PostgreSQL
-        info "Configuration PostgreSQL..."
-        sudo -u postgres psql -c "CREATE USER donbosco WITH PASSWORD 'donbosco123';" 2>/dev/null || true
-        sudo -u postgres psql -c "CREATE DATABASE don_bosco OWNER donbosco;" 2>/dev/null || true
-        
-        # Migrations
-        info "Migrations..."
-        python manage.py migrate || python3 manage.py migrate
-        
-        # Superuser
-        info "Superutilisateur..."
-        python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn --password admin123 2>/dev/null || true
-        
-        # Ollama
-        info "Installation Ollama..."
-        curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null || info "Ollama déjà installé"
-        ollama pull qwen2.5:3b 2>/dev/null || info "Modèle déjà présent"
-        
-        cd ..
-        
-        # Web
-        info "Configuration Web..."
-        cd web
-        npm install
-        cd ..
-        
-        # Mobile
-        info "Configuration Mobile..."
-        cd mobile
-        npm install
-        cd ..
-        
-        success "Installation locale terminée!"
-        echo ""
-        echo "Pour démarrer:"
-        echo "  Backend: cd backend && python manage.py runserver"
-        echo "  Web: cd web && npm run dev"
-        echo "  Mobile: cd mobile && npx expo start"
-        ;;
-    *)
-        error "Choix invalide"
-        ;;
-esac
+    
+    docker-compose -f docker-compose.yml build 2>/dev/null || docker compose -f docker-compose.yml build
+    docker-compose -f docker-compose.yml up -d 2>/dev/null || docker compose -f docker-compose.yml up -d
+    
+    info "Attente des services (30s)..."
+    sleep 30
+    
+    docker-compose -f docker-compose.yml exec -T backend python manage.py migrate 2>/dev/null || docker compose -f docker-compose.yml exec -T backend python manage.py migrate
+    docker-compose -f docker-compose.yml exec -T backend python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn --password admin123 2>/dev/null || true
+    
+    success "Installation Docker terminée!"
+    echo ""
+    echo "🌐 Services:"
+    echo "   Backend API : http://localhost:8000"
+    echo "   Web         : http://localhost:3000"
+    echo "   Admin       : http://localhost:8000/admin"
+    echo ""
+    echo "📝 Logs: docker-compose logs -f"
+    echo "🛑 Stop: docker-compose down"
+else
+    info "Docker non détecté - Installation locale..."
+    
+    cd backend
+    pip install -r requirements.txt 2>/dev/null || pip3 install -r requirements.txt
+    
+    sudo -u postgres psql -c "CREATE USER donbosco WITH PASSWORD 'donbosco123';" 2>/dev/null || true
+    sudo -u postgres psql -c "CREATE DATABASE don_bosco OWNER donbosco;" 2>/dev/null || true
+    
+    python manage.py migrate 2>/dev/null || python3 manage.py migrate
+    python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn --password admin123 2>/dev/null || true
+    
+    curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null || true
+    ollama pull qwen2.5:3b 2>/dev/null || true
+    
+    cd ..
+    
+    cd web && npm install && cd ..
+    cd mobile && npm install && cd ..
+    
+    success "Installation locale terminée!"
+    echo ""
+    echo "🚀 Démarrage:"
+    echo "   cd backend && python manage.py runserver"
+    echo "   cd web && npm run dev"
+    echo "   cd mobile && npx expo start"
+fi
 
 success "Installation terminée avec succès!"
 echo ""
