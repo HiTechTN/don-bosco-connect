@@ -300,6 +300,6 @@ Copyright © 2024 Don Bosco Tunis. Tous droits réservés.
 
 **Développé avec ❤️ pour l'éducation**
 
-[Site Web](https://donbosco.tn) · [Signaler un bug](https://github.com/HiTechTN/don-bosco-connect/issues)
+[Site Web](https://github.com/HiTechTN/don-bosco-connect) · [Signaler un bug](https://github.com/HiTechTN/don-bosco-connect/issues)
 
 </div>

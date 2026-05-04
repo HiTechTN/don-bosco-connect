@@ -7,11 +7,11 @@ Don Bosco Connect est la plateforme éducative de l'école Don Bosco Tunis. Cett
 ## 🚀 Accès à l'Application
 
 ### Web & Desktop
-- **URL** : https://donbosco.tn (ou localhost:5173 si local)
+- **URL** : https://github.com/HiTechTN/don-bosco-connect (ou localhost:3000 si local)
 - **Desktop** : Télécharger depuis [Releases](https://github.com/HiTechTN/don-bosco-connect/releases)
 
 ### Mobile
-- **iOS/Android** : Scanner QR code sur https://donbosco.tn/mobile
+- **iOS/Android** : Scanner QR code sur https://github.com/HiTechTN/don-bosco-connect/mobile
 - **APK** : Télécharger depuis Releases
 
 ---
@@ -107,6 +107,6 @@ Langues supportées : 🇬🇧 English | 🇫🇷 Français | 🇹🇳 العر�
 
 ## 📞 Support
 
-- **Email** : support@donbosco.tn
+- **Email** : support@donbosco-connect.tn
 - **Issues** : https://github.com/HiTechTN/don-bosco-connect/issues
-- **Docs** : https://docs.donbosco.tn
+- **Docs** : https://github.com/HiTechTN/don-bosco-connect/wiki

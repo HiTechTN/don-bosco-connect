@@ -1,8 +1,9 @@
 #!/bin/bash
 # Don Bosco Connect - Installation Automatique
-# Usage: curl -fsSL https://donbosco.tn/install.sh | bash
-# Or: gh repo clone HiTechTN/don-bosco-connect && cd don-bosco-connect && ./install.sh
-# For private repos: GITHUB_TOKEN=xxx curl -fsSL https://donbosco.tn/install.sh | bash
+# Usage: 
+#   gh repo clone HiTechTN/don-bosco-connect && cd don-bosco-connect && ./install.sh
+# Or with token:
+#   GITHUB_TOKEN=xxx gh repo clone HiTechTN/don-bosco-connect && cd don-bosco-connect && ./install.sh
 
 set -e
 
@@ -84,7 +85,7 @@ EOL
     sleep 30
     
     docker-compose -f docker-compose.yml exec -T backend python manage.py migrate 2>/dev/null || docker compose -f docker-compose.yml exec -T backend python manage.py migrate
-    docker-compose -f docker-compose.yml exec -T backend python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn --password admin123 2>/dev/null || true
+    docker-compose -f docker-compose.yml exec -T backend python manage.py createsuperuser --noinput --username admin --email admin@donbosco-connect.tn --password admin123 2>/dev/null || true
     
     success "Installation Docker terminée!"
     echo ""
@@ -105,7 +106,7 @@ else
     sudo -u postgres psql -c "CREATE DATABASE don_bosco OWNER donbosco;" 2>/dev/null || true
     
     python manage.py migrate 2>/dev/null || python3 manage.py migrate
-    python manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn --password admin123 2>/dev/null || true
+    python manage.py createsuperuser --noinput --username admin --email admin@donbosco-connect.tn --password admin123 2>/dev/null || true
     
     curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null || true
     ollama pull qwen2.5:3b 2>/dev/null || true

@@ -188,4 +188,4 @@ npm test
 ## 🆘 Support
 
 - Issues : https://github.com/HiTechTN/don-bosco-connect/issues
-- Email : contact@donbosco.tn
+- Email : contact@donbosco-connect.tn

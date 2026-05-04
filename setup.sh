@@ -44,7 +44,7 @@ install_local() {
     # Migrations
     info "Migrations Django..."
     python3 manage.py migrate
-    python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn 2>/dev/null || true
+    python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco-connect.tn 2>/dev/null || true
     
     # Ollama
     info "Installation Ollama..."
@@ -103,7 +103,7 @@ EOL
      
      # Création superuser
      info "Création superutilisateur..."
-     docker-compose exec -T backend python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn 2>/dev/null || docker compose exec -T backend python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco.tn || true
+     docker-compose exec -T backend python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco-connect.tn 2>/dev/null || docker compose exec -T backend python3 manage.py createsuperuser --noinput --username admin --email admin@donbosco-connect.tn || true
     
     succes "Installation Docker terminée!"
     echo ""
