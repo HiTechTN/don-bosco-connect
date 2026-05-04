@@ -8,3 +8,4 @@ httpx>=0.26
 pillow>=10.2
 django-filter>=23.5
 dj-database-url>=2.0
+gunicorn>=21.2
