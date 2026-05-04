@@ -6,21 +6,19 @@ services:
     environment:
       POSTGRES_DB: don_bosco
       POSTGRES_USER: donbosco
-      POSTGRES_PASSORD: donbosco123
+      POSTGRES_PASSWORD: donbosco123
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U donbosco"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
 
   ollama:
     image: ollama/ollama:latest
@@ -28,35 +26,23 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     command: >
       bash -c "ollama serve & sleep 5 && ollama pull qwen2.5:3b && wait"
+    restart: unless-stopped
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.backend
-    command: >
-      bash -c "cd /app && 
-      python manage.py migrate && 
-      python manage.py collectstatic --noinput && 
-      gunicorn donbosco_connect.wsgi:application --bind 0.0.0.0:8000"
-    volumes:
-      - ./backend:/app
-      - static_volume:/app/static
-      - media_volume:/app/media
-    ports:
-      - "8000:8000"
+      dockerfile: Dockerfile
     environment:
       - DATABASE_URL=postgresql://donbosco:donbosco123@db:5432/don_bosco
       - OLLAMA_BASE_URL=http://ollama:11434
       - DJANGO_SETTINGS_MODULE=donbosco_connect.settings
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-default-secret-key-change-me}
+      - DEBUG=False
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -67,28 +53,11 @@ services:
   web:
     build:
       context: ./web
-      dockerfile: Dockerfile.web
-    volumes:
-      - ./web:/app
-    ports:
-      - "3000:3000"
+      dockerfile: Dockerfile
     environment:
-      - VITE_API_URL=http://localhost:8000/api
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api}
     depends_on:
       - backend
-    restart: unless-stopped
-
-  mobile:
-    build:
-      context: ./mobile
-      dockerfile: Dockerfile.mobile
-    volumes:
-      - ./mobile:/app
-    ports:
-      - "19000:19000"
-      - "19006:19006"
-    environment:
-      - EXPO_PUBLIC_API_URL=http://localhost:8000/api
     restart: unless-stopped
 
 volumes:
