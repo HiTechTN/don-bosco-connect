@@ -1,0 +1,25 @@
+{
+  "app": {
+    "name": "Don Bosco Connect",
+    "tagline": "Votre plateforme éducative"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "mfa_code": "Code de vérification",
+    "forgot_password": "Mot de passe oublié ?"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "courses": "Cours",
+    "grades": "Notes",
+    "absences": "Absences",
+    "messages": "Messages",
+    "timetable": "Emploi du temps",
+    "quizzes": "Quiz",
+    "ai_mentor": "Mentor IA",
+    "settings": "Paramètres"
+  }
+}

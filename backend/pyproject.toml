@@ -1,0 +1,21 @@
+[project]
+name = "donbosco-connect"
+version = "0.1.0"
+description = "Don Bosco Connect - Plateforme éducative"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+select = ["E", "F", "I", "N", "W", "D", "UP", "ANN"]
+ignore = ["ANN101", "ANN102", "D100", "D104", "D107", "D203", "D212", "D213", "D401", "D404", "D406", "D407", "D413", "D415"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["D"]
+
+[tool.pytest.ini_options]
+testpaths = ["app/tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["app"]
