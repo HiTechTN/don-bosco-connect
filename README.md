@@ -12,7 +12,7 @@ Stack full **on-premise** : IA locale (Ollama), base vectorielle (pgvector), chi
 
 ## Vidéo de démonstration
 
-https://github.com/user-attachments/assets/506e0ad9-cdd7-4556-9fce-5f9055259e38
+<video src="https://github.com/HiTechTN/don-bosco-connect/raw/main/demo/demo_don_bosco.mp4" controls width="100%" poster="demo/screenshots/00_landing.png"></video>
 
 ---
 
