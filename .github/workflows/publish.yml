@@ -49,16 +49,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Make package public
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          sleep 5
-          gh api "/repos/${{ github.repository }}/packages/container/don-bosco-connect%2Fbackend/visibility" \
-            -X POST \
-            -f visibility=public \
-            --silent
-
   publish-frontend:
     runs-on: ubuntu-latest
     permissions:
@@ -97,16 +87,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Make package public
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          sleep 5
-          gh api "/repos/${{ github.repository }}/packages/container/don-bosco-connect%2Ffrontend/visibility" \
-            -X POST \
-            -f visibility=public \
-            --silent
-
   publish-nginx:
     runs-on: ubuntu-latest
     permissions:
@@ -144,13 +124,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Make package public
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          sleep 5
-          gh api "/repos/${{ github.repository }}/packages/container/don-bosco-connect%2Fnginx/visibility" \
-            -X POST \
-            -f visibility=public \
-            --silent
