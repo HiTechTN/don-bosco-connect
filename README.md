@@ -134,7 +134,12 @@ Ce script génère automatiquement :
 Ou étape par étape :
 
 ```bash
-docker compose up -d                             # Tout lancer
+# Compilation locale
+docker compose up -d
+
+# Ou utiliser les images pré-construites depuis GitHub Container Registry :
+docker compose -f docker-compose.yml -f docker-compose.ghcr.yml up -d
+
 docker compose exec api python scripts/init_db.py # Seed la base
 docker compose exec ollama ollama pull qwen2.5:7b-instruct  # Modèle chat
 docker compose exec ollama ollama pull nomic-embed-text      # Modèle embedding
@@ -339,6 +344,8 @@ don-bosco-connect/
 │   ├── prometheus.yml
 │   └── grafana/
 ├── docker-compose.yml
+├── docker-compose.ghcr.yml       # Utilise les images GHCR pré-construites
+├── docker-compose.dev.yml
 ├── .env.example
 ├── screenshots/               # Captures d'écran (README)
 ├── scripts/                   # Utilitaires
