@@ -49,19 +49,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Make package public
+      - name: Make backend package public
         run: |
           sleep 5
-          for tag in ${{ steps.meta.outputs.tags }}; do
-            PKG_NAME=$(echo "$tag" | sed 's|ghcr\.io/[^/]*/||')
-            break
-          done
-          echo "Setting $PKG_NAME to public..."
-          gh api "/orgs/${{ env.OWNER }}/packages/container/$PKG_NAME/visibility" \
+          gh api "/orgs/${{ env.OWNER }}/packages/container/don-bosco-connect%2Fbackend/visibility" \
             -X POST \
             -f visibility=public \
             2>/dev/null || true
-          echo "Done"
 
   publish-frontend:
     runs-on: ubuntu-latest
@@ -101,19 +95,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Make package public
+      - name: Make frontend package public
         run: |
           sleep 5
-          for tag in ${{ steps.meta.outputs.tags }}; do
-            PKG_NAME=$(echo "$tag" | sed 's|ghcr\.io/[^/]*/||')
-            break
-          done
-          echo "Setting $PKG_NAME to public..."
-          gh api "/orgs/${{ env.OWNER }}/packages/container/$PKG_NAME/visibility" \
+          gh api "/orgs/${{ env.OWNER }}/packages/container/don-bosco-connect%2Ffrontend/visibility" \
             -X POST \
             -f visibility=public \
             2>/dev/null || true
-          echo "Done"
 
   publish-nginx:
     runs-on: ubuntu-latest
@@ -156,8 +144,7 @@ jobs:
       - name: Make package public
         run: |
           sleep 5
-          PKG_NAME="don-bosco-connect/nginx"
-          gh api "/orgs/${{ env.OWNER }}/packages/container/$PKG_NAME/visibility" \
+          gh api "/orgs/${{ env.OWNER }}/packages/container/don-bosco-connect%2Fnginx/visibility" \
             -X POST \
             -f visibility=public \
             2>/dev/null || true
