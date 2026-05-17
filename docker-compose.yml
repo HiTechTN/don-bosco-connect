@@ -1,5 +1,3 @@
-version: '3.9'
-
 networks:
   donbosco_net:
     driver: bridge

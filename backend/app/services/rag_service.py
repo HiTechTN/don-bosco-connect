@@ -1,11 +1,10 @@
 import httpx
+import json
 from app.config import settings
-from app.models.base import DocumentChunk
+from app.models import DocumentChunk
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from pgvector.sqlalchemy import Vector
 from typing import AsyncGenerator, Optional
-import json
 
 SYSTEM_PROMPT = """Tu es le tuteur IA de {subject_name} au collège Don Bosco Tunis.
 Tu aides les élèves à comprendre leur programme de cours.
@@ -94,3 +93,21 @@ async def query_rag(
                     yield data["message"]["content"]
                 if data.get("done"):
                     break
+
+
+def call_ollama_sync(prompt: str, model: str = None, max_tokens: int = 4096) -> str:
+    """Synchronous call to Ollama (used by Celery tasks)."""
+    import httpx as sync_httpx
+    target_model = model or settings.OLLAMA_CHAT_MODEL
+    with sync_httpx.Client(timeout=120.0) as client:
+        resp = client.post(
+            f"{settings.OLLAMA_BASE_URL}/api/generate",
+            json={
+                "model": target_model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {"num_predict": max_tokens, "temperature": 0.3},
+            },
+        )
+        resp.raise_for_status()
+        return resp.json().get("response", "")
