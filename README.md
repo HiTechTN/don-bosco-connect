@@ -3,135 +3,45 @@
 [![CI](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/ci.yml/badge.svg)](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/ci.yml)
 [![Pages](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/deploy-pages.yml)
 [![Docker](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/publish.yml/badge.svg)](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/publish.yml)
-[![Docker](https://img.shields.io/badge/GHCR-images-blue?logo=github)](https://github.com/HiTechTN/don-bosco-connect/pkgs/container/don-bosco-connect%2Fbackend)
+[![GHCR](https://img.shields.io/badge/GHCR-images-blue?logo=github)](https://github.com/HiTechTN/don-bosco-connect/pkgs/container/don-bosco-connect%2Fbackend)
 
-Plateforme éducative sur-mesure pour le **Collège Don Bosco Tunis**.  
-Stack full **on-premise** : IA locale (Ollama), base vectorielle (pgvector), chiffrement AES-256, MFA, et notifications temps réel.
+**Don Bosco Connect** est une plateforme éducative sur-mesure pour le Collège Don Bosco Tunis — 100 % on-premise, IA locale, chiffrée de bout en bout.
 
 ---
 
-## Vidéo de démonstration
+## Démo
+
+**En ligne** → [hitechtn.github.io/don-bosco-connect](https://hitechtn.github.io/don-bosco-connect/)<br>
+**Vidéo** → [`demo/demo_don_bosco.mp4`](demo/demo_don_bosco.mp4) (3 min 13 s)
 
 <video src="https://github.com/HiTechTN/don-bosco-connect/raw/main/demo/demo_don_bosco.mp4" controls width="100%" poster="demo/screenshots/00_landing.png"></video>
 
----
+<details>
+<summary>📷 Voir les 29 captures d'écran</summary>
 
-## Architecture
+| Profil | Pages |
+|--------|-------|
+| **Admin** | [Dashboard](demo/screenshots/admin_02_dashboard.png) · [Utilisateurs](demo/screenshots/admin_03_users.png) · [Classes](demo/screenshots/admin_04_classes.png) · [Emploi du temps](demo/screenshots/admin_06_timetable.png) · [Audit](demo/screenshots/admin_07_audit.png) |
+| **Enseignant** | [Dashboard](demo/screenshots/teacher_02_dashboard.png) · [Cours](demo/screenshots/teacher_03_courses.png) · [Notes](demo/screenshots/teacher_04_grades.png) · [Absences](demo/screenshots/teacher_05_absences.png) · [Messages](demo/screenshots/teacher_06_messages.png) · [IA](demo/screenshots/teacher_07_ai.png) |
+| **Élève** | [Dashboard](demo/screenshots/student_02_dashboard.png) · [Notes](demo/screenshots/student_03_grades.png) · [Absences](demo/screenshots/student_04_absences.png) · [Emploi du temps](demo/screenshots/student_05_timetable.png) · [Quiz](demo/screenshots/student_06_quizzes.png) · [Mentor IA](demo/screenshots/student_07_ai.png) · [Gamification](demo/screenshots/student_08_gamification.png) |
+| **Parent** | [Dashboard](demo/screenshots/parent_02_dashboard.png) · [Notes](demo/screenshots/parent_03_grades.png) · [Absences](demo/screenshots/parent_04_absences.png) · [Messages](demo/screenshots/parent_05_messages.png) |
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    Frontend                          │
-│  React 18 + Vite + Tailwind (Web)                   │
-│  React Native + Expo 54 (Mobile)                    │
-└──────────┬──────────────────────────┬───────────────┘
-           │ HTTP/WS                   │ HTTPS
-┌──────────▼──────────────────────────▼───────────────┐
-│                    Nginx 1.25                        │
-│  Rate limiting · Security headers                   │
-└──────────┬──────────────────────────┬───────────────┘
-           │                          │
-┌──────────▼──────────┐  ┌───────────▼───────────────┐
-│   FastAPI 0.115      │  │   Workers (Celery)        │
-│   SQLAlchemy 2.0     │  │   Redis 7.2               │
-│   JWT + MFA + AES    │  └───────────────────────────┘
-└──────────┬───────────┘
-           │
-┌──────────▼──────────────────┐  ┌──────────────────────┐
-│  PostgreSQL 16 + pgvector   │  │   Ollama (externe)   │
-│  Données : users, notes,    │  │   deepseek-r1:14b    │
-│  absences, messages (AES)   │  │   nomic-embed-text   │
-│  Vecteurs IA (cosine dist)  │  │   (RAG pipeline)     │
-└─────────────────────────────┘  └──────────────────────┘
-           │
-┌──────────▼──────────┐
-│   MinIO (S3)        │
-│   Cours PDF/DOCX    │
-└─────────────────────┘
-```
-
-### Services
-
-| Service | Image | Port | Rôle |
-|---------|-------|------|------|
-| `db` | pgvector/pgvector:pg16 | 5432 | Base de données + vecteurs |
-| `redis` | redis:7.2-alpine | 6379 | Cache / files d'attente |
-| `minio` | minio/minio | 9000/9001 | Stockage fichiers |
-| `api` | custom | 8000 | FastAPI (backend) |
-| `worker` | custom | - | Celery worker |
-| `frontend` | custom | 80 | Nginx (static build) |
-| `nginx` | nginx:1.25-alpine | 8080 | Reverse proxy |
-
-> Ollama fonctionne sur un serveur externe (192.168.0.100:11434) — configurable via `OLLAMA_BASE_URL`.
-
----
-
-## Démonstration en ligne
-
-**→ https://hitechtn.github.io/don-bosco-connect/**
-
-### Captures d'écran
-
-#### Administration
-
-| Tableau de bord | Gestion utilisateurs | Classes & Matières |
-|:---:|:---:|:---:|
-| ![Dashboard](demo/screenshots/admin_02_dashboard.png) | ![Users](demo/screenshots/admin_03_users.png) | ![Classes](demo/screenshots/admin_04_classes.png) |
-
-| Emploi du temps | Journal d'audit |
-|:---:|:---:|
-| ![Timetable](demo/screenshots/admin_06_timetable.png) | ![Audit](demo/screenshots/admin_07_audit.png) |
-
-#### Enseignant
-
-| Dashboard | Cours | Notes |
-|:---:|:---:|:---:|
-| ![Dashboard](demo/screenshots/teacher_02_dashboard.png) | ![Cours](demo/screenshots/teacher_03_courses.png) | ![Notes](demo/screenshots/teacher_04_grades.png) |
-
-| Absences | Messages | Assistant IA |
-|:---:|:---:|:---:|
-| ![Absences](demo/screenshots/teacher_05_absences.png) | ![Messages](demo/screenshots/teacher_06_messages.png) | ![IA](demo/screenshots/teacher_07_ai.png) |
-
-#### Élève
-
-| Dashboard | Notes | Absences |
-|:---:|:---:|:---:|
-| ![Dashboard](demo/screenshots/student_02_dashboard.png) | ![Notes](demo/screenshots/student_03_grades.png) | ![Absences](demo/screenshots/student_04_absences.png) |
-
-| Emploi du temps | Quiz | Mentor IA | Gamification |
-|:---:|:---:|:---:|:---:|
-| ![Timetable](demo/screenshots/student_05_timetable.png) | ![Quiz](demo/screenshots/student_06_quizzes.png) | ![IA](demo/screenshots/student_07_ai.png) | ![Gamification](demo/screenshots/student_08_gamification.png) |
-
-#### Parent
-
-| Dashboard | Notes | Absences | Messages |
-|:---:|:---:|:---:|:---:|
-| ![Dashboard](demo/screenshots/parent_02_dashboard.png) | ![Notes](demo/screenshots/parent_03_grades.png) | ![Absences](demo/screenshots/parent_04_absences.png) | ![Messages](demo/screenshots/parent_05_messages.png) |
+</details>
 
 ---
 
 ## Installation
 
-### ⚡ Installation automatique (recommandé)
-
 ```bash
+# Automatique (recommandé)
 curl -sSL https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/scripts/install.sh | bash
-```
 
-> Détection automatique de Docker / Podman, génération de clés AES-256, migration de la base, seed des données de démonstration.
-
-#### Mode GHCR (images pré-construites)
-
-```bash
+# Mode GHCR (images pré-construites)
 USE_GHCR=1 GHCR_TOKEN=$(gh auth token) curl -sSL https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/scripts/install.sh | bash
-```
 
-### 📦 Installation manuelle
-
-```bash
-git clone https://github.com/HiTechTN/don-bosco-connect.git
-cd don-bosco-connect
-./scripts/setup.sh
-./scripts/start.sh
+# Manuelle
+git clone https://github.com/HiTechTN/don-bosco-connect.git && cd don-bosco-connect
+./scripts/setup.sh && ./scripts/start.sh
 ```
 
 ### Comptes de démonstration
@@ -147,143 +57,127 @@ cd don-bosco-connect
 
 | Script | Usage |
 |--------|-------|
-| `scripts/install.sh` | Installation automatique complète (curl \| bash) |
-| `scripts/setup.sh` | Configuration post-clonage (.env, SSL, clés) |
-| `scripts/start.sh` | Démarrage progressif de la stack |
-| `scripts/stop.sh` | Arrêt de tous les services |
-| `scripts/reset.sh` | Réinitialisation complète (⚠️ supprime les données) |
-| `scripts/healthcheck.sh` | Diagnostic de tous les services |
-| `scripts/backup.sh` | Sauvegarde PostgreSQL |
-| `scripts/init_db.py` | Seed des données de démonstration |
+| `install.sh` | Installation automatique (curl \| bash) |
+| `setup.sh` | Configuration post-clonage (.env, SSL, clés) |
+| `start.sh` / `stop.sh` | Démarrage / arrêt de la stack |
+| `reset.sh` | Réinitialisation complète (⚠️ données) |
+| `healthcheck.sh` | Diagnostic des services |
+| `backup.sh` | Sauvegarde PostgreSQL |
+| `init_db.py` | Seed des données de démonstration |
 
 ---
 
-## Développement
+## Architecture
 
-### Backend
-
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn app.main:app --reload --port 8000
-pytest -v
+```
+                    ┌─────────────────────┐
+                    │  React 18 + Vite     │  ← Web
+                    │  React Native (Expo) │  ← Mobile
+                    └─────────┬───────────┘
+                              │ HTTP / WS
+                    ┌─────────▼───────────┐
+                    │  Nginx 1.25          │  :8080
+                    │  Rate limiting · CSP │
+                    └─────────┬───────────┘
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+    ┌─────────▼──────┐  ┌────▼─────┐  ┌──────▼──────┐
+    │  FastAPI         │  │  Redis   │  │  Workers     │
+    │  SQLAlchemy      │  │  Cache   │  │  Celery      │
+    │  JWT + MFA + AES │  │  Queue   │  └─────────────┘
+    └─────────┬───────┘  └──────────┘
+              │
+    ┌─────────▼──────────────────┐  ┌──────────────────┐
+    │  PostgreSQL 16 + pgvector   │  │  Ollama (externe)│
+    │  Données · Vecteurs IA      │  │  LLM · Embeddings│
+    └─────────────────────────────┘  └──────────────────┘
+              │
+    ┌─────────▼──────────┐
+    │  MinIO (S3)         │
+    │  Cours PDF/DOCX     │
+    └─────────────────────┘
 ```
 
-### Frontend web
+| Service | Image | Port | Rôle |
+|---------|-------|------|------|
+| `db` | pgvector/pgvector:pg16 | 5432 | Base + vecteurs |
+| `redis` | redis:7.2-alpine | 6379 | Cache / queue |
+| `minio` | minio/minio | 9000-9001 | Stockage fichiers |
+| `api` | custom | 8000 | Backend FastAPI |
+| `worker` | custom | — | Tâches Celery |
+| `frontend` | custom | 80 | Static build nginx |
+| `nginx` | nginx:1.25-alpine | **8080** | Reverse proxy |
 
-```bash
-cd frontend
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # Production
-```
-
-### Mobile (React Native)
-
-```bash
-cd mobile
-npm install
-npx expo start
-```
-
-### Générer la vidéo de démonstration
-
-```bash
-nix-shell -p python3Packages.moviepy python3Packages.gtts python3Packages.pillow python3Packages.numpy
-# ou : pip install moviepy gtts pillow numpy
-
-python demo/generate_demo_video.py
-# Produit : demo/demo_don_bosco.mp4 + 6 fichiers audio .mp3
-```
-
-### Captures d'écran (Playwright)
-
-```bash
-# Stack lancée sur http://localhost:8080
-nix-shell -p glib -p nodejs --run "node /tmp/demo_screenshots.js"
-# Résultat : demo/screenshots/*.png (29 captures, 4 profils)
-```
-
----
-
-## API
-
-Documentation interactive (OpenAPI) : `http://localhost:8000/docs`
-
-### Endpoints principaux
-
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/v1/auth/login` | Authentification |
-| POST | `/api/v1/auth/refresh` | Rafraîchir JWT |
-| GET | `/api/v1/users` | Liste utilisateurs (admin) |
-| POST | `/api/v1/courses` | Créer un cours |
-| POST | `/api/v1/evaluations` | Créer une évaluation |
-| POST | `/api/v1/evaluations/{id}/grades` | Saisie de notes |
-| GET | `/api/v1/ai/chat/{conv_id}` | Chat avec Mentor IA (SSE) |
-| POST | `/api/v1/ai/quiz/generate` | Générer un quiz |
-| POST | `/api/v1/ai/quiz/submit` | Soumettre un quiz (score adaptatif) |
-| GET | `/api/v1/gamification/profile` | Profil XP / niveau |
-| GET | `/api/v1/gamification/leaderboard` | Classement |
-| GET | `/api/v1/gamification/at-risk` | Élèves à risque décrochage |
-| WS | `/ws/v1/notifications?token=` | WebSocket notifications |
-| WS | `/ws/v1/ai/stream/{conv_id}?token=` | WebSocket streaming IA |
-
----
-
-## Sécurité
-
-- **JWT** : access token 15 min, refresh token 7 jours
-- **MFA** : TOTP obligatoire pour admin & enseignants
-- **Chiffrement** : AES-256-GCM pour les messages privés
-- **Headers** : HSTS, CSP, X-Frame-Options, X-Content-Type-Options
-- **Rate limiting** : 20 req/s API, 5 req/m login
-- **On-premise** : aucune donnée en dehors du réseau local
+> Ollama : externe (configurable via `OLLAMA_BASE_URL`). Modèles : `deepseek-r1-tool-calling:14b`, `nomic-embed-text`.
 
 ---
 
 ## Fonctionnalités
 
-- **IA RAG locale** : déposez un PDF, l'IA répond basée sur le cours via pgvector + Ollama
-- **Quiz adaptatif** : score pondérant rapidité et historique (remediation / normal / advanced)
-- **Gamification** : XP, badges, streaks, leaderboard
-- **Décrochage** : algorithme prédictif (absences 35%, niveau adaptatif 30%, streaks 15%)
-- **Notifications temps réel** : WebSocket pour absences, notes
-- **Messagerie chiffrée** : AES-256-GCM entre parents, enseignants, administration
-- **Tableaux de bord analytics** : usage IA, distribution notes, statistiques quiz
-- **Application mobile** : React Native / Expo avec authentification MFA
+- **IA RAG locale** — PDF déposé → indexé → l'IA répond sur le contenu du cours uniquement
+- **Quiz adaptatif** — score selon rapidité + historique → niveau remediation / normal / advanced
+- **Gamification** — XP, badges (7), streaks, classement bienveillant
+- **Décrochage prédictif** — algorithme : absences 35 %, niveau 30 %, régularité 15 %
+- **Notifications temps réel** — WebSocket (absences, notes, messages)
+- **Messagerie chiffrée** — AES-256-GCM parents ↔ enseignants ↔ administration
+- **MFA** — TOTP obligatoire pour admin et enseignants
+- **Tableaux de bord analytics** — usage IA, distribution notes, quiz
+- **Application mobile** — React Native / Expo
 
 ---
 
-## Structure du projet
+## Sécurité
+
+| Mesure | Détail |
+|--------|--------|
+| Authentification | JWT (15 min) + refresh token (7 j) |
+| MFA | TOTP (admin & enseignants) |
+| Chiffrement | AES-256-GCM (messages privés) |
+| Headers | HSTS, CSP, X-Frame-Options, X-Content-Type-Options |
+| Rate limiting | API 20 req/s, login 5 req/m |
+| Hébergement | 100 % on-premise, zéro cloud |
+
+---
+
+## Développement
+
+```bash
+# Backend
+cd backend && python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+pytest -v
+
+# Frontend Web
+cd frontend && npm install && npm run dev  # :5173
+
+# Mobile
+cd mobile && npm install && npx expo start
+
+# Vidéo de démo
+pip install moviepy gtts pillow numpy
+python demo/generate_demo_video.py            # → demo/demo_don_bosco.mp4
+```
+
+API docs : `http://localhost:8000/docs`
+
+---
+
+## Structure
 
 ```
 don-bosco-connect/
-├── backend/
-│   ├── app/
-│   │   ├── api/v1/           # Routeurs FastAPI
-│   │   ├── core/             # Sécurité, permissions
-│   │   ├── models/           # SQLAlchemy
-│   │   ├── schemas/          # Pydantic
-│   │   ├── services/         # Logique métier
-│   │   └── workers/          # Tâches Celery
-│   ├── alembic/              # Migrations
-│   └── tests/
-├── frontend/
-│   └── src/
-│       ├── components/       # UI Kit
-│       ├── pages/            # admin/ teacher/ student/ parent/
-│       ├── lib/              # API helper, utils
-│       └── store/            # Zustand
-├── mobile/                   # React Native / Expo
-├── demo/                     # Démo : vidéo, captures, scripts
-│   ├── screenshots/          # 29 captures d'écran (4 profils)
-│   ├── generate_demo_video.py
-│   └── demo_don_bosco.mp4
-├── nginx/
-├── scripts/                  # Installation, maintenance
+├── backend/         # FastAPI · SQLAlchemy · Alembic · Celery
+│   ├── app/api/v1   # Routeurs
+│   ├── app/models   # SQLAlchemy
+│   ├── app/schemas  # Pydantic
+│   └── app/workers  # Tâches
+├── frontend/        # React 18 · Vite · Tailwind · shadcn/ui
+├── mobile/          # React Native / Expo
+├── demo/            # Vidéo · captures · scripts de démo
+├── nginx/           # Configuration reverse proxy
+├── scripts/         # Installation · maintenance
 ├── docker-compose.yml
 ├── docker-compose.ghcr.yml
 ├── docker-compose.override.yml
