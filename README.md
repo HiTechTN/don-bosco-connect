@@ -1,5 +1,10 @@
 # Don Bosco Connect
 
+[![CI](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/ci.yml/badge.svg)](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/ci.yml)
+[![Pages](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/deploy-pages.yml)
+[![Docker](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/publish.yml/badge.svg)](https://github.com/HiTechTN/don-bosco-connect/actions/workflows/publish.yml)
+[![Docker](https://img.shields.io/badge/GHCR-images-blue?logo=github)](https://github.com/HiTechTN/don-bosco-connect/pkgs/container/don-bosco-connect%2Fbackend)
+
 Plateforme éducative sur-mesure pour le **Collège Don Bosco Tunis**.  
 Stack full **on-premise** : IA locale (Ollama), base vectorielle (pgvector), chiffrement AES-256, MFA, et notifications temps réel.
 
