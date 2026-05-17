@@ -1,0 +1,25 @@
+services:
+
+  api:
+    image: ghcr.io/hitechtn/don-bosco-connect/backend:latest
+    build: []
+
+  worker:
+    image: ghcr.io/hitechtn/don-bosco-connect/backend:latest
+    build: []
+
+  beat:
+    image: ghcr.io/hitechtn/don-bosco-connect/backend:latest
+    build: []
+
+  flower:
+    image: ghcr.io/hitechtn/don-bosco-connect/backend:latest
+    build: []
+
+  frontend:
+    image: ghcr.io/hitechtn/don-bosco-connect/frontend:latest
+    build: []
+
+  nginx:
+    image: ghcr.io/hitechtn/don-bosco-connect/nginx:latest
+    build: []
