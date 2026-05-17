@@ -103,6 +103,22 @@ curl -sSL https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/scri
 > Détection automatique de Docker / Podman, génération de clés AES-256, migration de la base, seed des données de démonstration, téléchargement des modèles Ollama (Qwen 2.5 + nomic-embed-text).  
 > Compatible : Ubuntu, Debian, Fedora, Arch Linux, macOS (via Docker Desktop).
 
+#### Mode GHCR (images pré-construites)
+
+Utilisez les images Docker pré-construites depuis **GitHub Container Registry** au lieu de compiler localement :
+
+```bash
+USE_GHCR=1 GHCR_TOKEN=<github_token> curl -sSL https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/scripts/install.sh | bash
+```
+
+Le token GitHub nécessite la permission `read:packages`.  
+Si `gh` CLI est installé et authentifié, le token est détecté automatiquement.
+
+```bash
+# Alternative avec gh CLI
+USE_GHCR=1 GHCR_TOKEN=$(gh auth token) curl ... | bash
+```
+
 ### 📦 Installation manuelle
 
 #### Prérequis
