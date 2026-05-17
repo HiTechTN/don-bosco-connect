@@ -9,6 +9,14 @@ REPO_URL="https://github.com/HiTechTN/don-bosco-connect.git"
 REPO_DIR="don-bosco-connect"
 BRANCH="main"
 
+# ── Mode GHCR (images pré-construites) ──────────────────
+# Usage: USE_GHCR=1 GHCR_TOKEN=<github_token> curl ... | bash
+USE_GHCR="${USE_GHCR:-0}"
+GHCR_USER="${GHCR_USER:-HiTechTN}"
+GHCR_TOKEN="${GHCR_TOKEN:-}"
+COMPOSE_FILES="-f docker-compose.yml"
+[ "$USE_GHCR" = "1" ] && COMPOSE_FILES="-f docker-compose.yml -f docker-compose.ghcr.yml"
+
 PASS_COLOR='\033[0;32m'
 INFO_COLOR='\033[0;34m'
 WARN_COLOR='\033[1;33m'
@@ -114,6 +122,20 @@ fi
 
 pass_msg "Docker détecté : $DOCKER_CMD ($DOCKER_COMPOSE_CMD)"
 
+# ── Connexion GHCR ──────────────────────────────────────
+if [ "$USE_GHCR" = "1" ]; then
+    if [ -z "$GHCR_TOKEN" ]; then
+        warn_msg "GHCR_TOKEN non défini. Tentative avec gh CLI..."
+        GHCR_TOKEN=$(gh auth token 2>/dev/null || true)
+    fi
+    if [ -n "$GHCR_TOKEN" ]; then
+        echo "$GHCR_TOKEN" | $DOCKER_CMD login ghcr.io -u "$GHCR_USER" --password-stdin 2>/dev/null
+        pass_msg "Connecté à ghcr.io ($GHCR_USER)"
+    else
+        warn_msg "GHCR_TOKEN non disponible. Utilisation des images en cache uniquement."
+    fi
+fi
+
 # ── Cloner le dépôt ─────────────────────────────────────
 if [ -d "$REPO_DIR" ]; then
     warn_msg "Le répertoire $REPO_DIR existe déjà. Mise à jour..."
@@ -180,12 +202,12 @@ fi
 
 # ── L'infrastructure de base (DB, Redis, MinIO) ────────
 info_msg "Démarrage de l'infrastructure (DB, Redis, MinIO)..."
-$DOCKER_COMPOSE_CMD up -d db redis minio
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES up -d db redis minio
 
 # Attendre PostgreSQL
 info_msg "⏳ Attente de PostgreSQL..."
 for i in $(seq 1 30); do
-    if $DOCKER_COMPOSE_CMD exec -T db pg_isready -U donbosco_user -d donbosco 2>/dev/null; then
+    if $DOCKER_COMPOSE_CMD $COMPOSE_FILES exec -T db pg_isready -U donbosco_user -d donbosco 2>/dev/null; then
         pass_msg "PostgreSQL prêt"
         break
     fi
@@ -198,7 +220,7 @@ done
 
 # ── Lancer l'API pour exécuter les migrations ──────────
 info_msg "Démarrage de l'API (migrations Alembic + seed)..."
-$DOCKER_COMPOSE_CMD up -d api
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES up -d api
 
 info_msg "⏳ Attente de l'API..."
 for i in $(seq 1 30); do
@@ -209,7 +231,7 @@ for i in $(seq 1 30); do
     if [ "$i" -eq 30 ]; then
         error_msg "L'API ne répond pas après 30 secondes."
         info_msg "Logs de l'API :"
-        $DOCKER_COMPOSE_CMD logs --tail=20 api
+        $DOCKER_COMPOSE_CMD $COMPOSE_FILES logs --tail=20 api
         exit 1
     fi
     sleep 1
@@ -217,29 +239,29 @@ done
 
 # ── Seed ────────────────────────────────────────────────
 info_msg "Initialisation de la base de données..."
-$DOCKER_COMPOSE_CMD exec -T api python scripts/init_db.py
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES exec -T api python scripts/init_db.py
 pass_msg "Base de données initialisée"
 
 # ── Ollama modèles IA ──────────────────────────────────
 info_msg "Démarrage d'Ollama (téléchargement des modèles IA)..."
-$DOCKER_COMPOSE_CMD up -d ollama
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES up -d ollama
 
 info_msg "⏳ Téléchargement de qwen2.5:7b-instruct (plusieurs minutes)..."
-$DOCKER_COMPOSE_CMD exec -T ollama ollama pull qwen2.5:7b-instruct 2>&1 | tail -1
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES exec -T ollama ollama pull qwen2.5:7b-instruct 2>&1 | tail -1
 pass_msg "Modèle de chat téléchargé"
 
 info_msg "⏳ Téléchargement de nomic-embed-text..."
-$DOCKER_COMPOSE_CMD exec -T ollama ollama pull nomic-embed-text 2>&1 | tail -1
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES exec -T ollama ollama pull nomic-embed-text 2>&1 | tail -1
 pass_msg "Modèle d'embedding téléchargé"
 
 # ── Lancer le reste de la stack ────────────────────────
 info_msg "Démarrage de tous les services..."
-$DOCKER_COMPOSE_CMD up -d worker beat flower frontend nginx prometheus grafana
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES up -d worker beat flower frontend nginx prometheus grafana
 
 # ── Vérification finale ────────────────────────────────
 info_msg "Vérification de l'état de la stack..."
 sleep 5
-$DOCKER_COMPOSE_CMD ps --format "table {{.Name}}\t{{.Status}}" 2>/dev/null || true
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES ps --format "table {{.Name}}\t{{.Status}}" 2>/dev/null || true
 
 # Vérifier les healthchecks
 echo ""
@@ -269,8 +291,8 @@ echo "╚═══════════════════════�
 # ── Vérifier les services problématiques ───────────────
 echo ""
 info_msg "Résumé des services :"
-$DOCKER_COMPOSE_CMD ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null
+$DOCKER_COMPOSE_CMD $COMPOSE_FILES ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null
 
 echo ""
-echo -e "${INFO_COLOR}ℹ️  Utilisez '${DOCKER_COMPOSE_CMD} logs -f api' pour suivre les logs.${NC}"
-echo -e "${INFO_COLOR}ℹ️  Utilisez '${DOCKER_COMPOSE_CMD} down' pour arrêter tous les services.${NC}"
+echo -e "${INFO_COLOR}ℹ️  Utilisez '${DOCKER_COMPOSE_CMD} ${COMPOSE_FILES} logs -f api' pour suivre les logs.${NC}"
+echo -e "${INFO_COLOR}ℹ️  Utilisez '${DOCKER_COMPOSE_CMD} ${COMPOSE_FILES} down' pour arrêter tous les services.${NC}"
