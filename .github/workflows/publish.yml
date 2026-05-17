@@ -52,7 +52,7 @@ jobs:
       - name: Make backend package public
         run: |
           sleep 5
-          gh api "/orgs/${{ env.OWNER }}/packages/container/don-bosco-connect%2Fbackend/visibility" \
+          gh api "/repos/${{ github.repository }}/packages/container/don-bosco-connect%2Fbackend/visibility" \
             -X POST \
             -f visibility=public \
             --silent
@@ -98,7 +98,15 @@ jobs:
       - name: Make frontend package public
         run: |
           sleep 5
-          gh api "/orgs/${{ env.OWNER }}/packages/container/don-bosco-connect%2Ffrontend/visibility" \
+          gh api "/repos/${{ github.repository }}/packages/container/don-bosco-connect%2Ffrontend/visibility" \
+            -X POST \
+            -f visibility=public \
+            --silent
+
+      - name: Make nginx package public
+        run: |
+          sleep 5
+          gh api "/repos/${{ github.repository }}/packages/container/don-bosco-connect%2Fnginx/visibility" \
             -X POST \
             -f visibility=public \
             --silent
