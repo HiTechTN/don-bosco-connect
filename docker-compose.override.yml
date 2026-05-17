@@ -1,0 +1,14 @@
+services:
+
+  ollama:
+    profiles: ["disabled"]
+
+  api:
+    environment:
+      OLLAMA_BASE_URL: http://192.168.0.100:11434
+    volumes:
+      - ./scripts:/app/scripts:ro
+
+  worker:
+    environment:
+      OLLAMA_BASE_URL: http://192.168.0.100:11434

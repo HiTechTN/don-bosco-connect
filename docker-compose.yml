@@ -136,7 +136,6 @@ services:
     depends_on:
       - db
       - redis
-      - ollama
     networks: [donbosco_net]
 
   beat:
