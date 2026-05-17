@@ -57,50 +57,98 @@ Stack full **on-premise** : IA locale (Ollama), base vectorielle (pgvector), chi
 
 ---
 
-## Démarrage rapide
+## Démonstration
 
-### Prérequis
+> ### Accéder à la démo en ligne : [hitechtn.github.io/don-bosco-connect](https://hitechtn.github.io/don-bosco-connect/)
 
-- Docker & Docker Compose v2
-- GPU NVIDIA (recommandé pour Ollama) ou CPU
+### Page d'accueil
 
-### 1. Cloner & configurer
+![Hero](screenshots/01-hero.png)
+
+### Indicateurs clés
+
+![KPIs](screenshots/02-kpis.png)
+
+### Fonctionnalités par profil
+
+| Admin | Enseignant |
+|-------|-----------|
+| ![Admin](screenshots/03-features-admin.png) | ![Enseignant](screenshots/04-features-teacher.png) |
+
+| Élève | Parent |
+|-------|--------|
+| ![Élève](screenshots/05-features-student.png) | ![Parent](screenshots/06-features-parent.png) |
+
+### Aperçu complet
+
+![Plein page](screenshots/07-fullpage.png)
+
+---
+
+## Installation
+
+### ⚡ Installation automatique (recommandé)
+
+Une seule commande pour tout installer (Docker, clés sécurisées, base de données, modèles IA) :
 
 ```bash
-git clone https://github.com/DonBoscoTunis/don-bosco-connect.git
+curl -sSL https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/scripts/install.sh | bash
+```
+
+> Détection automatique de Docker / Podman, génération de clés AES-256, migration de la base, seed des données de démonstration, téléchargement des modèles Ollama (Qwen 2.5 + nomic-embed-text).  
+> Compatible : Ubuntu, Debian, Fedora, Arch Linux, macOS (via Docker Desktop).
+
+### 📦 Installation manuelle
+
+#### Prérequis
+
+- Docker & Docker Compose v2 (ou Podman)
+- GPU NVIDIA recommandé pour Ollama (fonctionne aussi sur CPU)
+
+#### 1. Cloner
+
+```bash
+git clone https://github.com/HiTechTN/don-bosco-connect.git
 cd don-bosco-connect
-cp .env.example .env
-# Éditer .env : clés secrètes, mots de passe, etc.
 ```
 
-### 2. Lancer la stack
+#### 2. Configurer l'environnement
 
 ```bash
-docker compose up -d
+./scripts/setup.sh
 ```
 
-### 3. Initialiser la base
+Ce script génère automatiquement :
+- Les clés secrètes `SECRET_KEY` et `ENCRYPTION_KEY` (AES-256)
+- Les mots de passe pour PostgreSQL, Redis, MinIO, Grafana
+- Les certificats SSL auto-signés pour le développement
+
+#### 3. Lancer la stack
 
 ```bash
-docker compose exec api python scripts/init_db.py
+./scripts/start.sh
 ```
 
-### 4. Télécharger les modèles Ollama
+> Démarrage progressif : infrastructure (DB, Redis, MinIO) → Ollama → API → Workers → Frontend.
+
+Ou étape par étape :
 
 ```bash
-docker compose exec ollama ollama pull qwen2.5:7b-instruct
-docker compose exec ollama ollama pull nomic-embed-text
+docker compose up -d                             # Tout lancer
+docker compose exec api python scripts/init_db.py # Seed la base
+docker compose exec ollama ollama pull qwen2.5:7b-instruct  # Modèle chat
+docker compose exec ollama ollama pull nomic-embed-text      # Modèle embedding
 ```
 
-### 5. Accéder
+#### 4. Accéder
 
 | Interface | URL |
 |-----------|-----|
-| Application | https://donbosco.local |
+| Application | http://localhost:80 |
+| API (docs) | http://localhost:8000/docs |
 | MinIO Console | http://localhost:9001 |
-| Flower | http://localhost:5555 |
-| Prometheus | http://localhost:9090 |
-| Grafana | http://localhost:3000 |
+| Flower (Celery) | http://localhost:5555 |
+| Grafana | http://localhost:3001 |
 
 ### Comptes de démonstration
 
@@ -110,6 +158,19 @@ docker compose exec ollama ollama pull nomic-embed-text
 | Enseignant | karim.hamdi@donbosco.tn | teacher123! |
 | Élève | adam.slim@donbosco.tn | student123! |
 | Parent | ahmed.slim@parent.tn | parent123! |
+
+### Scripts disponibles
+
+| Script | Usage |
+|--------|-------|
+| `scripts/install.sh` | Installation automatique complète (curl \| bash) |
+| `scripts/setup.sh` | Configuration post-clonage (.env, SSL, clés) |
+| `scripts/start.sh` | Démarrage progressif de la stack |
+| `scripts/stop.sh` | Arrêt de tous les services |
+| `scripts/reset.sh` | Réinitialisation complète (⚠️ supprime les données) |
+| `scripts/healthcheck.sh` | Diagnostic de tous les services |
+| `scripts/backup.sh` | Sauvegarde PostgreSQL |
+| `start_demo.sh` | Démo rapide (backend SQLite + frontend Vite, sans Docker) |
 
 ---
 
@@ -156,9 +217,14 @@ npx expo start
 pip install gtts moviepy pillow numpy
 python demo/generate_audio.py   # TTS
 python demo/generate_video.py   # Montage
-# Avec captures réelles (stack lancée) :
-pip install playwright && playwright install chromium
-python demo/capture_screenshots.py --base-url https://donbosco.local
+```
+
+### Captures d'écran (README)
+
+```bash
+# Avec la stack lancée (http://localhost:5173) :
+pip install playwright selenium webdriver-manager
+python scripts/capture_screenshots.py
 ```
 
 ---
@@ -229,10 +295,16 @@ Variables requises dans `.env` :
 ### Sauvegarde
 
 ```bash
-./scripts/backup.sh
+./scripts/backup.sh          # DB PostgreSQL → /backups/postgres/
 ```
 
-Sauvegarde : dump PostgreSQL + export MinIO → `/backups/`
+Rétention : 30 jours (configurable dans le script).  
+Pour une sauvegarde complète (DB + MinIO) :
+
+```bash
+docker compose exec minio mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+docker compose exec minio mc mirror local/courses /backups/minio/
+```
 
 ---
 
@@ -267,10 +339,26 @@ don-bosco-connect/
 │   ├── prometheus.yml
 │   └── grafana/
 ├── docker-compose.yml
-└── .env.example
+├── .env.example
+├── screenshots/               # Captures d'écran (README)
+├── scripts/                   # Utilitaires
+│   ├── install.sh             # Installation automatique (curl | bash)
+│   ├── setup.sh               # Configuration post-clonage
+│   ├── start.sh               # Démarrage progressif
+│   ├── stop.sh                # Arrêt des services
+│   ├── reset.sh               # Réinitialisation complète
+│   ├── healthcheck.sh         # Diagnostic des services
+│   ├── backup.sh              # Sauvegarde PostgreSQL
+│   ├── init_db.py             # Seed des données de démo
+│   └── ollama-entrypoint.sh   # Pull automatique des modèles IA
+└── docker-compose.dev.yml
 ```
 
 ---
+
+## Démo en ligne
+
+**→ https://hitechtn.github.io/don-bosco-connect/**
 
 ## Licence
 
