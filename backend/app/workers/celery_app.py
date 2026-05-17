@@ -19,15 +19,16 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     beat_schedule={
         "compute-daily-analytics": {
-            "task": "app.workers.tasks.compute_daily_analytics",
-            "schedule": 86400.0,  # daily
+            "task": "app.workers.notification_tasks.compute_daily_analytics",
+            "schedule": 86400.0,
         },
         "check-dropout-risk": {
-            "task": "app.workers.tasks.check_dropout_risk",
-            "schedule": 43200.0,  # every 12 hours
+            "task": "app.workers.notification_tasks.check_dropout_risk",
+            "schedule": 43200.0,
         },
     },
 )
 
-# Import tasks so they are registered
-from app.workers import tasks  # noqa: E402, F401
+from app.workers import document_tasks  # noqa: E402, F401
+from app.workers import notification_tasks  # noqa: E402, F401
+from app.workers import ai_tasks  # noqa: E402, F401

@@ -23,18 +23,7 @@ def upgrade() -> None:
     op.execute('CREATE EXTENSION IF NOT EXISTS "pgcrypto"')
     op.execute('CREATE EXTENSION IF NOT EXISTS "vector"')
 
-    # Enums
-    op.execute("CREATE TYPE user_role AS ENUM ('admin', 'teacher', 'student', 'parent')")
-    op.execute("CREATE TYPE user_status AS ENUM ('active', 'inactive', 'suspended')")
-    op.execute("CREATE TYPE schedule_day AS ENUM ('monday','tuesday','wednesday','thursday','friday','saturday')")
-    op.execute("CREATE TYPE file_type AS ENUM ('pdf', 'video', 'image', 'document', 'audio', 'other')")
-    op.execute("CREATE TYPE processing_status AS ENUM ('pending', 'processing', 'indexed', 'failed')")
-    op.execute("CREATE TYPE evaluation_type AS ENUM ('quiz', 'devoir', 'examen', 'controle', 'oral', 'projet')")
-    op.execute("CREATE TYPE difficulty_level AS ENUM ('remediation', 'normal', 'advanced')")
-    op.execute("CREATE TYPE message_role AS ENUM ('user', 'assistant', 'system')")
-    op.execute("CREATE TYPE absence_type AS ENUM ('absence', 'retard', 'exclusion')")
-    op.execute("CREATE TYPE justification_status AS ENUM ('pending', 'justified', 'unjustified')")
-    op.execute("CREATE TYPE notification_type AS ENUM ('absence', 'grade_published', 'message', 'ai_response', 'quiz_available', 'event', 'system', 'decrochage_alert')")
+    # Enums (created automatically by sa.Enum in table definitions)
 
     # Users
     op.create_table(

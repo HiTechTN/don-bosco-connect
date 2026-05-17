@@ -17,6 +17,7 @@ from app.api.v1.notifications import router as notifications_router
 from app.api.v1.reports import router as reports_router
 from app.api.v1.ai import router as ai_router
 from app.api.v1.gamification import router as gamification_router
+from app.api.v1.events import router as events_router
 
 v1_router = APIRouter(prefix="/api/v1")
 
@@ -37,4 +38,5 @@ v1_router.include_router(notifications_router)
 v1_router.include_router(reports_router)
 v1_router.include_router(ai_router)
 v1_router.include_router(gamification_router)
+v1_router.include_router(events_router)
 # WebSocket router is included directly in main.py (no prefix)

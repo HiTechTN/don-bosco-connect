@@ -32,6 +32,10 @@ import StudentGamification from './pages/student/GamificationPage';
 import ParentDashboard from './pages/parent/DashboardPage';
 import ParentGrades from './pages/parent/GradesPage';
 import ParentAbsences from './pages/parent/AbsencesPage';
+import ParentMessages from './pages/parent/MessagesPage';
+
+// Teacher messages
+import TeacherMessages from './pages/teacher/MessagesPage';
 
 const queryClient = new QueryClient();
 
@@ -57,6 +61,7 @@ function App() {
             <Route path="courses" element={<TeacherCourses />} />
             <Route path="grades" element={<TeacherGrades />} />
             <Route path="absences" element={<TeacherAbsences />} />
+            <Route path="messages" element={<TeacherMessages />} />
             <Route path="ai" element={<TeacherAI />} />
           </Route>
           <Route path="/student" element={<Layout />}>
@@ -74,6 +79,7 @@ function App() {
             <Route path="dashboard" element={<ParentDashboard />} />
             <Route path="grades" element={<ParentGrades />} />
             <Route path="absences" element={<ParentAbsences />} />
+            <Route path="messages" element={<ParentMessages />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

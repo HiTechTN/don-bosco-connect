@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy import text
 
 from app.config import settings
-from app.models.base import User, UserRole, AcademicYear, Class, ClassEnrollment, Subject, StudentParentLink, StudentProfile, Badge
+from app.models import User, UserRole, AcademicYear, Class, ClassEnrollment, Subject, StudentParentLink, StudentProfile, Badge
 from app.core.security import hash_password
 
 

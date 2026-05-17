@@ -14,6 +14,7 @@ from sqlalchemy import select
 from app.models.base import User, RefreshToken
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
 from app.core.exceptions import ConflictException
+import uuid
 
 
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> Tuple[Optional[User], Optional[str]]:
@@ -43,7 +44,7 @@ async def generate_tokens(db: AsyncSession, user: User) -> Tuple[str, str]:
     access_token = create_access_token(user_id=str(user.id), role=user.role)
     refresh_token_raw, refresh_token_hash = create_refresh_token(user_id=str(user.id))
     refresh_token = RefreshToken(
-        id=secrets.token_urlsafe(32),
+        id=uuid.uuid4(),
         user_id=user.id,
         token_hash=refresh_token_hash,
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
