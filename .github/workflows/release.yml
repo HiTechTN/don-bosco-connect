@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build Web
+        run: |
+          cd web
+          npm install
+          npm run build
+
+      - name: Build Mobile
+        run: |
+          cd mobile
+          npm install
+          npx expo export --platform web
+
+      - name: Package builds
+        run: |
+          cd web/dist && zip -r ../../don-bosco-connect-web.zip . && cd ../..
+          cd mobile/dist && zip -r ../../don-bosco-connect-mobile.zip . && cd ../..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            don-bosco-connect-web.zip
+            don-bosco-connect-mobile.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}

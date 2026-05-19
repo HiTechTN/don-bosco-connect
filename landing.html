@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Don Bosco Connect - Plateforme Éducative Intelligente</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .hero { padding: 60px 20px; text-align: center; color: white; }
+        .hero h1 { font-size: 3.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .hero p { font-size: 1.3rem; margin-bottom: 30px; opacity: 0.95; }
+        .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: all 0.3s; }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-secondary { background: transparent; color: white; border: 2px solid white; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .features { background: white; padding: 80px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .features h2 { text-align: center; font-size: 2.5rem; margin-bottom: 50px; color: #333; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+        .feature-card { text-align: center; padding: 30px; border-radius: 15px; background: #f8f9fa; transition: transform 0.3s; }
+        .feature-card:hover { transform: translateY(-10px); }
+        .feature-icon { font-size: 3rem; margin-bottom: 20px; }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 15px; color: #667eea; }
+        .demo-section { background: #f8f9fa; padding: 80px 20px; text-align: center; }
+        .demo-section h2 { font-size: 2.5rem; margin-bottom: 30px; color: #333; }
+        .demo-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+        .demo-link { padding: 15px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s; }
+        .demo-link:hover { background: #764ba2; }
+        footer { background: #333; color: white; text-align: center; padding: 40px 20px; }
+        .lang-switch { position: absolute; top: 20px; right: 20px; }
+        .lang-switch a { color: white; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="lang-switch">
+        <a href="?lang=fr">FR</a> | <a href="?lang=en">EN</a> | <a href="?lang=ar">عربي</a>
+    </div>
+
+    <section class="hero">
+        <div class="container">
+            <h1>🎓 Don Bosco Connect</h1>
+            <p>La plateforme éducative intelligente propulsée par l'IA</p>
+            <p style="font-size: 1rem; margin-top: 10px;">Multilingue • Adaptive Learning • Open Source</p>
+            <div class="cta-buttons">
+                <a href="#demo" class="btn btn-primary">🚀 Voir la Démo</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect" class="btn btn-secondary">📦 GitHub</a>
+                <a href="#install" class="btn btn-secondary">⚙️ Installation</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>✨ Fonctionnalités Principales</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>IA Adaptative</h3>
+                    <p>Apprentissage personnalisé avec Ollama. Le système ajuste le niveau automatiquement selon vos performances.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Multilingue</h3>
+                    <p>Disponible en Français, Anglais et Arabe (RTL supporté). Interface adaptée à chaque culture.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Gestion des Rôles</h3>
+                    <p>Admin, Professeur, Élève, Parent - Chaque rôle a son espace dédié et ses fonctionnalités.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Multi-Plateforme</h3>
+                    <p>Web (React), Mobile (React Native), Desktop (Electron) - Une expérience unifiée partout.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Suivi en Temps Réel</h3>
+                    <p>Tableaux de bord, statistiques, quiz interactifs et suivi de progression pour tous les utilisateurs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Open Source</h3>
+                    <p>Code transparent, auto-hébergeable, Docker-ready. Contribuez sur GitHub !</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2>🎬 Découvrez Don Bosco Connect</h2>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 30px;">
+                Testez l'application avec un compte de démonstration
+            </p>
+            <div class="demo-links">
+                <a href="http://localhost:3000" class="demo-link">🌐 Version Web</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect/releases" class="demo-link">📦 Télécharger</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect" class="demo-link">💻 Code Source</a>
+            </div>
+            <div style="margin-top: 50px; padding: 30px; background: white; border-radius: 15px; text-align: left;">
+                <h3 style="color: #667eea; margin-bottom: 20px;">Comptes de Test</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div>
+                        <strong>👨‍💼 Admin</strong><br>
+                        Email: admin@donbosco-connect.tn<br>
+                        Mot de passe: admin123
+                    </div>
+                    <div>
+                        <strong>👨‍🏫 Professeur</strong><br>
+                        Email: prof@donbosco-connect.tn<br>
+                        Mot de passe: prof123
+                    </div>
+                    <div>
+                        <strong>👨‍🎓 Élève</strong><br>
+                        Email: eleve@donbosco-connect.tn<br>
+                        Mot de passe: eleve123
+                    </div>
+                    <div>
+                        <strong>👪 Parent</strong><br>
+                        Email: parent@donbosco-connect.tn<br>
+                        Mot de passe: parent123
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="install" class="features">
+        <div class="container">
+            <h2>⚙️ Installation Rapide</h2>
+            <div style="background: #1e1e1e; color: #d4d4d4; padding: 30px; border-radius: 10px; text-align: left; margin-top: 30px; font-family: 'Courier New', monospace;">
+                <p style="color: #4ec9b0;"># Cloner et installer avec Docker (recommandé)</p>
+                <p>git clone https://github.com/HiTechTN/don-bosco-connect.git</p>
+                <p>cd don-bosco-connect</p>
+                <p>./setup.sh --docker</p>
+                <br>
+                <p style="color: #4ec9b0;"># Ou avec gh CLI</p>
+                <p>gh repo clone HiTechTN/don-bosco-connect</p>
+                <p>cd don-bosco-connect && ./install.sh</p>
+            </div>
+            <div style="margin-top: 30px;">
+                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/INTEGRATION.md" class="btn btn-primary" style="color: #667eea;">📖 Guide Intégrateur</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/USER_GUIDE.md" class="btn btn-secondary" style="margin-left: 20px;">📘 Guide Utilisateur</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Don Bosco Connect © 2026 - Propulsé par Open Source</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">
+            <a href="https://github.com/HiTechTN/don-bosco-connect" style="color: #667eea;">GitHub</a> | 
+            <a href="https://github.com/HiTechTN/don-bosco-connect/issues" style="color: #667eea;">Signaler un bug</a> | 
+            <a href="mailto:contact@donbosco-connect.tn" style="color: #667eea;">Contact</a>
+        </p>
+    </footer>
+</body>
+</html>
