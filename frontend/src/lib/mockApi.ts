@@ -216,12 +216,21 @@ interface MockRequest {
   url: string;
   data?: any;
   params?: Record<string, any>;
+  headers?: Record<string, string>;
+}
+
+function extractToken(req: MockRequest): string {
+  const sessionToken = sessionStorage.getItem('access_token');
+  if (sessionToken) return sessionToken;
+  const authHeader = req.headers?.Authorization || req.headers?.authorization || '';
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1] : '';
 }
 
 export function handleMockRequest(req: MockRequest) {
   const { method, url, data, params } = req;
   const path = url.replace(/^\/api\/v1/, '');
-  const token = sessionStorage.getItem('access_token');
+  const token = extractToken(req);
   const currentUser = token ? DEMO_USERS.find(u => token.includes(u.id)) || DEMO_USERS[0] : null;
 
   // Auth

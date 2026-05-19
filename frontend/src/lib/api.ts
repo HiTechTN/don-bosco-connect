@@ -23,6 +23,7 @@ if (useMock) {
       url: config.url || '',
       data: config.data ? (typeof config.data === 'string' ? JSON.parse(config.data) : config.data) : undefined,
       params: config.params,
+      headers: config.headers as Record<string, string>,
     };
     const mockResponse = handleMockRequest(mockReq);
     if (mockResponse.status >= 200 && mockResponse.status < 300) {
