@@ -31,7 +31,7 @@ class EventUpdate(BaseModel):
 class EventResponse(EventBase):
     id: uuid.UUID
     created_by: Optional[uuid.UUID] = None
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True

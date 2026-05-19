@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 import uuid
 from decimal import Decimal
+from datetime import datetime
 
 
 class SubjectBase(BaseModel):
@@ -28,7 +29,7 @@ class SubjectUpdate(BaseModel):
 
 class SubjectResponse(SubjectBase):
     id: uuid.UUID
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True

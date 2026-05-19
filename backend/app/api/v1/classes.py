@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, or_, update
+from sqlalchemy import select, func, and_, or_, update, delete
 from typing import Optional
 import uuid
 
@@ -100,7 +100,26 @@ async def list_classes(
         query = query.where(Class.main_teacher_id == uuid.UUID(teacher_id))
     result = await db.execute(query)
     classes = result.scalars().all()
-    return [ClassResponse.model_validate(cls) for cls in classes]
+    responses = []
+    for cls in classes:
+        count_result = await db.execute(
+            select(func.count(ClassEnrollment.id)).where(
+                ClassEnrollment.class_id == cls.id,
+                ClassEnrollment.status == 'active'
+            )
+        )
+        enrollment_count = count_result.scalar() or 0
+        teacher_name = None
+        if cls.main_teacher_id:
+            teacher_result = await db.execute(select(User).where(User.id == cls.main_teacher_id))
+            teacher = teacher_result.scalar_one_or_none()
+            if teacher:
+                teacher_name = f"{teacher.first_name} {teacher.last_name}"
+        resp = ClassResponse.model_validate(cls)
+        resp.enrollment_count = enrollment_count
+        resp.main_teacher_name = teacher_name
+        responses.append(resp)
+    return responses
 
 
 @class_router.get("/{class_id}", response_model=ClassResponse)
@@ -154,6 +173,25 @@ async def update_class(
     return ClassResponse.model_validate(class_)
 
 
+@class_router.delete("/{class_id}", status_code=204)
+async def delete_class(
+    class_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.admin))
+):
+    try:
+        class_uuid = uuid.UUID(class_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="ID classe invalide")
+    result = await db.execute(select(Class).where(Class.id == class_uuid))
+    class_ = result.scalar_one_or_none()
+    if not class_:
+        raise NotFoundException("Classe non trouvée")
+    await db.execute(delete(ClassEnrollment).where(ClassEnrollment.class_id == class_uuid))
+    await db.delete(class_)
+    await db.commit()
+
+
 enrollment_router = APIRouter(prefix="/classes/{class_id}/students", tags=["enrollments"])
 
 
@@ -168,13 +206,22 @@ async def list_class_students(
     except ValueError:
         raise HTTPException(status_code=400, detail="ID classe invalide")
     result = await db.execute(
-        select(User).join(ClassEnrollment).where(
+        select(ClassEnrollment, User).join(User, ClassEnrollment.student_id == User.id).where(
             ClassEnrollment.class_id == class_uuid,
             ClassEnrollment.status == 'active'
         )
     )
-    students = result.scalars().all()
-    return [{"id": str(s.id), "first_name": s.first_name, "last_name": s.last_name, "email": s.email} for s in students]
+    rows = result.all()
+    return [
+        {
+            "id": str(enr.id),
+            "student_id": str(enr.student_id),
+            "student_first_name": user.first_name,
+            "student_last_name": user.last_name,
+            "student_email": user.email,
+        }
+        for enr, user in rows
+    ]
 
 
 @enrollment_router.post("/", response_model=ClassEnrollmentResponse)
@@ -264,3 +311,24 @@ async def unenroll_student(
     await db.delete(enrollment)
     await db.commit()
     return {"message": "Étudiant désinscrit"}
+
+
+enrollment_delete_router = APIRouter(prefix="/classes/enrollments", tags=["enrollments"])
+
+
+@enrollment_delete_router.delete("/{enrollment_id}", status_code=204)
+async def delete_enrollment(
+    enrollment_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.admin))
+):
+    try:
+        enr_uuid = uuid.UUID(enrollment_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="ID inscription invalide")
+    result = await db.execute(select(ClassEnrollment).where(ClassEnrollment.id == enr_uuid))
+    enrollment = result.scalar_one_or_none()
+    if not enrollment:
+        raise NotFoundException("Inscription non trouvée")
+    await db.delete(enrollment)
+    await db.commit()

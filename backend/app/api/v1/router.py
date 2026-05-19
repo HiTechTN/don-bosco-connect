@@ -4,7 +4,7 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.users import router as users_router
 from app.api.v1.classes import router as classes_router
 from app.api.v1.classes import class_router
-from app.api.v1.classes import enrollment_router
+from app.api.v1.classes import enrollment_router, enrollment_delete_router
 from app.api.v1.subjects import router as subjects_router
 from app.api.v1.timetable import router as timetable_router
 from app.api.v1.audit import router as audit_router
@@ -26,6 +26,7 @@ v1_router.include_router(users_router)
 v1_router.include_router(classes_router)
 v1_router.include_router(class_router)
 v1_router.include_router(enrollment_router)
+v1_router.include_router(enrollment_delete_router)
 v1_router.include_router(subjects_router)
 v1_router.include_router(timetable_router)
 v1_router.include_router(audit_router)

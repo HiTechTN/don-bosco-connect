@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 import uuid
-from datetime import date
+from datetime import date, datetime
 from app.models.base import ScheduleDay
 
 
@@ -18,7 +18,7 @@ class AcademicYearCreate(AcademicYearBase):
 
 class AcademicYearResponse(AcademicYearBase):
     id: uuid.UUID
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -47,7 +47,9 @@ class ClassUpdate(BaseModel):
 class ClassResponse(ClassBase):
     id: uuid.UUID
     academic_year_id: uuid.UUID
-    created_at: str
+    enrollment_count: int = 0
+    main_teacher_name: Optional[str] = None
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -63,7 +65,7 @@ class ClassEnrollmentResponse(BaseModel):
     student_id: uuid.UUID
     class_id: uuid.UUID
     academic_year_id: uuid.UUID
-    enrolled_at: str
+    enrolled_at: datetime
     status: str
 
     class Config:
