@@ -1,50 +1,58 @@
-# Welcome to your Expo app 👋
+# Don Bosco Connect — Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  <img src="https://img.shields.io/badge/Expo-51-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo"/>
+  <img src="https://img.shields.io/badge/React_Native-0.76-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React Native"/>
+  <img src="https://img.shields.io/badge/iOS-Android-c96442?style=flat-square" alt="iOS + Android"/>
+</p>
 
-## Get started
+Application mobile de **Don Bosco Connect** — développée avec React Native / Expo.
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## 🚀 Démarrer
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Scannez le QR code avec **Expo Go** (Android/iOS) ou ouvrez dans un émulateur.
 
-## Learn more
+## 📱 Fonctionnalités
 
-To learn more about developing your project with Expo, look at the following resources:
+- Dashboard élève, enseignant, parent, admin
+- Notifications push temps réel
+- Mentor IA (chat RAG)
+- Quiz adaptatif
+- Gamification (XP, badges, streaks)
+- Messagerie chiffrée
+- Mode hors-ligne
+- Biométrie (empreinte / Face ID)
+- Support RTL (Arabe)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🏗️ Structure
 
-## Join the community
+```
+src/
+├── screens/       # 22 écrans (auth, dashboard, courses, etc.)
+├── components/    # UI réutilisable
+├── navigation/    # React Navigation (stack + tabs)
+├── services/      # API client, WebSocket, push
+├── hooks/         # Custom hooks
+└── i18n/          # FR / EN / AR
+```
 
-Join our community of developers creating universal apps.
+## 📦 Build natif
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+# Android APK
+eas build -p android --profile production
+
+# iOS IPA (macOS requis)
+eas build -p ios --profile production
+```
+
+## 🔗 Liens
+
+- [README principal](../README.md)
+- [Guide utilisateur](../USER_GUIDE.md)
+- [Démo](https://hitechtn.github.io/don-bosco-connect)

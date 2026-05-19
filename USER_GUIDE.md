@@ -1,190 +1,84 @@
-# 📘 Guide Utilisateur - Don Bosco Connect v1.1.0
+# 📘 Don Bosco Connect — User Guide
 
-## 🎯 Introduction
+<p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-c96442?style=flat-square" alt="Version"/>
+  <img src="https://img.shields.io/badge/status-production-059669?style=flat-square" alt="Status"/>
+</p>
 
-Don Bosco Connect est une plateforme éducative intelligente propulsée par l'IA (Ollama). Elle offre une expérience d'apprentissage adaptatif multilingue (FR/EN/AR).
+## 🔐 Login & Roles
 
----
+### Access
+- **Web** : `http://localhost:8080` (or your deployed domain)
+- **Mobile** : Expo Go or native build
 
-## 🔐 Connexion et Rôles
+### Demo Accounts
 
-### Accès à la plateforme
-- **Web** : http://localhost:3000 (ou votre domaine déployé)
-- **Mobile** : Application React Native (via Expo Go ou build natif)
-
-### Comptes de démonstration
-| Rôle | Email | Mot de passe |
-|------|-------|--------------|
-| Admin | admin@donbosco-connect.tn | admin123 |
-| Professeur | prof@donbosco-connect.tn | prof123 |
-| Élève | eleve@donbosco-connect.tn | eleve123 |
-| Parent | parent@donbosco-connect.tn | parent123 |
-
----
-
-## 👨‍💼 Interface Admin
-
-### Fonctionnalités principales
-1. **Gestion des utilisateurs**
-   - Créer/modifier/supprimer des comptes
-   - Assigner les rôles (Admin/Prof/Élève/Parent)
-   - Lier les élèves à leurs parents
-
-2. **Gestion des cours**
-   - Créer des cours avec modules et leçons
-   - Uploader des ressources (PDF, vidéos)
-   - Définir les prérequis
-
-3. **Statistiques**
-   - Tableau de bord avec graphiques
-   - Suivi des performances par classe
-   - Rapports d'activité
-
-4. **Configuration IA**
-   - Choisir le modèle Ollama (qwen2.5:3b recommandé)
-   - Ajuster la formule d'adaptive learning
-   - Voir les logs de l'IA
+| Role | Email | Password |
+|------|-------|----------|
+| 🛡️ Admin | `admin@donbosco.tn` | `admin123!` |
+| 👨‍🏫 Teacher | `karim.hamdi@donbosco.tn` | `teacher123!` |
+| 🧑‍🎓 Student | `adam.slim@donbosco.tn` | `student123!` |
+| 👪 Parent | `ahmed.slim@parent.tn` | `parent123!` |
 
 ---
 
-## 👨‍🏫 Interface Professeur
+## 🛡️ Admin Dashboard
 
-### Tableau de bord
-- Vue d'ensemble de vos cours
-- Élèves inscrits et leur progression
-- Quiz et devoirs à corriger
-
-### Créer un cours
-1. Allez dans "Mes Cours" → "Nouveau Cours"
-2. Remplissez : Titre, Description, Niveau
-3. Ajoutez des modules et leçons
-4. Publiez quand c'est prêt
-
-### Créer un quiz
-1. Sélectionnez un cours → "Quiz"
-2. Ajoutez des questions (QCM, Vrai/Faux, Texte libre)
-3. Définissez le score de passage (par défaut 70%)
-4. Le système ajuste automatiquement la difficulté selon les résultats
-
-### Suivi des élèves
-- **Progression** : Voir la courbe d'apprentissage
-- **Niveau IA** : Calculé automatiquement : `Niveau = (Score_Quiz × 0.6) + (Vitesse_Réponse × 0.4)`
-- **Alertes** : Élèves en difficulté mis en évidence
+1. **User Management** — CRUD accounts, assign roles, link students to parents
+2. **Classes & Subjects** — Create classes, set capacity (default 30), assign homeroom teachers
+3. **Timetable** — Create slots per class with overlap detection
+4. **School Year** — Manage academic years (only one active at a time)
+5. **Audit Logs** — All admin actions logged with filters
+6. **Analytics** — Usage stats, grade distribution, AI conversations
 
 ---
 
-## 👨‍🎓 Interface Élève
+## 👨‍🏫 Teacher Dashboard
 
-### Tableau de bord
-- Cours disponibles et inscriptions
-- Progression personnelle
-- Score IA actuel (niveau adaptatif)
-
-### Apprentissage adaptatif
-1. **Quiz intelligent** : Le système ajuste la difficulté en temps réel
-2. **Mentor IA** : Posez des questions sur le cours
-3. **Parcours personnalisé** : Basé sur vos performances
-
-### Utiliser le Mentor IA
-1. Allez dans "IA Mentor" (icône 🤖)
-2. Posez une question sur le cours actuel
-3. L'IA vous répond instantanément via Ollama
-4. Les réponses sont sauvegardées pour suivi
-
-### Soumettre un devoir
-1. Allez dans "Devoirs" → Sélectionnez le devoir
-2. Uploader votre fichier (PDF, DOC, ZIP)
-3. Ajoutez un commentaire si nécessaire
-4. Soumettez avant la date limite
+1. **Courses** — Upload PDF/DOCX/video, published to students
+2. **Grades** — Create evaluations (Quiz, Exam, Project, Oral, etc.), enter scores, publish
+3. **Absences** — Record absence/late/excused, justification workflow
+4. **AI Assistant** — Generate quizzes from course content, RAG tutor
+5. **Messaging** — AES-256-GCM encrypted chat with parents & admin
 
 ---
 
-## 👪 Interface Parent
+## 🧑‍🎓 Student Dashboard
 
-### Suivi des enfants
-- Liste de vos enfants inscrits
-- Progression par cours
-- Scores IA et moyennes
-
-### Alertes et notifications
-- Retards et absences
-- Notes importantes
-- Messages des professeurs
-
-### Communication
-- Messagerie avec les profs
-- Calendrier des devoirs à venir
-- Rapports mensuels automatiques
+1. **AI Mentor** — Ask questions about course content (RAG), 24/7
+2. **Adaptive Quizzes** — Difficulty adjusts in real-time (remediation → normal → advanced)
+3. **Gamification** — XP, 7 badges, streaks, friendly leaderboard
+4. **Grades & Absences** — View published scores and attendance
+5. **Portfolio** — Export PDF with achievements and QR-coded badges
 
 ---
 
-## 🌍 Multilingue
+## 👪 Parent Dashboard
 
-### Changer de langue
-1. Cliquez sur l'icône 🌐 en haut à droite
-2. Choisissez : Français | English | العربية
-3. L'interface change instantanément
-4. L'arabe (RTL) est supporté nativement
-
----
-
-## 📱 Version Mobile
-
-### Installation
-- **Android/iOS** : Scannez le QR code avec l'app Expo Go
-- **Build natif** : Utilisez `npm run build` dans le dossier `mobile/`
-
-### Fonctionnalités mobiles
-- Toutes les fonctionnalités web disponibles
-- Notifications push (à venir)
-- Mode hors-ligne limité (caching)
+1. **Monitoring** — Real-time grades, absences, messages for linked children
+2. **Justify Absences** — Submit justification through the platform
+3. **Messaging** — Encrypted chat with teachers
+4. **Calendar** — School events, homework deadlines
 
 ---
 
-## ❓ Support et Dépannage
+## 🌍 Multi-language
 
-### Problèmes courants
-
-**Je ne peux pas me connecter**
-- Vérifiez votre email et mot de passe
-- Utilisez "Mot de passe oublié" si besoin
-- Contactez l'admin si le compte est bloqué
-
-**L'IA ne répond pas**
-- Vérifiez qu'Ollama est lancé : `curl http://localhost:11434/api/tags`
-- Le modèle doit être téléchargé : `ollama pull qwen2.5:3b`
-- Vérifiez les logs : `docker-compose logs backend`
-
-**Les quiz ne s'affichent pas**
-- Rafraîchissez la page (F5)
-- Videz le cache du navigateur
-- Vérifiez votre connexion internet
-
-**La page est vide / blanche**
-- JavaScript doit être activé
-- Essayez un autre navigateur (Chrome, Firefox recommandés)
-- Vérifiez la console (F12) pour les erreurs
-
-### Contacter le support
-- **Email** : support@donbosco-connect.tn
-- **GitHub Issues** : https://github.com/HiTechTN/don-bosco-connect/issues
-- **Documentation** : https://github.com/HiTechTN/don-bosco-connect/wiki
+Click the 🌐 icon (top-right) to switch between **Français · English · العربية**.
 
 ---
 
-## 📊 Glossaire
+## 🆘 Troubleshooting
 
-| Terme | Définition |
-|-------|-------------|
-| Score IA | Niveau calculé par la formule adaptative |
-| Quiz adaptatif | Questions dont la difficulté change selon vos réponses |
-| Ollama | Moteur d'IA locale (LLM) |
-| Mentor IA | Assistant virtuel pour répondre aux questions |
-| Niveau | Débutant (1-3) / Intermédiaire (4-7) / Avancé (8-10) |
+| Issue | Solution |
+|-------|----------|
+| **Can't log in** | Check email/password, use "Forgot password", or contact admin |
+| **AI not responding** | Ensure Ollama is running: `curl http://localhost:11434/api/tags` |
+| **Blank page** | Enable JavaScript, try Chrome/Firefox, check F12 console |
+| **Quizzes not showing** | Refresh (F5), clear browser cache |
+
+**Support** : [GitHub Issues](https://github.com/HiTechTN/don-bosco-connect/issues)
 
 ---
 
-**Version** : 1.1.0  
-**Dernière mise à jour** : Mai 2026  
-**Licence** : MIT  
-**Auteur** : HiTech TN
+*Version 2.0.0 · © Collège Don Bosco Tunis*

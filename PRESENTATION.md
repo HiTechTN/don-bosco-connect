@@ -1,4 +1,10 @@
-# Don Bosco Connect — Présentation pour l'Administration
+# Don Bosco Connect — Présentation
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-c96442?style=flat-square" alt="Version"/>
+  <img src="https://img.shields.io/badge/statut-prêt-059669?style=flat-square" alt="Statut"/>
+  <img src="https://img.shields.io/badge/on--premise-100%25-2D2A24?style=flat-square" alt="On-Premise"/>
+</p>
 
 ---
 
@@ -18,266 +24,176 @@
 
 ---
 
-## Slide 2 : Tour des Fonctionnalités (Démo en direct)
+## Slide 2 : Tour des Fonctionnalités
 
 ### 4 profils, une plateforme unifiée
 
 | Profil | Fonctionnalités clés |
 |---|---|
-| **👨‍💼 Admin** | Dashboard analytique · Gestion utilisateurs · Classes · Emploi du temps · Audit logs · Rapports PDF |
+| **🛡️ Admin** | Dashboard analytique · Gestion utilisateurs · Classes · Emploi du temps · Audit logs · Rapports PDF |
 | **👨‍🏫 Enseignant** | Dépôt cours (PDF/vidéo) · Carnet de notes · Absences · Assistant IA · Messagerie chiffrée |
-| **👨‍🎓 Élève** | Mentor IA 24/7 · Quiz adaptatif · Gamification · Portfolio numérique · Notes et absences |
+| **🧑‍🎓 Élève** | Mentor IA 24/7 · Quiz adaptatif · Gamification · Portfolio numérique · Notes et absences |
 | **👪 Parent** | Suivi temps réel · Justification absences · Messagerie · Bulletin en ligne |
 
-**✨ NOUVEAU : Interface Premium avec animations fluides, graphiques analytics, et gamification immersive**
+---
+
+## Slide 3 : L'IA au Cœur de l'Apprentissage
+
+### 1. Mentor IA 24/7 (RAG local)
+- PDF déposé → indexé → réponse sur le contenu du cours uniquement
+- Modèle : **DeepSeek R1 14B** (local, sécurisé, rapide)
+
+### 2. Quiz Adaptatif
+- Difficulté ajustée en temps réel : **Remédiation → Normal → Avancé**
+
+### 3. Décrochage Prédictif
+- Algorithme : absences 35% + niveau 30% + régularité 15% + stress 20%
 
 ---
 
-## Slide 3 : L'Intelligence Artificielle au Cœur de l'Apprentissage
+## Slide 4 : Expérience Utilisateur
 
-### Trois innovations majeures
-
-**1. Mentor IA 24/7 (RAG local)**
-- L'élève pose une question → l'IA répond UNIQUEMENT sur le contenu des cours déposés
-- PDF déposé par l'enseignant → indexé automatiquement → recherche vectorielle
-- Modèle Qwen 2.5 7B (local, sécurisé, rapide)
-
-**2. Quiz Adaptatif**
-- La difficulté s'ajuste en temps réel selon le niveau de l'élève
-- 3 niveaux : Remédiation → Normal → Avancé
-- Détection des lacunes et reinforcement automatique
-
-**3. Décrochage Prédictif**
-- Algorithme multi-facteurs : absences (35%) + niveau (30%) + régularité (15%) + stress (20%)
-- Alertes automatiques aux enseignants et à l'administration
-- Intervention précoce possible
+| Fonctionnalité | Détail |
+|---|---|
+| **🎨 Design** | Glass-morphism, animations fluides, mode sombre, mobile-first |
+| **🎮 Gamification** | XP, niveaux, badges, streaks, confetti, classement bienveillant |
+| **📊 Analytics** | Graphiques Recharts, progression par matière |
+| **📱 Portfolio** | Export PDF, badges certifiés avec QR code |
+| **🔐 Sécurité** | JWT + MFA TOTP · AES-256-GCM · 100% on-premise · RGPD |
 
 ---
 
-## Slide 4 : L'Expérience Utilisateur Nouvelle Génération
-
-### Ce qui rend Don Bosco Connect unique
-
-**🎨 Design Premium**
-- Interface glass-morphism avec animations fluides
-- Mode sombre automatique
-- Accessibilité mobile-first
-
-**🎮 Gamification Immersive**
-- XP, niveaux, badges, streaks, classements bienveillants
-- Effets visuels (confetti, popups, animations)
-- Système de motivation pour les élèves
-
-**📊 Analytics Temps Réel**
-- Graphiques interactifs (Recharts)
-- Progression des notes visuelle
-- Performance par matière
-- Emploi du temps du jour
-
-**📱 Portfolio Numérique**
-- Export PDF du parcours de l'élève
-- Badges certifiés avec QR code
-- Compilation automatique des achievements
-
-**🔐 Sécurité Maximale**
-- JWT + Refresh token · MFA TOTP
-- Chiffrement AES-256-GCM (messages)
-- 100% on-premise · Zéro cloud
-- Respect RGPD pour les données des mineurs
-
----
-
-## Slide 5 : Architecture Technique (Déploiement On-Premise)
+## Slide 5 : Architecture
 
 ```
-                    🌐 Navigateur Web / 📱 Mobile
-                            │
-                    ┌───────▼───────┐
-                    │   Nginx 1.25   │  ← TLS 1.3, Rate limiting
-                    └───────┬───────┘
-                            │
-           ┌────────────────┼────────────────┐
-           │                │                │
-    ┌──────▼─────┐   ┌─────▼──────┐   ┌─────▼──────┐
-    │  FastAPI    │   │   Redis     │   │  Workers   │
-    │  REST/WS    │   │  Cache/Q    │   │  Celery    │
-    └──────┬─────┘   └────────────┘   └────────────┘
-           │
-    ┌──────▼──────────────────┐   ┌──────────────────┐
-    │ PostgreSQL 16 + pgvector │   │  Ollama (Local)  │
-    │ Données + Vecteurs IA    │   │  LLM 7B + Embed  │
-    └─────────────────────────┘   └──────────────────┘
-           │
-    ┌──────▼──────────┐
-    │  MinIO (S3)     │
-    │  Cours PDF/DOCX │
-    └─────────────────┘
+                     ┌──────────────────────┐
+                     │  React 18 + Vite      │  ← Web
+                     │  React Native (Expo)  │  ← Mobile
+                     └──────────┬───────────┘
+                                │ HTTP / WS
+                     ┌──────────▼───────────┐
+                     │  Nginx 1.25           │  :8080
+                     │  TLS 1.3 · Rate limit │
+                     └──────────┬───────────┘
+                                │
+               ┌────────────────┼────────────────┐
+               │                │                │
+     ┌─────────▼──────┐  ┌─────▼──────┐  ┌──────▼──────┐
+     │  FastAPI        │  │  Redis 7   │  │  Celery      │
+     │  SQLAlchemy 2.0 │  │  Cache     │  │  Workers     │
+     │  JWT + MFA      │  │  Queue     │  └─────────────┘
+     └─────────┬───────┘  └───────────┘
+               │
+     ┌─────────▼──────────────────────┐  ┌──────────────────────┐
+     │  PostgreSQL 16 + pgvector       │  │  Ollama (externe)    │
+     │  Données · Embeddings IA        │  │  DeepSeek 14B        │
+     └─────────────────────────────────┘  │  nomic-embed-text   │
+               │                          └──────────────────────┘
+     ┌─────────▼──────────┐
+     │  MinIO (S3)         │
+     │  Cours · Documents  │
+     └─────────────────────┘
 ```
 
 | Service | Technologie | Rôle |
-|---|---|---|
+|---------|------------|------|
 | Base de données | PostgreSQL 16 + pgvector | Données + embeddings vectoriels |
 | Cache / Queue | Redis 7 | Sessions, cache IA, tâches asynchrones |
 | Stockage fichiers | MinIO (S3 compatible) | Cours, devoirs, avatars |
-| IA Locale | Ollama (Qwen 2.5 7B) | Mentor IA, génération quiz, embeddings RAG |
-| API | FastAPI + WebSocket | REST, notifications temps réel |
-| Frontend Web | React 18 + Vite | Interface utilisateur responsive |
-| Mobile | React Native / Expo | Application iOS et Android |
+| IA Locale | Ollama (DeepSeek 14B) | Mentor IA, génération quiz, embeddings RAG |
+| API | FastAPI + WebSocket | REST + notifications temps réel |
+| Frontend Web | React 18 + Vite + Tailwind | Interface utilisateur responsive |
+| Mobile | React Native / Expo | Application iOS + Android |
 | Monitoring | Prometheus + Grafana | Métriques, alertes, dashboards |
 
 ---
 
-## Slide 6 : Stack Technologique
+## Slide 6 : Stack Technique
 
-### 100% Open Source · Zéro Licence · Zéro Cloud
+**100% Open Source · Zéro Licence · Zéro Cloud**
 
 | Catégorie | Technologies |
 |---|---|
 | **Backend** | FastAPI · Python 3.12 · SQLAlchemy 2.0 · Celery · Redis |
 | **Frontend** | React 18 · TypeScript · Tailwind CSS · shadcn/ui · Framer Motion |
-| **Mobile** | React Native · Expo · Push notifications |
-| **Base de données** | PostgreSQL 16 · pgvector · Alembic migrations |
-| **IA** | Ollama · Qwen 2.5 7B · nomic-embed-text · RAG (Retrieval Augmented Generation) |
+| **Mobile** | React Native · Expo · Notifications push |
+| **Base de données** | PostgreSQL 16 · pgvector · Alembic |
+| **IA** | Ollama · DeepSeek R1 14B · nomic-embed-text · RAG |
 | **Infrastructure** | Docker · Docker Compose · Nginx · MinIO |
-| **Monitoring** | Prometheus · Grafana · Loki (logs) |
-| **Sécurité** | JWT · TOTP MFA · AES-256-GCM · bcrypt (cost 12) · TLS 1.3 · CSP · HSTS |
+| **Monitoring** | Prometheus · Grafana · Loki |
+| **Sécurité** | JWT · TOTP MFA · AES-256-GCM · bcrypt · TLS 1.3 · CSP · HSTS |
 
 ---
 
 ## Slide 7 : Roadmap Déploiement
 
-### Phase 1 : Mise en Production (Semaine 1-2)
+### Phase 1 — Mise en Production (Semaine 1-2)
 
-| Étape | Durée | Détails |
-|---|---|---|
-| ✅ Déploiement serveur | 1 jour | Installation Docker, configuration .env, services de base |
-| ✅ Base de données | 1 jour | PostgreSQL, migration Alembic, seed données démo |
-| ✅ Application | 1 jour | Build frontend, déploiement API, Nginx reverse proxy |
-| ✅ Tests & validation | 1 jour | Tests automatisés, validation manuelle |
-
-### Phase 2 : Adoption (Semaine 3-4)
-
-| Étape | Détails |
+| Étape | Durée |
 |---|---|
-| Formation enseignants | 2 sessions de 2h (présentiel) |
-| Création comptes utilisateurs | Import CSV des élèves, enseignants, parents |
-| Configuration année scolaire | Classes, matières, emplois du temps |
-| Test pilote (1 classe) | 1 semaine avec une classe test |
+| Déploiement serveur | 1 jour |
+| Base de données + migrations | 1 jour |
+| Application (build + déploiement) | 1 jour |
+| Tests & validation | 1 jour |
 
-### Phase 3 : Déploiement Complet (Mois 2)
+### Phase 2 — Adoption (Semaine 3-4)
+- Formation enseignants (2 sessions de 2h)
+- Import CSV comptes utilisateurs
+- Test pilote (1 classe, 1 semaine)
 
-| Étape | Détails |
-|---|---|
-| Déploiement toutes classes | Ouverture progressive par niveau |
-| Formation continue | Tutoriels vidéo, guide utilisateur |
-| Support & maintenance | Hotline, monitoring 24/7 |
+### Phase 3 — Déploiement Complet (Mois 2)
+- Ouverture progressive par niveau
+- Formation continue (tutoriels vidéo)
+- Support & maintenance
 
 ---
 
-## Slide 8 : Chiffres Clés & Performance
+## Slide 8 : Chiffres Clés
 
-| Métrique | Valeur | Détail |
-|---|---|---|
-| **Disponibilité** | 99.9% | Architecture redondante, auto-healing Docker |
-| **Latence API** | < 50ms | Cache Redis, connexions pool PostgreSQL |
-| **Latence IA** | < 3s | Ollama en local, pas de latence réseau |
-| **Utilisateurs simultanés** | 500+ | Testé avec locust, pool de 100 connexions DB |
-| **Temps de réponse web** | < 1s | Build optimisé, lazy loading, CDN local |
-| **Espace disque minimal** | 20 Go | Base + Modèles IA (10 Go) + Fichiers |
-| **Sauvegarde** | Quotidienne | Backup automatisé PostgreSQL (rétention 30 jours) |
+| Métrique | Valeur |
+|---|---|
+| Disponibilité | 99.9% |
+| Latence API | < 50ms |
+| Latence IA | < 3s |
+| Utilisateurs simultanés | 500+ |
+| Temps réponse web | < 1s |
+| Backup | Quotidien (rétention 30 jours) |
+
+### Budget
+
+| Poste | Coût |
+|---|---|
+| Serveur (existant) | 0 TND |
+| Électricité | ~50 TND/mois |
+| Maintenance | ~200 TND/mois |
+| **Total** | **~250 TND/mois** |
+
+**Économie vs SaaS : 75-87%**
 
 ---
 
-## Slide 9 : Sécurité & Conformité
+## Slide 9 : Sécurité
 
-### Protection des données des mineurs
-
-**🔐 Authentification**
 - JWT 15 min + Refresh token 7 jours
 - MFA TOTP obligatoire (admin & enseignants)
 - Blocage après 5 échecs
-- Hash bcrypt cost 12
-
-**🔒 Chiffrement**
 - Messages AES-256-GCM
 - TLS 1.3 partout
-- URLs présignées pour fichiers
-- Base de données isolée
-
-**📋 Traçabilité**
 - Audit logs de toutes les actions
-- Logs pseudonymisés (RGPD)
-- Backup quotidien (30 jours)
-- Monitoring Prometheus / Grafana
-
-**🏠 Infrastructure**
-- 100% on-premise : aucune donnée ne quitte le réseau
-- Zéro dépendance cloud
-- Mise à jour automatique par conteneurs
+- **100% on-premise, zéro cloud**
 
 ---
 
-## Slide 10 : Budget & Ressources
+## Slide 10 : Prochaines Étapes
 
-### Coûts de fonctionnement (mensuel)
-
-| Poste | Coût | Détail |
-|---|---|---|
-| Serveur (HP Proliant existant) | 0 TND | Utilisation d'un serveur existant |
-| Électricité | ~50 TND | Consommation ~200W |
-| Maintenance | ~200 TND/mois | Heures IT, mises à jour |
-| **Total** | **~250 TND/mois** | Soit ~0.25 TND par élève ! |
-
-### Comparaison avec solutions cloud
-
-| Solution | Coût mensuel | Données locales | Personnalisable |
-|---|---|---|---|
-| **Don Bosco Connect** | **~250 TND** | ✅ Oui | ✅ Total |
-| Cloud (Gestion Scolaire SaaS) | 500-2000 TND | ❌ Non | ❌ Limitée |
-| ERP scolaire | 2000-5000 TND | ✅ Oui | Partielle |
-
-**ROI :** Économie de 60% vs solution cloud · Indépendance technologique · Maîtrise des données
-
----
-
-## Slide 11 : Prochaines Étapes
-
-### Court terme (J+1)
-- [ ] Présentation et validation de l'administration ✅ (aujourd'hui)
-- [ ] Déploiement sur le serveur de production
+- [ ] Déploiement sur serveur de production
 - [ ] Création des comptes utilisateurs réels
-
-### Moyen terme (Semaine 1-2)
-- [ ] Session de formation pour les enseignants
-- [ ] Test pilote avec une classe
-- [ ] Ajustements et corrections
-
-### Long terme (Mois 1-3)
+- [ ] Formation enseignants
+- [ ] Test pilote
 - [ ] Déploiement complet
-- [ ] Application mobile (React Native)
-- [ ] Support et maintenance continue
-
----
-
-## Slide 12 : Questions & Réponses
-
-### Contacts
-
-| Rôle | Personne |
-|---|---|
-| **Direction technique** | HiTech TN |
-| **Support** | support@donbosco.tn |
-| **Code source** | github.com/HiTechTN/don-bosco-connect |
-
-### Liens utiles
-
-- 📖 Guide d'utilisation : `GUIDE_UTILISATION.md`
-- 🚀 Déploiement : `scripts/install.sh`
-- 🔧 API Docs : `http://localhost:8000/docs`
-- 📊 Monitoring : `http://localhost:3004` (Grafana)
 
 ---
 
 **Don Bosco Connect** — Propulsé par l'IA · 100% On-Premise · Fièrement Tunisien 🇹🇳
 
-*© 2026 Collège Don Bosco Tunis — Tous droits réservés*
+*© 2026 Collège Don Bosco Tunis — Tous droits réservés · Réalisé par [HiTech TN](https://github.com/HiTechTN)*

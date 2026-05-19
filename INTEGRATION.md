@@ -1,322 +1,193 @@
-# 🔧 Guide d'Intégration - Don Bosco Connect v1.1.0
+# 🔧 Don Bosco Connect — Integration Guide
 
-## 📋 Vue d'ensemble
+<p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-c96442?style=flat-square" alt="Version"/>
+  <img src="https://img.shields.io/badge/status-production-059669?style=flat-square" alt="Status"/>
+</p>
 
-Ce guide détaille l'installation, la configuration et le déploiement de Don Bosco Connect pour les administrateurs système et intégrateurs.
+## 📋 Overview
+
+Integration and deployment guide for system administrators.
 
 ---
 
-## 🖥️ Prérequis Système
+## 🖥️ System Requirements
 
-### Serveur recommandé
-| Composant | Minimum | Recommandé |
+| Component | Minimum | Recommended |
 |-----------|---------|-------------|
-| CPU | 2 cores | 4+ cores |
-| RAM | 4 GB | 8+ GB |
-| Stockage | 20 GB | 50+ GB SSD |
-| OS | Ubuntu 22.04 / Debian 11 | Ubuntu 22.04 LTS |
+| CPU | 4 cores | 8+ cores |
+| RAM | 16 GB | 32 GB |
+| Storage | 50 GB SSD | 100 GB NVMe |
+| OS | Ubuntu 22.04 / Debian 12 | Ubuntu 24.04 LTS |
+| Docker | 24.0+ | 27.x |
+| Network | 100 Mbps | 1 Gbps |
 
-### Logiciels requis
-- **Docker** 24.0+ & **Docker Compose** 2.20+
-- **Node.js** 22.x (pour build manuel)
-- **Python** 3.11+ (pour dev local)
-- **PostgreSQL** 15+ (si hors Docker)
-- **Ollama** (pour l'IA locale)
+### Required Software
+- **Docker** 24.0+ & Docker Compose v2
+- **Ollama** (local AI engine)
 
 ---
 
-## 🚀 Installation Rapide (Docker - Recommandé)
+## 🚀 Quick Start (Docker)
 
-### 1. Cloner le projet
+### 1. Clone & Configure
+
 ```bash
 git clone https://github.com/HiTechTN/don-bosco-connect.git
 cd don-bosco-connect
+cp .env.example .env
+# Edit .env with your secrets
 ```
 
-### 2. Configuration environnement
+### 2. Start Stack
+
 ```bash
-cp backend/env.example backend/.env
-nano backend/.env  # Modifier selon votre environnement
+./scripts/setup.sh    # Generate keys, SSL certs
+docker compose up -d
 ```
 
-**Variables clés** :
-```env
-DB_NAME=don_bosco
-DB_USER=donbosco
-DB_PASSWORD=votre_mot_de_passe_securise
-DB_HOST=db  # 'localhost' si hors Docker
-OLLAMA_URL=http://ollama:11434  # ou http://localhost:11434
-OLLAMA_MODEL=qwen2.5:3b
-DEBUG=False  # En production
-DJANGO_SECRET_KEY=votre_cle_secrete_50_caracteres
-```
+### 3. Seed Demo Data
 
-### 3. Lancer avec Docker Compose
 ```bash
-docker-compose up -d --build
+docker exec donbosco_api python scripts/init_db.py
 ```
 
-### 4. Initialiser la base de données
-```bash
-docker-compose exec backend python manage.py migrate
-docker-compose exec backend python manage.py createsuperuser
-```
+### 4. Verify
 
-### 5. Télécharger le modèle IA
 ```bash
-docker-compose exec ollama ollama pull qwen2.5:3b
+./scripts/healthcheck.sh
+curl http://localhost:8000/health
+curl http://localhost:8080    # Frontend
 ```
 
 ---
 
-## 🔐 Sécurité et Production
+## 🧩 Architecture
 
-### Configuration Django (production)
-```python
-# backend/donbosco_connect/settings.py
-DEBUG = False
-ALLOWED_HOSTS = ['votre-domaine.com', 'localhost']
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+```
+┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│ Frontend │  │   API    │  │   DB     │  │  Ollama  │
+│ :8080    │→│ :8000    │→│ :5432    │  │ :11434   │
+│ React    │  │ FastAPI  │  │ PG + vec │  │ DeepSeek │
+└──────────┘  └──────────┘  └──────────┘  └──────────┘
 ```
 
-### HTTPS avec Nginx (exemple)
-```nginx
-server {
-    listen 443 ssl;
-    server_name donbosco-connect.tn;
-
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-
-    location / {
-        proxy_pass http://localhost:3000;  # Web frontend
-        proxy_set_header Host $host;
-    }
-
-    location /api/ {
-        proxy_pass http://localhost:8000;  # Backend Django
-        proxy_set_header Host $host;
-    }
-
-    location /media/ {
-        proxy_pass http://localhost:8000/media/;
-    }
-}
-```
+| Service | Port | Purpose |
+|---------|------|---------|
+| `nginx` | 8080 | Reverse proxy, TLS, rate limiting |
+| `api` | 8000 | FastAPI backend, REST + WebSocket |
+| `frontend` | 80 | Static React SPA (served by nginx) |
+| `db` | 5432 | PostgreSQL 16 + pgvector |
+| `redis` | 6379 | Cache, session store, Celery broker |
+| `minio` | 9000-9001 | S3-compatible file storage |
+| `worker` | — | Celery async tasks |
+| `ollama` | 11434 | Local LLM (external, configurable) |
 
 ---
 
-## 🔧 Configuration des Rôles
+## 🔐 Security Configuration
 
-### Admin (Superuser)
-- Accès complet à `/admin/`
-- Gestion des utilisateurs, cours, et configuration IA
-- Création via `createsuperuser` ou interface admin
+```bash
+# Generate JWT secret (32 bytes hex)
+openssl rand -hex 32
 
-### Professeur
-- Création via Admin ou API : `POST /api/accounts/teachers/`
-- Assignation de cours et création de quiz
-- Suivi des élèves
+# Generate AES encryption key
+openssl rand -hex 32
 
-### Élève
-- Inscription via API : `POST /api/accounts/students/`
-- Niveau IA calculé automatiquement
-- Progression sauvegardée
+# Self-signed SSL (for testing)
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/donbosco.key \
+  -out nginx/ssl/donbosco.crt
+```
 
-### Parent
-- Lié à un ou plusieurs élèves via Admin
-- Suivi des notes et progression
-- Notifications
+### Key `.env` Variables
+
+| Variable | Description |
+|----------|-------------|
+| `SECRET_KEY` | JWT signing key (32 bytes hex) |
+| `ENCRYPTION_KEY` | AES-256-GCM key |
+| `DB_PASSWORD` | PostgreSQL password |
+| `REDIS_PASSWORD` | Redis password |
+| `MINIO_ROOT_PASSWORD` | MinIO admin password |
+| `OLLAMA_BASE_URL` | Ollama server URL |
+| `AI_DAILY_TOKEN_LIMIT_PER_STUDENT` | Per-student daily AI token cap |
 
 ---
 
-## 🤖 Configuration Ollama (IA)
+## 🤖 Ollama Configuration
 
-### Modèles supportés
-| Modèle | Taille | Usage |
-|--------|--------|-------|
-| qwen2.5:3b | 2.0 GB | Recommandé (rapide, précis) |
-| llama3.2:3b | 2.0 GB | Alternative |
-| phi3:mini | 1.1 GB | Léger, moins précis |
+### Supported Models
 
-### Tester Ollama
+| Model | Size | Use |
+|-------|------|-----|
+| `deepseek-r1-tool-calling:14b` | ~9 GB | Recommended (best accuracy) |
+| `nomic-embed-text` | ~0.3 GB | Embeddings for RAG |
+
+### Install Models
+
+```bash
+ollama pull deepseek-r1-tool-calling:14b
+ollama pull nomic-embed-text
+```
+
+### Test
+
 ```bash
 curl http://localhost:11434/api/generate -d '{
-  "model": "qwen2.5:3b",
-  "prompt": "Expliquez la photosynthèse"
+  "model": "deepseek-r1-tool-calling:14b",
+  "prompt": "Explique la photosynthèse"
 }'
 ```
 
-### Changer de modèle
-1. Modifiez `OLLAMA_MODEL` dans `.env`
-2. Redémarrez le backend : `docker-compose restart backend`
-3. Ou via Admin : Paramètres → Configuration IA
-
 ---
 
-## 📊 Adaptive Learning (IA)
+## 📊 Monitoring
 
-### Formule par défaut
-```
-Niveau = (Score_Quiz × 0.6) + (Vitesse_Réponse × 0.4)
-```
-
-### Personnalisation
-Dans `backend/ai/services.py` :
-```python
-class AdaptiveLearningService:
-    def calculate_level(self, quiz_score, response_time):
-        # Modifiez les coefficients ici
-        level = (quiz_score * 0.6) + (response_time * 0.4)
-        return min(max(level, 1), 10)  # Entre 1 et 10
-```
-
-### API Endpoint
 ```bash
-GET /api/ai/student/{id}/level  # Voir le niveau actuel
-POST /api/ai/mentor/           # Poser une question à l'IA
+# Grafana
+open http://localhost:3001
+
+# Prometheus
+open http://localhost:9090
+
+# Logs
+docker compose logs -f
 ```
 
 ---
 
-## 🌍 Multilingue (i18n)
+## 💾 Backup & Restore
 
-### Langues supportées
-- **Français** (fr) - Par défaut
-- **English** (en)
-- **العربية** (ar) - RTL supporté
-
-### Ajouter une langue
-1. Créez le fichier : `web/src/i18n/[lang].ts`
-2. Ajoutez les traductions
-3. Modifiez `web/src/i18n/index.ts`
-4. Rebuild : `cd web && npm run build`
-
-### RTL (Arabe)
-Le CSS s'adapte automatiquement via `dir="rtl"` dans `<html>`.
-
----
-
-## 📱 Build et Déploiement Mobile
-
-### Expo Go (développement)
-```bash
-cd mobile
-npx expo start  # Scannez le QR code
-```
-
-### Build natif (production)
-```bash
-cd mobile
-eas build -p android  # APK
-eas build -p ios      # IPA (macOS requis)
-```
-
-### Configuration
-Modifiez `mobile/app.json` :
-```json
-{
-  "expo": {
-    "name": "Don Bosco Connect",
-    "slug": "don-bosco-connect",
-    "version": "1.1.0"
-  }
-}
-```
-
----
-
-## 🔍 Dépannage (Troubleshooting)
-
-### Erreurs courantes
-
-**Database connection refused**
-```bash
-# Vérifiez PostgreSQL
-sudo systemctl status postgresql
-# Ou dans Docker
-docker-compose logs db
-```
-
-**Ollama not responding**
-```bash
-# Vérifiez qu'Ollama tourne
-curl http://localhost:11434/api/tags
-# Redémarrez le conteneur
-docker-compose restart ollama
-```
-
-**CORS errors (Web)**
-```python
-# Dans settings.py
-CORS_ALLOW_ALL_ORIGINS = False  # En production
-CORS_ALLOWED_ORIGINS = ['https://votre-domaine.com']
-```
-
-**Static files not loading**
-```bash
-# Collectez les fichiers statiques
-python manage.py collectstatic --noinput
-# Vérifiez nginx/Apache sert le dossier /static/
-```
-
-### Logs utiles
-```bash
-# Backend Django
-docker-compose logs backend -f
-
-# Web frontend (build)
-cd web && npm run dev  # ou check dist/
-
-# Ollama
-docker-compose logs ollama -f
-
-# PostgreSQL
-docker-compose logs db -f
-```
-
----
-
-## 📈 Monitoring et Maintenance
-
-### Backups (PostgreSQL)
 ```bash
 # Backup
-docker-compose exec db pg_dump -U donbosco don_bosco > backup_$(date +%Y%m%d).sql
+./scripts/backup.sh    # → /backups/donbosco_YYYYMMDD.sql
 
 # Restore
-docker-compose exec -T db psql -U donbosco don_bosco < backup_20260504.sql
+docker compose exec -T db psql -U donbosco_user -d donbosco < backup.sql
 ```
 
-### Mise à jour
+---
+
+## 🔄 Update
+
 ```bash
-git pull origin master
-docker-compose down
-docker-compose up -d --build
-docker-compose exec backend python manage.py migrate
+git pull origin main
+docker compose down
+docker compose up -d --build
 ```
 
-### Performance
-- Utilisez **Redis** pour le cache (déjà dans docker-compose.yml)
-- Configurez **Gunicorn** avec plusieurs workers :
-  ```bash
-  gunicorn donbosco_connect.wsgi:application --workers 4
-  ```
+---
+
+## 🆘 Troubleshooting
+
+| Problem | Check |
+|---------|-------|
+| API down | `docker compose logs api --tail=50` |
+| DB corrupted | `docker compose down -v && docker compose up -d` |
+| Ollama not responding | `curl http://localhost:11434/api/tags` |
+| Files not loading | Check MinIO Console at `http://localhost:9001` |
+| CORS errors | Verify `CORS_ORIGINS` in `.env` |
 
 ---
 
-## 📞 Support
-
-- **Email** : contact@donbosco-connect.tn
-- **GitHub Issues** : https://github.com/HiTechTN/don-bosco-connect/issues
-- **Wiki** : https://github.com/HiTechTN/don-bosco-connect/wiki
-- **Documentation Ollama** : https://github.com/ollama/ollama
-
----
-
-**Version** : 1.1.0  
-**Dernière mise à jour** : Mai 2026  
-**Licence** : MIT  
-**Auteur** : HiTech TN
+*© Collège Don Bosco Tunis — Usage interne*
