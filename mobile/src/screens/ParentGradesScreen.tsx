@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import api from '../services/api';
-import { getUser } from '../lib/auth';
 import LoadingScreen from '../components/LoadingScreen';
 
-export default function GradesScreen() {
+interface Props { route: any }
+
+export default function ParentGradesScreen({ route }: Props) {
+  const { child } = route.params;
   const [grades, setGrades] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const u = await getUser();
       try {
-        const res = await api.get(`/students/${u.id}/grades`);
+        const res = await api.get(`/students/${child.id}/grades`);
         setGrades(res.data || []);
       } catch { } finally { setLoading(false); }
     })();
@@ -24,9 +25,9 @@ export default function GradesScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.avgCard}>
-        <Text style={styles.avgLabel}>Moyenne générale</Text>
-        <Text style={styles.avgValue}>{avg}/20</Text>
+      <View style={styles.childHeader}>
+        <Text style={styles.childName}>{child.first_name} {child.last_name}</Text>
+        <Text style={styles.avg}>Moyenne: {avg}/20</Text>
       </View>
       <FlatList
         data={grades}
@@ -35,11 +36,10 @@ export default function GradesScreen() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.subject}>{item.subject_name || 'Matière'}</Text>
+              <Text style={styles.subject}>{item.subject_name}</Text>
               <Text style={[styles.score, { color: (item.score || 0) >= 10 ? '#059669' : '#EF4444' }]}>{item.score ?? 'Abs'}/20</Text>
             </View>
             <Text style={styles.evalTitle}>{item.evaluation_title}</Text>
-            {item.comment ? <Text style={styles.comment}>{item.comment}</Text> : null}
             <Text style={styles.date}>{new Date(item.graded_at).toLocaleDateString('fr-FR')}</Text>
           </View>
         )}
@@ -50,14 +50,13 @@ export default function GradesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9FAFB' },
-  avgCard: { backgroundColor: '#4F46E5', padding: 20, margin: 12, borderRadius: 16, alignItems: 'center' },
-  avgLabel: { fontSize: 14, color: '#C7D2FE' },
-  avgValue: { fontSize: 36, fontWeight: '800', color: '#fff', marginTop: 4 },
+  childHeader: { backgroundColor: '#4F46E5', padding: 20, alignItems: 'center' },
+  childName: { fontSize: 20, fontWeight: '700', color: '#fff' },
+  avg: { fontSize: 14, color: '#C7D2FE', marginTop: 4 },
   card: { backgroundColor: '#fff', padding: 16, borderRadius: 14, marginBottom: 8, elevation: 2 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
   subject: { fontSize: 15, fontWeight: '600', color: '#1F2937' },
   score: { fontSize: 18, fontWeight: '700' },
-  evalTitle: { fontSize: 13, color: '#6B7280', marginBottom: 4 },
-  comment: { fontSize: 13, color: '#374151', fontStyle: 'italic' },
+  evalTitle: { fontSize: 13, color: '#6B7280' },
   date: { fontSize: 11, color: '#9CA3AF', marginTop: 4 },
 });

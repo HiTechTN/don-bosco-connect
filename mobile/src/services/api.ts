@@ -1,7 +1,11 @@
 import axios from 'axios';
 import { getAccessToken, getRefreshToken, saveTokens, clearAuth } from '../lib/auth';
 
-const api = axios.create({ baseURL: 'http://donbosco.local/api/v1' });
+const BASE_URL = 'http://donbosco.local/api/v1';
+// Change to your server's URL for production
+// const BASE_URL = __DEV__ ? 'http://donbosco.local/api/v1' : 'https://api.donbosco.tn/api/v1';
+
+const api = axios.create({ baseURL: BASE_URL });
 
 api.interceptors.request.use(async (config) => {
   const token = await getAccessToken();
@@ -34,7 +38,7 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         const refresh = await getRefreshToken();
-        const res = await axios.post('http://donbosco.local/api/v1/auth/refresh', { refresh_token: refresh });
+        const res = await axios.post(`${BASE_URL}/auth/refresh`, { refresh_token: refresh });
         const { access_token, refresh_token } = res.data;
         await saveTokens(access_token, refresh_token);
         processQueue(null, access_token);

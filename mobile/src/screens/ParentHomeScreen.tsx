@@ -1,58 +1,106 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { clearAuth, getUser } from '../lib/auth';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import api from '../services/api';
+import { getUser, clearAuth } from '../lib/auth';
+import LoadingScreen from '../components/LoadingScreen';
+import Card from '../components/Card';
 
-interface Props {
-  navigation: any;
-}
+interface Props { navigation: any }
 
-export default function ParentHomeScreen({ navigation }: Props) {
+export default function ParentDashboardScreen({ navigation }: Props) {
+  const [user, setUser] = useState<any>(null);
   const [children, setChildren] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
-      const u = await getUser();
-      setUser(u);
-      setLoading(false);
+      const u = await getUser(); setUser(u);
+      try {
+        const res = await api.get('/users/me/children');
+        setChildren(res.data || []);
+      } catch { } finally { setLoading(false); }
     })();
   }, []);
 
-  const handleLogout = async () => {
-    await clearAuth();
-    navigation.replace('Login');
-  };
-
-  if (loading) return <View style={styles.centered}><ActivityIndicator size="large" /></View>;
+  if (loading) return <LoadingScreen />;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Bonjour, {user?.first_name}</Text>
-        <TouchableOpacity onPress={handleLogout}><Text style={styles.logout}>Déconnexion</Text></TouchableOpacity>
+        <View>
+          <Text style={styles.greeting}>Bonjour, {user?.first_name}</Text>
+          <Text style={styles.role}>Parent</Text>
+        </View>
+        <TouchableOpacity onPress={async () => { await clearAuth(); navigation.replace('Login'); }}>
+          <Text style={styles.logout}>Déconnexion</Text>
+        </TouchableOpacity>
       </View>
-      <Text style={styles.title}>Mes Enfants</Text>
-      <FlatList
-        data={[]} // populated from API in real implementation
-        keyExtractor={(_, i) => String(i)}
-        ListEmptyComponent={
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>Aucun enfant lié pour le moment</Text>
+
+      <ScrollView style={styles.content}>
+        <Card title="Mes Enfants">
+          {children.length === 0 ? (
+            <Text style={styles.empty}>Aucun enfant lié</Text>
+          ) : (
+            children.map((child) => (
+              <View key={child.id} style={styles.childCard}>
+                <View style={styles.childAvatar}>
+                  <Text style={styles.childAvatarText}>{child.first_name[0]}{child.last_name[0]}</Text>
+                </View>
+                <View style={styles.childInfo}>
+                  <Text style={styles.childName}>{child.first_name} {child.last_name}</Text>
+                  <Text style={styles.childEmail}>{child.email}</Text>
+                  <View style={styles.childActions}>
+                    <TouchableOpacity style={styles.childBtn} onPress={() => navigation.navigate('ParentGrades', { child })}>
+                      <Text style={styles.childBtnText}>Notes</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.childBtn} onPress={() => navigation.navigate('ParentAbsences', { child })}>
+                      <Text style={styles.childBtnText}>Absences</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
+        </Card>
+
+        <Card title="Actions">
+          <View style={styles.quickActions}>
+            {[
+              { title: 'Messages', icon: '💬', screen: 'Messages' },
+              { title: 'Notifications', icon: '🔔', screen: 'ParentHome' },
+            ].map((item) => (
+              <TouchableOpacity key={item.screen} style={styles.actionBtn} onPress={() => navigation.navigate(item.screen)}>
+                <Text style={styles.actionIcon}>{item.icon}</Text>
+                <Text style={styles.actionLabel}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        }
-      />
-    </View>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  greeting: { fontSize: 22, fontWeight: 'bold', color: '#1a237e' },
-  logout: { color: '#d32f2f', fontSize: 14 },
-  title: { fontSize: 20, fontWeight: '600', marginBottom: 16 },
-  emptyBox: { alignItems: 'center', marginTop: 60 },
-  emptyText: { color: '#999', fontSize: 16 },
+  safe: { flex: 1, backgroundColor: '#F9FAFB' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
+  greeting: { fontSize: 20, fontWeight: '700', color: '#1F2937' },
+  role: { fontSize: 13, color: '#6B7280', marginTop: 2 },
+  logout: { color: '#EF4444', fontSize: 14, fontWeight: '500' },
+  content: { flex: 1, padding: 16 },
+  empty: { color: '#9CA3AF', fontSize: 14, textAlign: 'center', paddingVertical: 20 },
+  childCard: { flexDirection: 'row', backgroundColor: '#F9FAFB', padding: 14, borderRadius: 12, marginBottom: 10 },
+  childAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#4F46E5', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  childAvatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },
+  childInfo: { flex: 1 },
+  childName: { fontSize: 16, fontWeight: '600', color: '#1F2937' },
+  childEmail: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  childActions: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  childBtn: { backgroundColor: '#4F46E5', paddingVertical: 6, paddingHorizontal: 14, borderRadius: 6 },
+  childBtnText: { color: '#fff', fontSize: 12, fontWeight: '500' },
+  quickActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  actionBtn: { alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: '#F9FAFB', flex: 1 },
+  actionIcon: { fontSize: 28, marginBottom: 4 },
+  actionLabel: { fontSize: 12, fontWeight: '500', color: '#374151' },
 });

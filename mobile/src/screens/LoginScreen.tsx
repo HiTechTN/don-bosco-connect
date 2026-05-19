@@ -1,61 +1,55 @@
 import React, { useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../services/api';
 import { saveTokens, saveUser } from '../lib/auth';
 
-interface Props {
-  navigation: any;
-}
+interface Props { navigation: any }
+
+const DEMO_ACCOUNTS = [
+  { role: 'Admin', email: 'admin@donbosco.tn', password: 'admin123!', color: '#4F46E5' },
+  { role: 'Enseignant', email: 'karim.hamdi@donbosco.tn', password: 'teacher123!', color: '#059669' },
+  { role: 'Élève', email: 'adam.slim@donbosco.tn', password: 'student123!', color: '#D97706' },
+  { role: 'Parent', email: 'ahmed.slim@parent.tn', password: 'parent123!', color: '#DC2626' },
+];
 
 export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mfaRequired, setMfaRequired] = useState(false);
-  const [mfaCode, setMfaCode] = useState('');
 
   const handleLogin = async () => {
-    setLoading(true);
-    setError('');
+    if (!email || !password) { setError('Veuillez remplir tous les champs'); return; }
+    setLoading(true); setError('');
     try {
       const res = await api.post('/auth/login', { email, password });
-      if (res.data.mfa_required) {
-        setMfaRequired(true);
-      } else {
-        await saveTokens(res.data.access_token, res.data.refresh_token);
-        await saveUser(res.data.user);
-        navigation.replace(res.data.user.role === 'admin' ? 'AdminHome' : res.data.user.role === 'teacher' ? 'TeacherHome' : res.data.user.role === 'parent' ? 'ParentHome' : 'StudentHome');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erreur de connexion');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMfaVerify = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.post('/auth/mfa/verify', { email, password, mfa_code: mfaCode });
       await saveTokens(res.data.access_token, res.data.refresh_token);
       await saveUser(res.data.user);
-      navigation.replace(res.data.user.role === 'admin' ? 'AdminHome' : res.data.user.role === 'teacher' ? 'TeacherHome' : 'StudentHome');
+      const role = res.data.user.role;
+      if (role === 'admin') navigation.replace('AdminHome');
+      else if (role === 'teacher') navigation.replace('TeacherHome');
+      else if (role === 'parent') navigation.replace('ParentHome');
+      else navigation.replace('StudentHome');
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Code MFA invalide');
-    } finally {
-      setLoading(false);
-    }
+      setError(err.response?.data?.detail || 'Email ou mot de passe incorrect');
+    } finally { setLoading(false); }
   };
 
+  const fillDemo = (a: typeof DEMO_ACCOUNTS[0]) => { setEmail(a.email); setPassword(a.password); };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Don Bosco Connect</Text>
-      {!mfaRequired ? (
-        <>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <Text style={styles.logo}>🎓</Text>
+          <Text style={styles.title}>Don Bosco{'\n'}Connect</Text>
+          <Text style={styles.subtitle}>Plateforme éducative intelligente</Text>
+        </View>
+
+        <View style={styles.form}>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
           <TextInput
             placeholder="Email"
             style={styles.input}
@@ -63,6 +57,7 @@ export default function LoginScreen({ navigation }: Props) {
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
+            placeholderTextColor="#9CA3AF"
           />
           <TextInput
             placeholder="Mot de passe"
@@ -70,39 +65,47 @@ export default function LoginScreen({ navigation }: Props) {
             style={styles.input}
             value={password}
             onChangeText={setPassword}
+            placeholderTextColor="#9CA3AF"
           />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Connexion</Text>}
+
+          <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginText}>Se connecter</Text>}
           </TouchableOpacity>
-        </>
-      ) : (
-        <>
-          <Text style={styles.instruction}>Code d'authentification</Text>
-          <TextInput
-            placeholder="Code à 6 chiffres"
-            style={styles.input}
-            value={mfaCode}
-            onChangeText={setMfaCode}
-            keyboardType="number-pad"
-            maxLength={6}
-          />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <TouchableOpacity style={styles.button} onPress={handleMfaVerify} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Vérifier</Text>}
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
+        </View>
+
+        <View style={styles.demoSection}>
+          <Text style={styles.demoTitle}>Comptes de démonstration</Text>
+          <View style={styles.demoRow}>
+            {DEMO_ACCOUNTS.map((a) => (
+              <TouchableOpacity key={a.role} style={[styles.demoBtn, { borderColor: a.color }]} onPress={() => fillDemo(a)}>
+                <Text style={[styles.demoRole, { color: a.color }]}>{a.role}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <Text style={styles.footer}>🔒 Connexion sécurisée</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#f5f5f5' },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 40, color: '#1a237e' },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', marginBottom: 12, padding: 14, borderRadius: 8, fontSize: 16 },
-  button: { backgroundColor: '#1a237e', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  error: { color: '#d32f2f', textAlign: 'center', marginBottom: 8 },
-  instruction: { textAlign: 'center', fontSize: 16, marginBottom: 16, color: '#555' },
+  safe: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flexGrow: 1, padding: 24, justifyContent: 'center' },
+  header: { alignItems: 'center', marginBottom: 40 },
+  logo: { fontSize: 56, marginBottom: 8 },
+  title: { fontSize: 28, fontWeight: '800', color: '#1F2937', textAlign: 'center', lineHeight: 34 },
+  subtitle: { fontSize: 14, color: '#6B7280', marginTop: 6 },
+  form: { marginBottom: 24 },
+  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12, padding: 16, borderRadius: 12, fontSize: 15, color: '#1F2937' },
+  loginBtn: { backgroundColor: '#4F46E5', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 4 },
+  loginText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  error: { color: '#EF4444', textAlign: 'center', marginBottom: 12, fontSize: 14 },
+  demoSection: { marginTop: 8, paddingTop: 20, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
+  demoTitle: { textAlign: 'center', fontSize: 12, color: '#9CA3AF', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 },
+  demoRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
+  demoBtn: { borderWidth: 1, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 16 },
+  demoRole: { fontSize: 13, fontWeight: '600' },
+  footer: { textAlign: 'center', color: '#9CA3AF', fontSize: 12, marginTop: 32 },
 });
