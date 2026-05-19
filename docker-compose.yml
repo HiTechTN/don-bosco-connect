@@ -30,8 +30,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - "5432:5432"
+    # Pas de port mapping externe : les services communiquent via le réseau Docker
+    expose:
+      - "5432"
 
   redis:
     image: redis:7.2-alpine
@@ -46,8 +47,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - "6379:6379"
+    # Pas de port mapping externe : les services communiquent via le réseau Docker
+    expose:
+      - "6379"
 
   minio:
     image: minio/minio:latest
@@ -110,7 +112,7 @@ services:
       minio: { condition: service_healthy }
     networks: [donbosco_net]
     ports:
-      - "8000:8000"
+      - "8002:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -188,7 +190,7 @@ services:
     container_name: donbosco_nginx
     restart: unless-stopped
     ports:
-      - "${NGINX_PORT:-8080}:80"
+      - "${NGINX_PORT:-8081}:80"
     depends_on:
       - api
       - frontend

@@ -11,6 +11,7 @@ import ClassesPage from './pages/admin/ClassesPage';
 import SubjectsPage from './pages/admin/SubjectsPage';
 import TimetablePage from './pages/admin/TimetablePage';
 import AuditPage from './pages/admin/AuditPage';
+import EventsPage from './pages/admin/EventsPage';
 
 // Teacher
 import TeacherDashboard from './pages/teacher/DashboardPage';
@@ -54,6 +55,7 @@ function App() {
             <Route path="subjects" element={<SubjectsPage />} />
             <Route path="timetable" element={<TimetablePage />} />
             <Route path="audit" element={<AuditPage />} />
+            <Route path="events" element={<EventsPage />} />
           </Route>
           <Route path="/teacher" element={<Layout />}>
             <Route index element={<Navigate to="dashboard" replace />} />

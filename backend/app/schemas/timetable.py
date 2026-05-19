@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 import uuid
-from datetime import time
+from datetime import time, datetime
 from app.models.base import ScheduleDay
 
 
@@ -31,7 +31,7 @@ class TimetableSlotUpdate(BaseModel):
 
 class TimetableSlotResponse(TimetableSlotBase):
     id: uuid.UUID
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True

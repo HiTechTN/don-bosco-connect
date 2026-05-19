@@ -6,7 +6,7 @@ import uuid
 
 from app.database import get_db
 from app.api.deps import get_current_user
-from app.models.base import User, UserRole, UserStatus
+from app.models.base import User, UserRole, UserStatus, StudentParentLink
 from app.schemas.user import UserResponse, UserCreate, UserUpdate, UserListResponse
 from app.core.permissions import require_roles
 from app.core.exceptions import NotFoundException, ConflictException
@@ -84,6 +84,25 @@ async def get_current_user_info(
     current_user: User = Depends(get_current_user)
 ):
     return UserResponse.model_validate(current_user)
+
+
+@router.get("/me/children")
+async def get_my_children(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != UserRole.parent:
+        raise HTTPException(status_code=403, detail="Réservé aux parents")
+    result = await db.execute(
+        select(User).join(StudentParentLink, User.id == StudentParentLink.student_id).where(
+            StudentParentLink.parent_id == current_user.id
+        )
+    )
+    students = result.scalars().all()
+    return [
+        {"id": str(s.id), "first_name": s.first_name, "last_name": s.last_name, "email": s.email}
+        for s in students
+    ]
 
 
 @router.patch("/me", response_model=UserResponse)

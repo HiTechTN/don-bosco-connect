@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BookOpen, Calendar, ClipboardList,
   GraduationCap, UserCheck, MessageSquare, BrainCircuit, Gamepad2,
-  LogOut, ChevronLeft, School, Bell,
+  LogOut, ChevronLeft, School, Bell, CalendarDays,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState } from 'react';
@@ -16,6 +16,7 @@ const roleNav = {
     { to: '/admin/subjects', label: 'Matières', icon: BookOpen },
     { to: '/admin/timetable', label: 'Emploi du temps', icon: Calendar },
     { to: '/admin/audit', label: 'Audit', icon: ClipboardList },
+    { to: '/admin/events', label: 'Événements', icon: CalendarDays },
   ],
   teacher: [
     { to: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
