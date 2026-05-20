@@ -14,7 +14,7 @@ async def create_notification(
     body: str | None = None,
     data: dict | None = None,
 ) -> Notification:
-    uid = UUID(user_id) if isinstance(user_id, str) else user_id
+    uid = UUID(user_id) if isinstance(user_id, str) and user_id else user_id
     notification = Notification(
         id=uuid4(),
         user_id=uid,

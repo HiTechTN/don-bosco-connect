@@ -9,7 +9,9 @@ from app.services.notification_service import notify_students_of_grade_publish
 ID_FIELDS_IN_EVALUATION = {"subject_id", "class_id", "course_id", "teacher_id", "academic_year_id"}
 
 
-def _to_uuid(val: str | UUID) -> UUID:
+def _to_uuid(val: str | UUID | None) -> UUID | None:
+    if val is None or val == "":
+        return None
     return UUID(val) if isinstance(val, str) else val
 
 

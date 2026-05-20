@@ -37,7 +37,9 @@ LEVEL_THRESHOLDS = [
 ]
 
 
-def _to_uuid(val: str | UUID) -> UUID:
+def _to_uuid(val: str | UUID | None) -> UUID | None:
+    if val is None or val == "":
+        return None
     return UUID(val) if isinstance(val, str) else val
 
 
