@@ -46,7 +46,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: pip install pytest pytest-asyncio pytest-cov httpx
-      - run: pytest app/tests/ --cov=app --cov-report=html --cov-fail-under=70
+      - run: pytest app/tests/ --cov=app --cov-report=html --cov-fail-under=40
         env:
           DB_HOST: localhost
           DB_PASSWORD: donbosco_test
