@@ -21,7 +21,7 @@ class AbsenceUpdate(BaseModel):
 
 class AbsenceResponse(BaseModel):
     id: UUID
-    student_id: UUID
+    student_id: UUID | None
     class_id: UUID | None
     subject_id: UUID | None
     teacher_id: UUID | None
