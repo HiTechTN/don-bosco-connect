@@ -6,9 +6,21 @@ import { ClipboardList, UserCheck, BrainCircuit, Gamepad2, TrendingUp, Calendar,
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import type { Grade, Absence, TimetableSlot, GamificationProfile } from '../../types';
 
 const SUBJECT_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
 const DAY_MAP: Record<string, string> = { monday: 'lundi', tuesday: 'mardi', wednesday: 'mercredi', thursday: 'jeudi', friday: 'vendredi', saturday: 'samedi' };
+
+interface SubjectAverage {
+  subject: string;
+  average: string;
+}
+
+interface GradeChartEntry {
+  name: string;
+  score: number;
+  fullScore: number;
+}
 
 export default function StudentDashboard() {
   const { user } = useAuthStore();
@@ -22,18 +34,18 @@ export default function StudentDashboard() {
     else setGreeting('Bonsoir');
   }, []);
 
-  const { data: grades } = useQuery({ queryKey: ['my-grades'], queryFn: () => api.get(`/students/${user?.id}/grades`).then(r => r.data), enabled: !!user?.id });
-  const { data: absences } = useQuery({ queryKey: ['my-absences'], queryFn: () => api.get(`/students/${user?.id}/absences`).then(r => r.data), enabled: !!user?.id });
-  const { data: timetable } = useQuery({ queryKey: ['my-timetable'], queryFn: () => api.get('/timetable/my').then(r => r.data), enabled: !!user?.id });
-  const { data: profile } = useQuery({ queryKey: ['gamification-profile'], queryFn: () => api.get('/gamification/profile').then(r => r.data) });
+  const { data: grades } = useQuery<Grade[]>({ queryKey: ['my-grades'], queryFn: () => api.get(`/students/${user?.id}/grades`).then(r => r.data), enabled: !!user?.id });
+  const { data: absences } = useQuery<Absence[]>({ queryKey: ['my-absences'], queryFn: () => api.get(`/students/${user?.id}/absences`).then(r => r.data), enabled: !!user?.id });
+  const { data: timetable } = useQuery<TimetableSlot[]>({ queryKey: ['my-timetable'], queryFn: () => api.get('/timetable/my').then(r => r.data), enabled: !!user?.id });
+  const { data: profile } = useQuery<GamificationProfile>({ queryKey: ['gamification-profile'], queryFn: () => api.get('/gamification/profile').then(r => r.data) });
 
   const todayKey = new Date().toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
-  const todaySlots = timetable?.filter((s: any) => DAY_MAP[s.day] === todayKey || s.day === todayKey) || [];
+  const todaySlots = timetable?.filter((s) => DAY_MAP[s.day] === todayKey || s.day === todayKey) || [];
 
-  const scores = (grades || []).filter((g: any) => g.score != null).map((g: any) => g.score);
+  const scores = (grades || []).filter((g) => g.score != null).map((g) => g.score);
   const avg = scores.length ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(2) : null;
 
-  const subjectGrades = grades?.reduce((acc: Record<string, number[]>, g: any) => {
+  const subjectGrades = grades?.reduce((acc: Record<string, number[]>, g) => {
     if (g.subject_name && g.score != null) {
       if (!acc[g.subject_name]) acc[g.subject_name] = [];
       acc[g.subject_name].push(g.score);
@@ -41,15 +53,15 @@ export default function StudentDashboard() {
     return acc;
   }, {});
 
-  const subjectAverages = subjectGrades ? Object.entries(subjectGrades).map(([subject, scores]) => ({
+  const subjectAverages: SubjectAverage[] = subjectGrades ? Object.entries(subjectGrades).map(([subject, scores]) => ({
     subject, average: (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1)
   })).slice(0, 6) : [];
 
-  const lastGrades = grades?.slice(-5).map((g: any) => ({
+  const lastGrades: GradeChartEntry[] = grades?.slice(-5).map((g) => ({
     name: g.evaluation_title?.substring(0, 15) || 'Évaluation', score: g.score || 0, fullScore: 20
   })) || [];
 
-  const justificationRate = absences?.length ? Math.round((absences.filter((a: any) => a.justified).length / absences.length) * 100) : 100;
+  const justificationRate = absences?.length ? Math.round((absences.filter((a) => a.justification_status === 'justified').length / absences.length) * 100) : 100;
 
   return (
     <div className="space-y-6">
@@ -116,7 +128,7 @@ export default function StudentDashboard() {
                 <YAxis dataKey="subject" type="category" tick={{ fontSize: 12 }} stroke="#94a3b8" width={80} />
                 <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
                 <Bar dataKey="average" radius={[0, 4, 4, 0]}>
-                  {subjectAverages.map((_: any, index: number) => (<Cell key={index} fill={SUBJECT_COLORS[index % SUBJECT_COLORS.length]} />))}
+                  {subjectAverages.map((_, index) => (<Cell key={index} fill={SUBJECT_COLORS[index % SUBJECT_COLORS.length]} />))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -132,7 +144,7 @@ export default function StudentDashboard() {
           </div>
           {todaySlots.length > 0 ? (
             <div className="space-y-3">
-              {todaySlots.slice(0, 4).map((slot: any, idx: number) => (
+              {todaySlots.slice(0, 4).map((slot, idx) => (
                 <motion.div key={slot.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }}
                   className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl">
                   <div className="text-center min-w-[60px]"><p className="text-lg font-bold text-slate-800">{slot.start_time}</p></div>

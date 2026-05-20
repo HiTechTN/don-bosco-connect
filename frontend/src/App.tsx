@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import LoginPage from './pages/auth/LoginPage';
 import LandingDemo from './components/LandingDemo';
 
@@ -42,9 +43,10 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<LandingDemo />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<Layout />}>
@@ -85,8 +87,9 @@ function App() {
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

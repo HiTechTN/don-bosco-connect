@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 
-interface User {
+export type UserRole = 'admin' | 'teacher' | 'student' | 'parent';
+
+export interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   first_name: string;
   last_name: string;
 }
@@ -16,6 +18,12 @@ interface AuthState {
   setUser: (user: User) => void;
 }
 
+let logoutCallback: (() => void) | null = null;
+
+export const setLogoutCallback = (callback: () => void) => {
+  logoutCallback = callback;
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
@@ -27,7 +35,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     sessionStorage.clear();
     set({ user: null, isAuthenticated: false });
-    window.location.href = '/login';
+    if (logoutCallback) {
+      logoutCallback();
+    } else {
+      window.location.href = '/login';
+    }
   },
   setUser: (user) => set({ user }),
 }));

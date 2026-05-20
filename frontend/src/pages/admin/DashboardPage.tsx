@@ -4,19 +4,20 @@ import { useAuthStore } from '../../store/authStore';
 import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line,
+  PieChart, Pie, Cell,
 } from 'recharts';
-import { Users, GraduationCap, BookOpen, BrainCircuit, Activity, Calendar, TrendingUp } from 'lucide-react';
+import { Users, GraduationCap, BookOpen, BrainCircuit, Activity, TrendingUp } from 'lucide-react';
+import type { AnalyticsDashboard, AnalyticsGrades, AnalyticsAIUsage, AnalyticsQuizStats, AuditLog } from '../../types';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
-  const { data: stats } = useQuery({ queryKey: ['admin-dashboard'], queryFn: () => api.get('/analytics/dashboard').then((r) => r.data) });
-  const { data: gradeDist } = useQuery({ queryKey: ['admin-grades-dist'], queryFn: () => api.get('/analytics/grades').then((r) => r.data) });
-  const { data: aiUsage } = useQuery({ queryKey: ['admin-ai-usage'], queryFn: () => api.get('/analytics/ai-usage', { params: { days: 30 } }).then((r) => r.data) });
-  const { data: quizStats } = useQuery({ queryKey: ['admin-quiz-stats'], queryFn: () => api.get('/analytics/quiz-stats').then((r) => r.data) });
-  const { data: recentLogs } = useQuery({ queryKey: ['admin-recent-logs'], queryFn: () => api.get('/audit/logs', { params: { per_page: 5 } }).then((r) => r.data) });
+  const { data: stats } = useQuery<{ data: AnalyticsDashboard }>({ queryKey: ['admin-dashboard'], queryFn: () => api.get('/analytics/dashboard').then((r) => r.data) });
+  const { data: gradeDist } = useQuery<{ data: AnalyticsGrades }>({ queryKey: ['admin-grades-dist'], queryFn: () => api.get('/analytics/grades').then((r) => r.data) });
+  const { data: aiUsage } = useQuery<{ data: AnalyticsAIUsage }>({ queryKey: ['admin-ai-usage'], queryFn: () => api.get('/analytics/ai-usage', { params: { days: 30 } }).then((r) => r.data) });
+  const { data: quizStats } = useQuery<{ data: AnalyticsQuizStats }>({ queryKey: ['admin-quiz-stats'], queryFn: () => api.get('/analytics/quiz-stats').then((r) => r.data) });
+  const { data: recentLogs } = useQuery<{ data: { items: AuditLog[] } }>({ queryKey: ['admin-recent-logs'], queryFn: () => api.get('/audit/logs', { params: { per_page: 5 } }).then((r) => r.data) });
 
   const statCards = [
     { label: 'Utilisateurs', value: stats?.total_users || 0, icon: Users, color: 'bg-blue-500' },
@@ -117,7 +118,7 @@ export default function DashboardPage() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }} className="bg-white p-6 rounded-xl shadow-sm">
           <h3 className="font-semibold mb-4">Activité récente</h3>
           <div className="space-y-3">
-            {recentLogs?.items?.length ? recentLogs.items.slice(0, 5).map((log: any) => (
+            {recentLogs?.items?.length ? recentLogs.items.slice(0, 5).map((log) => (
               <div key={log.id} className="flex items-start gap-3 text-sm">
                 <Activity className="h-4 w-4 mt-0.5 text-gray-400" />
                 <div>

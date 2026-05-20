@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, GraduationCap, Sparkles, Shield } from 'lucide-react';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import { DEMO_ACCOUNTS } from '../../lib/constants';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -45,14 +46,9 @@ export default function LoginPage() {
     }
   };
 
-  const demoAccounts = [
-    { role: 'Admin', email: 'admin@donbosco.tn', password: 'admin123!' },
-    { role: 'Enseignant', email: 'karim.hamdi@donbosco.tn', password: 'teacher123!' },
-    { role: 'Élève', email: 'adam.slim@donbosco.tn', password: 'student123!' },
-    { role: 'Parent', email: 'ahmed.slim@parent.tn', password: 'parent123!' },
-  ];
+  const demoAccounts = DEMO_ACCOUNTS;
 
-  const fillDemo = (account: typeof demoAccounts[0]) => {
+  const fillDemo = (account: typeof DEMO_ACCOUNTS[0]) => {
     setEmail(account.email);
     setPassword(account.password);
   };

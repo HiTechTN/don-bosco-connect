@@ -2,6 +2,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import api from '../../lib/api';
 import { motion } from 'framer-motion';
+import type { User, PaginatedResponse } from '../../types';
+
+interface UserForm {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  role: 'admin' | 'teacher' | 'student' | 'parent';
+  status: string;
+}
 
 export default function UsersPage() {
   const [page, setPage] = useState(1);
@@ -9,22 +19,22 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
-  const [editUser, setEditUser] = useState<any>(null);
-  const [form, setForm] = useState({ email: '', password: '', first_name: '', last_name: '', role: 'student', status: 'active' });
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [form, setForm] = useState<UserForm>({ email: '', password: '', first_name: '', last_name: '', role: 'student', status: 'active' });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<PaginatedResponse<User>>({
     queryKey: ['users', page, search, roleFilter],
     queryFn: () =>
       api.get('/users', { params: { page, per_page: 20, search: search || undefined, role: roleFilter || undefined } }).then((r) => r.data),
   });
 
   const createMutation = useMutation({
-    mutationFn: (user: typeof form) => api.post('/users', user),
+    mutationFn: (user: UserForm) => api.post('/users', user),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setShowForm(false); resetForm(); },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: { id: string; data: any }) => api.patch(`/users/${user.id}`, user.data),
+    mutationFn: (user: { id: string; data: Partial<UserForm> }) => api.patch(`/users/${user.id}`, user.data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setEditUser(null); resetForm(); },
   });
 
@@ -35,13 +45,13 @@ export default function UsersPage() {
 
   function resetForm() { setForm({ email: '', password: '', first_name: '', last_name: '', role: 'student', status: 'active' }); }
 
-  function openEdit(user: any) {
+  function openEdit(user: User) {
     setEditUser(user);
-    setForm({ email: user.email, password: '', first_name: user.first_name, last_name: user.last_name, role: user.role, status: user.status });
+    setForm({ email: user.email, password: '', first_name: user.first_name, last_name: user.last_name, role: user.role, status: user.status || 'active' });
   }
 
   function roleBadge(role: string) {
-    const colors: any = { admin: 'bg-red-50 text-red-700', teacher: 'bg-blue-50 text-blue-700', student: 'bg-green-50 text-green-700', parent: 'bg-purple-50 text-purple-700' };
+    const colors: Record<string, string> = { admin: 'bg-red-50 text-red-700', teacher: 'bg-blue-50 text-blue-700', student: 'bg-green-50 text-green-700', parent: 'bg-purple-50 text-purple-700' };
     return <span className={`px-2 py-1 text-xs rounded-full ${colors[role] || 'bg-gray-50'}`}>{role}</span>;
   }
 
@@ -79,7 +89,7 @@ export default function UsersPage() {
               <input placeholder="Nom" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
               <input placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
               {!editUser && <input placeholder="Mot de passe" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />}
-              <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-4 py-2 border rounded-lg">
+              <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as UserForm['role'] })} className="w-full px-4 py-2 border rounded-lg">
                 <option value="admin">Admin</option>
                 <option value="teacher">Enseignant</option>
                 <option value="student">Élève</option>
@@ -120,12 +130,12 @@ export default function UsersPage() {
             {isLoading ? (
               <tr><td colSpan={7} className="px-6 py-4 text-center">Chargement...</td></tr>
             ) : (
-              data?.items?.map((user: any) => (
+              data?.items?.map((user) => (
                 <tr key={user.id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium">{user.first_name} {user.last_name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                   <td className="px-6 py-4">{roleBadge(user.role)}</td>
-                  <td className="px-6 py-4">{statusBadge(user.status)}</td>
+                  <td className="px-6 py-4">{statusBadge(user.status || 'active')}</td>
                   <td className="px-6 py-4">
                     <span className={`text-xs ${user.mfa_enabled ? 'text-green-600' : 'text-gray-400'}`}>{user.mfa_enabled ? 'Activé' : 'Désactivé'}</span>
                   </td>

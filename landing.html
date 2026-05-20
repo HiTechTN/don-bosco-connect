@@ -7,11 +7,12 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        body[dir="rtl"] { direction: rtl; }
         .hero { padding: 60px 20px; text-align: center; color: white; }
         .hero h1 { font-size: 3.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .hero p { font-size: 1.3rem; margin-bottom: 30px; opacity: 0.95; }
         .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-        .btn { padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: all 0.3s; }
+        .btn { padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: all 0.3s; display: inline-block; }
         .btn-primary { background: white; color: #667eea; }
         .btn-secondary { background: transparent; color: white; border: 2px solid white; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -29,61 +30,73 @@
         .demo-link { padding: 15px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s; }
         .demo-link:hover { background: #764ba2; }
         footer { background: #333; color: white; text-align: center; padding: 40px 20px; }
-        .lang-switch { position: absolute; top: 20px; right: 20px; }
-        .lang-switch a { color: white; text-decoration: none; margin: 0 10px; }
+        .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; }
+        body[dir="rtl"] .lang-switch { right: auto; left: 20px; }
+        .lang-btn { padding: 8px 15px; border: 2px solid white; background: transparent; color: white; cursor: pointer; border-radius: 20px; font-weight: bold; transition: all 0.3s; }
+        .lang-btn:hover, .lang-btn.active { background: white; color: #667eea; }
+        .demo-accounts { margin-top: 50px; padding: 30px; background: white; border-radius: 15px; text-align: left; }
+        .accounts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .account-card { padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .account-card strong { color: #667eea; display: block; margin-bottom: 8px; }
+        .install-code { background: #1e1e1e; color: #d4d4d4; padding: 30px; border-radius: 10px; text-align: left; margin-top: 30px; font-family: 'Courier New', monospace; }
+        .install-code .comment { color: #4ec9b0; }
+        .nav-links { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        .nav-link { padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s; }
     </style>
 </head>
 <body>
     <div class="lang-switch">
-        <a href="?lang=fr">FR</a> | <a href="?lang=en">EN</a> | <a href="?lang=ar">عربي</a>
+        <button class="lang-btn" data-lang="fr" onclick="switchLanguage('fr')">FR</button>
+        <button class="lang-btn" data-lang="en" onclick="switchLanguage('en')">EN</button>
+        <button class="lang-btn" data-lang="ar" onclick="switchLanguage('ar')">عربي</button>
     </div>
 
     <section class="hero">
         <div class="container">
-            <h1>🎓 Don Bosco Connect</h1>
-            <p>La plateforme éducative intelligente propulsée par l'IA</p>
-            <p style="font-size: 1rem; margin-top: 10px;">Multilingue • Adaptive Learning • Open Source</p>
+            <h1>🎓 <span data-i18n="title">Don Bosco Connect</span></h1>
+            <p data-i18n="subtitle">La plateforme éducative intelligente propulsée par l'IA</p>
+            <p style="font-size: 1rem; margin-top: 10px;" data-i18n="features_badge">Multilingue • Adaptive Learning • Open Source</p>
             <div class="cta-buttons">
-                <a href="#demo" class="btn btn-primary">🚀 Voir la Démo</a>
-                <a href="https://github.com/HiTechTN/don-bosco-connect" class="btn btn-secondary">📦 GitHub</a>
-                <a href="#install" class="btn btn-secondary">⚙️ Installation</a>
+                <a href="#demo" class="btn btn-primary" data-i18n="btn_demo">🚀 Voir la Démo</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect" class="btn btn-secondary" data-i18n="btn_github">📦 GitHub</a>
+                <a href="#install" class="btn btn-secondary" data-i18n="btn_install">⚙️ Installation</a>
             </div>
         </div>
     </section>
 
     <section class="features">
         <div class="container">
-            <h2>✨ Fonctionnalités Principales</h2>
+            <h2 data-i18n="features_title">✨ Fonctionnalités Principales</h2>
             <div class="feature-grid">
                 <div class="feature-card">
                     <div class="feature-icon">🤖</div>
-                    <h3>IA Adaptative</h3>
-                    <p>Apprentissage personnalisé avec Ollama. Le système ajuste le niveau automatiquement selon vos performances.</p>
+                    <h3 data-i18n="feature_ai_title">IA Adaptative</h3>
+                    <p data-i18n="feature_ai_desc">Apprentissage personnalisé avec Ollama. Le système ajuste le niveau automatiquement selon vos performances.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🌍</div>
-                    <h3>Multilingue</h3>
-                    <p>Disponible en Français, Anglais et Arabe (RTL supporté). Interface adaptée à chaque culture.</p>
+                    <h3 data-i18n="feature_multilang_title">Multilingue</h3>
+                    <p data-i18n="feature_multilang_desc">Disponible en Français, Anglais et Arabe (RTL supporté). Interface adaptée à chaque culture.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">👥</div>
-                    <h3>Gestion des Rôles</h3>
-                    <p>Admin, Professeur, Élève, Parent - Chaque rôle a son espace dédié et ses fonctionnalités.</p>
+                    <h3 data-i18n="feature_roles_title">Gestion des Rôles</h3>
+                    <p data-i18n="feature_roles_desc">Admin, Professeur, Élève, Parent - Chaque rôle a son espace dédié et ses fonctionnalités.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📱</div>
-                    <h3>Multi-Plateforme</h3>
-                    <p>Web (React), Mobile (React Native), Desktop (Electron) - Une expérience unifiée partout.</p>
+                    <h3 data-i18n="feature_multiplatform_title">Multi-Plateforme</h3>
+                    <p data-i18n="feature_multiplatform_desc">Web (React), Mobile (React Native), Desktop (Electron) - Une expérience unifiée partout.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
-                    <h3>Suivi en Temps Réel</h3>
-                    <p>Tableaux de bord, statistiques, quiz interactifs et suivi de progression pour tous les utilisateurs.</p>
+                    <h3 data-i18n="feature_realtime_title">Suivi en Temps Réel</h3>
+                    <p data-i18n="feature_realtime_desc">Tableaux de bord, statistiques, quiz interactifs et suivi de progression pour tous les utilisateurs.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔧</div>
-                    <h3>Open Source</h3>
-                    <p>Code transparent, auto-hébergeable, Docker-ready. Contribuez sur GitHub !</p>
+                    <h3 data-i18n="feature_opensource_title">Open Source</h3>
+                    <p data-i18n="feature_opensource_desc">Code transparent, auto-hébergeable, Docker-ready. Contribuez sur GitHub !</p>
                 </div>
             </div>
         </div>
@@ -91,37 +104,37 @@
 
     <section id="demo" class="demo-section">
         <div class="container">
-            <h2>🎬 Découvrez Don Bosco Connect</h2>
-            <p style="font-size: 1.2rem; color: #666; margin-bottom: 30px;">
+            <h2 data-i18n="demo_title">🎬 Découvrez Don Bosco Connect</h2>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 30px;" data-i18n="demo_subtitle">
                 Testez l'application avec un compte de démonstration
             </p>
             <div class="demo-links">
-                <a href="http://localhost:3000" class="demo-link">🌐 Version Web</a>
-                <a href="https://github.com/HiTechTN/don-bosco-connect/releases" class="demo-link">📦 Télécharger</a>
-                <a href="https://github.com/HiTechTN/don-bosco-connect" class="demo-link">💻 Code Source</a>
+                <a href="http://localhost:3000" class="demo-link" data-i18n="demo_web">🌐 Version Web</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect/releases" class="demo-link" data-i18n="demo_download">📦 Télécharger</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect" class="demo-link" data-i18n="demo_source">💻 Code Source</a>
             </div>
-            <div style="margin-top: 50px; padding: 30px; background: white; border-radius: 15px; text-align: left;">
-                <h3 style="color: #667eea; margin-bottom: 20px;">Comptes de Test</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                    <div>
-                        <strong>👨‍💼 Admin</strong><br>
-                        Email: admin@donbosco-connect.tn<br>
-                        Mot de passe: admin123
+            <div class="demo-accounts">
+                <h3 style="color: #667eea; margin-bottom: 20px;" data-i18n="accounts_title">📋 Comptes de Test</h3>
+                <div class="accounts-grid">
+                    <div class="account-card">
+                        <strong>👨‍💼 <span data-i18n="role_admin">Admin</span></strong>
+                        <span data-i18n="email">Email:</span> admin@donbosco.tn<br>
+                        <span data-i18n="password">Mot de passe:</span> admin123!
                     </div>
-                    <div>
-                        <strong>👨‍🏫 Professeur</strong><br>
-                        Email: prof@donbosco-connect.tn<br>
-                        Mot de passe: prof123
+                    <div class="account-card">
+                        <strong>👨‍🏫 <span data-i18n="role_teacher">Professeur</span></strong>
+                        <span data-i18n="email">Email:</span> karim.hamdi@donbosco.tn<br>
+                        <span data-i18n="password">Mot de passe:</span> teacher123!
                     </div>
-                    <div>
-                        <strong>👨‍🎓 Élève</strong><br>
-                        Email: eleve@donbosco-connect.tn<br>
-                        Mot de passe: eleve123
+                    <div class="account-card">
+                        <strong>👨‍🎓 <span data-i18n="role_student">Élève</span></strong>
+                        <span data-i18n="email">Email:</span> adam.slim@donbosco.tn<br>
+                        <span data-i18n="password">Mot de passe:</span> student123!
                     </div>
-                    <div>
-                        <strong>👪 Parent</strong><br>
-                        Email: parent@donbosco-connect.tn<br>
-                        Mot de passe: parent123
+                    <div class="account-card">
+                        <strong>👪 <span data-i18n="role_parent">Parent</span></strong>
+                        <span data-i18n="email">Email:</span> ahmed.slim@parent.tn<br>
+                        <span data-i18n="password">Mot de passe:</span> parent123!
                     </div>
                 </div>
             </div>
@@ -130,31 +143,224 @@
 
     <section id="install" class="features">
         <div class="container">
-            <h2>⚙️ Installation Rapide</h2>
-            <div style="background: #1e1e1e; color: #d4d4d4; padding: 30px; border-radius: 10px; text-align: left; margin-top: 30px; font-family: 'Courier New', monospace;">
-                <p style="color: #4ec9b0;"># Cloner et installer avec Docker (recommandé)</p>
+            <h2 data-i18n="install_title">⚙️ Installation Rapide</h2>
+            <div class="install-code">
+                <p class="comment"># Cloner et installer avec Docker (recommandé)</p>
                 <p>git clone https://github.com/HiTechTN/don-bosco-connect.git</p>
                 <p>cd don-bosco-connect</p>
-                <p>./setup.sh --docker</p>
+                <p>docker-compose up -d</p>
                 <br>
-                <p style="color: #4ec9b0;"># Ou avec gh CLI</p>
+                <p class="comment"># Ou avec gh CLI</p>
                 <p>gh repo clone HiTechTN/don-bosco-connect</p>
                 <p>cd don-bosco-connect && ./install.sh</p>
             </div>
-            <div style="margin-top: 30px;">
-                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/INTEGRATION.md" class="btn btn-primary" style="color: #667eea;">📖 Guide Intégrateur</a>
-                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/USER_GUIDE.md" class="btn btn-secondary" style="margin-left: 20px;">📘 Guide Utilisateur</a>
+            <div class="nav-links">
+                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/INTEGRATION.md" class="btn btn-primary" style="color: #667eea;" data-i18n="guide_integrator">📖 Guide Intégrateur</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/USER_GUIDE.md" class="btn btn-secondary" data-i18n="guide_user">📘 Guide Utilisateur</a>
             </div>
         </div>
     </section>
 
     <footer>
-        <p>Don Bosco Connect © 2026 - Propulsé par Open Source</p>
+        <p>Don Bosco Connect © 2026 - <span data-i18n="footeropensource">Propulsé par Open Source</span></p>
         <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">
             <a href="https://github.com/HiTechTN/don-bosco-connect" style="color: #667eea;">GitHub</a> | 
-            <a href="https://github.com/HiTechTN/don-bosco-connect/issues" style="color: #667eea;">Signaler un bug</a> | 
-            <a href="mailto:contact@donbosco-connect.tn" style="color: #667eea;">Contact</a>
+            <a href="https://github.com/HiTechTN/don-bosco-connect/issues" style="color: #667eea;" data-i18n="report_bug">Signaler un bug</a> | 
+            <a href="mailto:contact@donbosco.tn" style="color: #667eea;" data-i18n="contact">Contact</a>
         </p>
     </footer>
+
+    <script>
+        const translations = {
+            fr: {
+                title: "Don Bosco Connect",
+                subtitle: "La plateforme éducative intelligente propulsée par l'IA",
+                features_badge: "Multilingue • Adaptive Learning • Open Source",
+                btn_demo: "🚀 Voir la Démo",
+                btn_github: "📦 GitHub",
+                btn_install: "⚙️ Installation",
+                features_title: "✨ Fonctionnalités Principales",
+                feature_ai_title: "IA Adaptative",
+                feature_ai_desc: "Apprentissage personnalisé avec Ollama. Le système ajuste le niveau automatiquement selon vos performances.",
+                feature_multilang_title: "Multilingue",
+                feature_multilang_desc: "Disponible en Français, Anglais et Arabe (RTL supporté). Interface adaptée à chaque culture.",
+                feature_roles_title: "Gestion des Rôles",
+                feature_roles_desc: "Admin, Professeur, Élève, Parent - Chaque rôle a son espace dédié et ses fonctionnalités.",
+                feature_multiplatform_title: "Multi-Plateforme",
+                feature_multiplatform_desc: "Web (React), Mobile (React Native), Desktop (Electron) - Une expérience unifiée partout.",
+                feature_realtime_title: "Suivi en Temps Réel",
+                feature_realtime_desc: "Tableaux de bord, statistiques, quiz interactifs et suivi de progression pour tous les utilisateurs.",
+                feature_opensource_title: "Open Source",
+                feature_opensource_desc: "Code transparent, auto-hébergeable, Docker-ready. Contribuez sur GitHub !",
+                demo_title: "🎬 Découvrez Don Bosco Connect",
+                demo_subtitle: "Testez l'application avec un compte de démonstration",
+                demo_web: "🌐 Version Web",
+                demo_download: "📦 Télécharger",
+                demo_source: "💻 Code Source",
+                accounts_title: "📋 Comptes de Test",
+                role_admin: "Admin",
+                role_teacher: "Professeur",
+                role_student: "Élève",
+                role_parent: "Parent",
+                email: "Email:",
+                password: "Mot de passe:",
+                install_title: "⚙️ Installation Rapide",
+                guide_integrator: "📖 Guide Intégrateur",
+                guide_user: "📘 Guide Utilisateur",
+                footeropensource: "Propulsé par Open Source",
+                report_bug: "Signaler un bug",
+                contact: "Contact"
+            },
+            en: {
+                title: "Don Bosco Connect",
+                subtitle: "The intelligent educational platform powered by AI",
+                features_badge: "Multilingual • Adaptive Learning • Open Source",
+                btn_demo: "🚀 See Demo",
+                btn_github: "📦 GitHub",
+                btn_install: "⚙️ Installation",
+                features_title: "✨ Key Features",
+                feature_ai_title: "Adaptive AI",
+                feature_ai_desc: "Personalized learning with Ollama. The system automatically adjusts the level based on your performance.",
+                feature_multilang_title: "Multilingual",
+                feature_multilang_desc: "Available in French, English and Arabic (RTL supported). Interface adapted to each culture.",
+                feature_roles_title: "Role Management",
+                feature_roles_desc: "Admin, Teacher, Student, Parent - Each role has its dedicated space and features.",
+                feature_multiplatform_title: "Cross-Platform",
+                feature_multiplatform_desc: "Web (React), Mobile (React Native), Desktop (Electron) - A unified experience everywhere.",
+                feature_realtime_title: "Real-Time Tracking",
+                feature_realtime_desc: "Dashboards, statistics, interactive quizzes and progress tracking for all users.",
+                feature_opensource_title: "Open Source",
+                feature_opensource_desc: "Transparent code, self-hostable, Docker-ready. Contribute on GitHub!",
+                demo_title: "🎬 Discover Don Bosco Connect",
+                demo_subtitle: "Test the application with a demo account",
+                demo_web: "🌐 Web Version",
+                demo_download: "📦 Download",
+                demo_source: "💻 Source Code",
+                accounts_title: "📋 Test Accounts",
+                role_admin: "Admin",
+                role_teacher: "Teacher",
+                role_student: "Student",
+                role_parent: "Parent",
+                email: "Email:",
+                password: "Password:",
+                install_title: "⚙️ Quick Installation",
+                guide_integrator: "📖 Integrator Guide",
+                guide_user: "📘 User Guide",
+                footeropensource: "Powered by Open Source",
+                report_bug: "Report a bug",
+                contact: "Contact"
+            },
+            ar: {
+                title: "دون بوsko كونكت",
+                subtitle: "منصة تعليمية ذكية تعمل بالذكاء الاصطناعي",
+                features_badge: "متعدد اللغات • تعلم تكيفي • مفتوح المصدر",
+                btn_demo: "🚀 شاهد العرض",
+                btn_github: "📦 جيثب",
+                btn_install: "⚙️ التثبيت",
+                features_title: "✨ الميزات الرئيسية",
+                feature_ai_title: "ذكاء اصطناعي تكيفي",
+                feature_ai_desc: "تعلم مخصص مع Ollama. يقوم النظام بتعديل المستوى تلقائيًا بناءً على أدائك.",
+                feature_multilang_title: "متعدد اللغات",
+                feature_multilang_desc: "متاح بالفرنسية والإنجليزية والعربية (دعم RTL). واجهة مخصصة لكل ثقافة.",
+                feature_roles_title: "إدارة الأدوار",
+                feature_roles_desc: "مدير، معلم، طالب، ولي أمر - لكل دور مساحته الخاصة وميزاته.",
+                feature_multiplatform_title: "متعدد المنصات",
+                feature_multiplatform_desc: "ويب (React)، موبايل (React Native)، سطح المكتب (Electron) - تجربة موحدة في كل مكان.",
+                feature_realtime_title: "تتبع في الوقت الفعلي",
+                feature_realtime_desc: "لوحات معلومات، إحصائيات، اختبارات تفاعلية وتتبع التقدم لجميع المستخدمين.",
+                feature_opensource_title: "مفتوح المصدر",
+                feature_opensource_desc: "كود شفاف، استضافة ذاتية، جاهز لـ Docker. ساهم على جيثب!",
+                demo_title: "🎬 اكتشف دون بوsko كونكت",
+                demo_subtitle: "اختبر التطبيق بحساب تجريبي",
+                demo_web: "🌐 نسخة الويب",
+                demo_download: "📦 تحميل",
+                demo_source: "💻 الكود المصدري",
+                accounts_title: "📋 حسابات الاختبار",
+                role_admin: "مدير",
+                role_teacher: "معلم",
+                role_student: "طالب",
+                role_parent: "ولي أمر",
+                email: "البريد الإلكتروني:",
+                password: "كلمة المرور:",
+                install_title: "⚙️ التثبيت السريع",
+                guide_integrator: "📖 دليل المطور",
+                guide_user: "📘 دليل المستخدم",
+                footeropensource: "مدعوم بمصدر مفتوح",
+                report_bug: "الإبلاغ عن خطأ",
+                contact: "اتصل بنا"
+            }
+        };
+
+        function getStoredLang() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            if (urlLang && translations[urlLang]) return urlLang;
+            
+            const stored = localStorage.getItem('landing_lang');
+            if (stored && translations[stored]) return stored;
+            
+            return 'fr';
+        }
+
+        function updatePageDirection(lang) {
+            const isRTL = lang === 'ar';
+            document.body.dir = isRTL ? 'rtl' : 'ltr';
+            document.body.lang = lang;
+        }
+
+        function updateActiveButtons(lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function translatePage(lang) {
+            const t = translations[lang];
+            if (!t) return;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (t[key]) {
+                    el.textContent = t[key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.dataset.i18nTitle;
+                if (t[key]) {
+                    el.title = t[key];
+                }
+            });
+
+            updatePageDirection(lang);
+            updateActiveButtons(lang);
+        }
+
+        function switchLanguage(lang) {
+            if (!translations[lang]) return;
+            
+            localStorage.setItem('landing_lang', lang);
+            
+            const url = new URL(window.location);
+            url.searchParams.set('lang', lang);
+            window.history.replaceState({}, '', url);
+            
+            translatePage(lang);
+            
+            document.title = lang === 'ar' 
+                ? 'دون بوsko كونكت - منصة تعليمية ذكية' 
+                : lang === 'en'
+                    ? 'Don Bosco Connect - Intelligent Educational Platform'
+                    : 'Don Bosco Connect - Plateforme Éducative Intelligente';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const lang = getStoredLang();
+            translatePage(lang);
+        });
+    </script>
 </body>
 </html>
