@@ -1,36 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../services/api';
-import { getUser, clearAuth } from '../lib/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatCard from '../components/StatCard';
 import LoadingScreen from '../components/LoadingScreen';
-import Card from '../components/Card';
 
 interface Props { navigation: any }
 
+const MOCK_STATS = {
+  grades: 8,
+  absences: 3,
+  xp: 2450,
+};
+
 export default function StudentDashboardScreen({ navigation }: Props) {
   const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState({ grades: 0, absences: 0, xp: 0 });
+  const [stats] = useState(MOCK_STATS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const u = await getUser(); setUser(u);
-      try {
-        const [gRes, aRes, gamRes] = await Promise.all([
-          api.get(`/students/${u.id}/grades`).catch(() => ({ data: [] })),
-          api.get(`/students/${u.id}/absences`).catch(() => ({ data: [] })),
-          api.get('/gamification/profile').catch(() => ({ data: { xp_total: 0 } })),
-        ]);
-        setStats({
-          grades: gRes.data.length || 0,
-          absences: aRes.data.length || 0,
-          xp: gamRes.data.xp_total || 0,
-        });
-      } catch { } finally { setLoading(false); }
+      const userStr = await AsyncStorage.getItem('user');
+      if (userStr) setUser(JSON.parse(userStr));
+      setLoading(false);
     })();
   }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  };
 
   if (loading) return <LoadingScreen />;
 
@@ -40,7 +39,7 @@ export default function StudentDashboardScreen({ navigation }: Props) {
         <Text style={styles.greeting}>Bonjour, {user?.first_name} 👋</Text>
         <Text style={styles.level}>Niveau {Math.floor(stats.xp / 500) + 1} • {stats.xp} XP</Text>
         <View style={styles.xpBar}><View style={[styles.xpFill, { width: `${(stats.xp % 500) / 5}%` }]} /></View>
-        <TouchableOpacity onPress={async () => { await clearAuth(); navigation.replace('Login'); }}>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logout}>Déconnexion</Text>
         </TouchableOpacity>
       </View>

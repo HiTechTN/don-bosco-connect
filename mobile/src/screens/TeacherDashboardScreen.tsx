@@ -1,35 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../services/api';
-import { getUser, clearAuth } from '../lib/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatCard from '../components/StatCard';
 import LoadingScreen from '../components/LoadingScreen';
 import Card from '../components/Card';
 
 interface Props { navigation: any }
 
+const MOCK_STATS = {
+  courses: 3,
+  evaluations: 5,
+  students: 28,
+};
+
 export default function TeacherDashboardScreen({ navigation }: Props) {
   const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState({ courses: 0, evaluations: 0, students: 0 });
+  const [stats] = useState(MOCK_STATS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const u = await getUser(); setUser(u);
-      try {
-        const [cRes, eRes] = await Promise.all([
-          api.get('/courses').catch(() => ({ data: [] })),
-          api.get('/evaluations').catch(() => ({ data: [] })),
-        ]);
-        setStats({
-          courses: cRes.data.length || cRes.data.items?.length || 0,
-          evaluations: eRes.data.length || 0,
-          students: 0,
-        });
-      } catch { } finally { setLoading(false); }
+      const userStr = await AsyncStorage.getItem('user');
+      if (userStr) setUser(JSON.parse(userStr));
+      setLoading(false);
     })();
   }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  };
 
   if (loading) return <LoadingScreen />;
 
@@ -40,7 +41,7 @@ export default function TeacherDashboardScreen({ navigation }: Props) {
           <Text style={styles.greeting}>Bonjour, {user?.first_name}</Text>
           <Text style={styles.role}>Enseignant</Text>
         </View>
-        <TouchableOpacity onPress={async () => { await clearAuth(); navigation.replace('Login'); }}>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logout}>Déconnexion</Text>
         </TouchableOpacity>
       </View>

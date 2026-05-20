@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../services/api';
-import { saveTokens, saveUser } from '../lib/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props { navigation: any }
 
@@ -12,6 +11,21 @@ const DEMO_ACCOUNTS = [
   { role: 'Élève', email: 'adam.slim@donbosco.tn', password: 'student123!', color: '#D97706' },
   { role: 'Parent', email: 'ahmed.slim@parent.tn', password: 'parent123!', color: '#DC2626' },
 ];
+
+const mockLogin = async (email: string, password: string) => {
+  const users: Record<string, { id: string; name: string; role: string }> = {
+    'admin@donbosco.tn': { id: 'admin-uuid-0001', name: 'Admin Principal', role: 'admin' },
+    'karim.hamdi@donbosco.tn': { id: 'teacher-uuid-001', name: 'Karim Hamdi', role: 'teacher' },
+    'adam.slim@donbosco.tn': { id: 'student-uuid-001', name: 'Adam Slim', role: 'student' },
+    'ahmed.slim@parent.tn': { id: 'parent-uuid-001', name: 'Ahmed Slim', role: 'parent' },
+  };
+  const user = users[email];
+  if (user && password.endsWith('!')) {
+    const parts = user.name.split(' ');
+    return { id: user.id, email, role: user.role, first_name: parts[0] || user.name, last_name: parts.slice(1).join(' ') || '' };
+  }
+  throw new Error('Email ou mot de passe incorrect');
+};
 
 export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
@@ -23,16 +37,20 @@ export default function LoginScreen({ navigation }: Props) {
     if (!email || !password) { setError('Veuillez remplir tous les champs'); return; }
     setLoading(true); setError('');
     try {
-      const res = await api.post('/auth/login', { email, password });
-      await saveTokens(res.data.access_token, res.data.refresh_token);
-      await saveUser(res.data.user);
-      const role = res.data.user.role;
-      if (role === 'admin') navigation.replace('AdminHome');
-      else if (role === 'teacher') navigation.replace('TeacherHome');
-      else if (role === 'parent') navigation.replace('ParentHome');
-      else navigation.replace('StudentHome');
+      const userData = await mockLogin(email, password);
+      await AsyncStorage.setItem('access_token', `mock_${userData.id}`);
+      await AsyncStorage.setItem('refresh_token', `mock_refresh_${userData.id}`);
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+      
+      const screenMap: Record<string, string> = {
+        admin: 'AdminHome',
+        teacher: 'TeacherHome',
+        parent: 'ParentHome',
+        student: 'StudentHome',
+      };
+      navigation.replace(screenMap[userData.role] || 'StudentHome');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Email ou mot de passe incorrect');
+      setError(err.message || 'Email ou mot de passe incorrect');
     } finally { setLoading(false); }
   };
 

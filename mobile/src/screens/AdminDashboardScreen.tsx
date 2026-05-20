@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../services/api';
-import { getUser, clearAuth } from '../lib/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatCard from '../components/StatCard';
 import LoadingScreen from '../components/LoadingScreen';
 
 interface Props { navigation: any }
 
+const MOCK_STATS = {
+  users: 9,
+  classes: 3,
+  subjects: 8,
+  events: 5,
+};
+
 export default function AdminDashboardScreen({ navigation }: Props) {
   const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState<any>({});
+  const [stats] = useState(MOCK_STATS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const u = await getUser(); setUser(u);
-      try {
-        const [uRes, cRes, sRes, eRes] = await Promise.all([
-          api.get('/users').catch(() => ({ data: { items: [] } })),
-          api.get('/classes').catch(() => ({ data: [] })),
-          api.get('/subjects').catch(() => ({ data: [] })),
-          api.get('/events').catch(() => ({ data: [] })),
-        ]);
-        setStats({
-          users: uRes.data.items?.length || uRes.data.length || 0,
-          classes: cRes.data.length || 0,
-          subjects: sRes.data.length || 0,
-          events: eRes.data.length || 0,
-        });
-      } catch { } finally { setLoading(false); }
+      const userStr = await AsyncStorage.getItem('user');
+      if (userStr) setUser(JSON.parse(userStr));
+      setLoading(false);
     })();
   }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  };
 
   if (loading) return <LoadingScreen />;
 
@@ -42,7 +41,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           <Text style={styles.greeting}>Bonjour, {user?.first_name}</Text>
           <Text style={styles.role}>Administrateur</Text>
         </View>
-        <TouchableOpacity onPress={async () => { await clearAuth(); navigation.replace('Login'); }}>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logout}>Déconnexion</Text>
         </TouchableOpacity>
       </View>

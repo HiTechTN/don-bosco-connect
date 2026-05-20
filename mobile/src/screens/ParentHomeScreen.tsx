@@ -1,27 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '../services/api';
-import { getUser, clearAuth } from '../lib/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingScreen from '../components/LoadingScreen';
 import Card from '../components/Card';
 
 interface Props { navigation: any }
 
+const MOCK_CHILDREN = [
+  { id: 'student-uuid-001', first_name: 'Adam', last_name: 'Slim', email: 'adam.slim@donbosco.tn' },
+];
+
 export default function ParentDashboardScreen({ navigation }: Props) {
   const [user, setUser] = useState<any>(null);
-  const [children, setChildren] = useState<any[]>([]);
+  const [children] = useState(MOCK_CHILDREN);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const u = await getUser(); setUser(u);
-      try {
-        const res = await api.get('/users/me/children');
-        setChildren(res.data || []);
-      } catch { } finally { setLoading(false); }
+      const userStr = await AsyncStorage.getItem('user');
+      if (userStr) setUser(JSON.parse(userStr));
+      setLoading(false);
     })();
   }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  };
 
   if (loading) return <LoadingScreen />;
 
@@ -32,7 +38,7 @@ export default function ParentDashboardScreen({ navigation }: Props) {
           <Text style={styles.greeting}>Bonjour, {user?.first_name}</Text>
           <Text style={styles.role}>Parent</Text>
         </View>
-        <TouchableOpacity onPress={async () => { await clearAuth(); navigation.replace('Login'); }}>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logout}>Déconnexion</Text>
         </TouchableOpacity>
       </View>
