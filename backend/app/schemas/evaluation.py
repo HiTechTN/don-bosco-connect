@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -21,7 +22,7 @@ class EvaluationUpdate(BaseModel):
     description: str | None = None
     max_score: float | None = None
     coefficient: float | None = None
-    date: date | None = None
+    date: Optional[date] = None  # noqa: UP045 (field name shadows type)
     is_published: bool | None = None
 
 
