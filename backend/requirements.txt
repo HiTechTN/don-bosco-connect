@@ -1,9 +1,0 @@
-django>=5.0
-djangorestframework>=3.14
-django-cors-headers>=4.3
-psycopg2-binary>=2.9
-python-dotenv>=1.0
-pydantic>=2.5
-httpx>=0.26
-pillow>=10.2
-django-filter>=23.5

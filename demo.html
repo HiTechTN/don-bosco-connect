@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Don Bosco Connect — Démo</title>
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #2563EB;
+      --primary-dark: #1E40AF;
+      --accent: #7C3AED;
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --radius: 16px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.08);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      padding: 48px 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .header p {
+      font-size: 1.125rem;
+      opacity: 0.9;
+      position: relative;
+    }
+
+    /* Container */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* Video Section */
+    .video-section {
+      margin-bottom: 48px;
+    }
+    .video-section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .video-wrapper {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      background: #000;
+      aspect-ratio: 16/9;
+    }
+    .video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    .video-overlay.hidden { opacity: 0; pointer-events: none; }
+    .play-btn {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .play-btn svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--primary);
+      margin-left: 4px;
+    }
+
+    /* Carousel Section */
+    .carousel-section {
+      margin-bottom: 48px;
+    }
+    .carousel-section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Profile Tabs */
+    .profile-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .profile-tab {
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .profile-tab:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .profile-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Carousel */
+    .carousel-container {
+      position: relative;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .carousel-viewport {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/10;
+      overflow: hidden;
+    }
+    .carousel-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      transform: scale(0.98);
+    }
+    .carousel-slide.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #F1F5F9;
+    }
+    .carousel-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 24px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    /* Carousel Controls */
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .carousel-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      color: var(--text);
+    }
+    .carousel-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+    .carousel-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+    .carousel-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .carousel-dot.active {
+      background: var(--primary);
+      transform: scale(1.2);
+    }
+    .carousel-counter {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Thumbnails */
+    .carousel-thumbnails {
+      display: flex;
+      gap: 8px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      border-top: 1px solid var(--border);
+    }
+    .carousel-thumbnails::-webkit-scrollbar {
+      height: 4px;
+    }
+    .carousel-thumbnails::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    .carousel-thumbnails::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+    .thumb {
+      flex-shrink: 0;
+      width: 80px;
+      height: 50px;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      opacity: 0.6;
+    }
+    .thumb.active {
+      border-color: var(--primary);
+      opacity: 1;
+    }
+    .thumb:hover { opacity: 0.8; }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .header h1 { font-size: 1.75rem; }
+      .profile-tabs { gap: 6px; }
+      .profile-tab { padding: 8px 14px; font-size: 0.8rem; }
+      .carousel-thumbnails { padding: 12px 16px; }
+      .thumb { width: 60px; height: 38px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Don Bosco Connect</h1>
+    <p>Plateforme éducative intelligente — Collège Don Bosco Tunis</p>
+  </div>
+
+  <div class="container">
+
+    <!-- Video Section -->
+    <div class="video-section">
+      <h2>🎬 Vidéo de présentation</h2>
+      <div class="video-wrapper">
+        <video id="demoVideo" poster="demo/screenshots/00_login.png" preload="metadata">
+          <source src="DonBoscoConnect_Presentation_v2.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay" id="videoOverlay">
+          <div class="play-btn">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carousel Section -->
+    <div class="carousel-section">
+      <h2>📸 Aperçu de la plateforme</h2>
+
+      <div class="profile-tabs" id="profileTabs">
+        <button class="profile-tab active" data-profile="admin">🛡️ Administration</button>
+        <button class="profile-tab" data-profile="teacher">👨‍🏫 Enseignant</button>
+        <button class="profile-tab" data-profile="student">🧑‍🎓 Élève</button>
+        <button class="profile-tab" data-profile="parent">👪 Parent</button>
+      </div>
+
+      <div class="carousel-container">
+        <div class="carousel-viewport" id="carouselViewport"></div>
+        <div class="carousel-controls">
+          <button class="carousel-btn" id="prevBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span class="carousel-counter" id="carouselCounter">1 / 7</span>
+          <div class="carousel-dots" id="carouselDots"></div>
+          <button class="carousel-btn" id="nextBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="carousel-thumbnails" id="carouselThumbs"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <p>Réalisé avec ❤️ par <a href="https://github.com/HiTechTN">HiTech TN</a> · <a href="https://hitechtn.github.io/don-bosco-connect">Démo en ligne</a> · <a href="https://github.com/HiTechTN/don-bosco-connect">Code source</a></p>
+  </div>
+
+  <script>
+    const PROFILES = {
+      admin: {
+        label: 'Administration',
+        slides: [
+          { src: 'demo/screenshots/admin_02_dashboard.png', caption: 'Tableau de bord Admin' },
+          { src: 'demo/screenshots/admin_03_users.png', caption: 'Gestion des utilisateurs' },
+          { src: 'demo/screenshots/admin_04_classes.png', caption: 'Gestion des classes' },
+          { src: 'demo/screenshots/admin_05_subjects.png', caption: 'Gestion des matières' },
+          { src: 'demo/screenshots/admin_06_timetable.png', caption: 'Emploi du temps' },
+          { src: 'demo/screenshots/admin_07_events.png', caption: 'Événements' },
+          { src: 'demo/screenshots/admin_08_audit.png', caption: 'Journaux d\'audit' },
+        ]
+      },
+      teacher: {
+        label: 'Enseignant',
+        slides: [
+          { src: 'demo/screenshots/teacher_02_dashboard.png', caption: 'Tableau de bord Enseignant' },
+          { src: 'demo/screenshots/teacher_03_courses.png', caption: 'Gestion des cours' },
+          { src: 'demo/screenshots/teacher_04_grades.png', caption: 'Carnet de notes' },
+          { src: 'demo/screenshots/teacher_05_absences.png', caption: 'Gestion des absences' },
+          { src: 'demo/screenshots/teacher_06_messages.png', caption: 'Messagerie' },
+          { src: 'demo/screenshots/teacher_07_ai.png', caption: 'Assistant IA' },
+        ]
+      },
+      student: {
+        label: 'Élève',
+        slides: [
+          { src: 'demo/screenshots/student_02_dashboard.png', caption: 'Tableau de bord Élève' },
+          { src: 'demo/screenshots/student_03_grades.png', caption: 'Suivi des notes' },
+          { src: 'demo/screenshots/student_04_absences.png', caption: 'Suivi des absences' },
+          { src: 'demo/screenshots/student_05_timetable.png', caption: 'Emploi du temps' },
+          { src: 'demo/screenshots/student_06_quizzes.png', caption: 'Quiz adaptatif' },
+          { src: 'demo/screenshots/student_07_ai.png', caption: 'Mentor IA' },
+          { src: 'demo/screenshots/student_08_gamification.png', caption: 'Gamification' },
+        ]
+      },
+      parent: {
+        label: 'Parent',
+        slides: [
+          { src: 'demo/screenshots/parent_02_dashboard.png', caption: 'Tableau de bord Parent' },
+          { src: 'demo/screenshots/parent_03_grades.png', caption: 'Suivi des notes' },
+          { src: 'demo/screenshots/parent_04_absences.png', caption: 'Suivi des absences' },
+          { src: 'demo/screenshots/parent_05_messages.png', caption: 'Messagerie' },
+        ]
+      }
+    };
+
+    let currentProfile = 'admin';
+    let currentIndex = 0;
+
+    const viewport = document.getElementById('carouselViewport');
+    const dotsContainer = document.getElementById('carouselDots');
+    const thumbsContainer = document.getElementById('carouselThumbs');
+    const counter = document.getElementById('carouselCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function renderCarousel() {
+      const slides = PROFILES[currentProfile].slides;
+      currentIndex = 0;
+
+      viewport.innerHTML = slides.map((s, i) =>
+        `<div class="carousel-slide ${i === 0 ? 'active' : ''}" data-index="${i}">
+          <img src="${s.src}" alt="${s.caption}" loading="lazy">
+          <div class="carousel-caption">${s.caption}</div>
+        </div>`
+      ).join('');
+
+      dotsContainer.innerHTML = slides.map((_, i) =>
+        `<div class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
+      ).join('');
+
+      thumbsContainer.innerHTML = slides.map((s, i) =>
+        `<div class="thumb ${i === 0 ? 'active' : ''}" data-index="${i}">
+          <img src="${s.src}" alt="${s.caption}" loading="lazy">
+        </div>`
+      ).join('');
+
+      updateCounter();
+    }
+
+    function updateCounter() {
+      const slides = PROFILES[currentProfile].slides;
+      counter.textContent = `${currentIndex + 1} / ${slides.length}`;
+    }
+
+    function goToSlide(index) {
+      const slides = PROFILES[currentProfile].slides;
+      if (index < 0) index = slides.length - 1;
+      if (index >= slides.length) index = 0;
+
+      viewport.querySelectorAll('.carousel-slide').forEach(s => s.classList.remove('active'));
+      dotsContainer.querySelectorAll('.carousel-dot').forEach(d => d.classList.remove('active'));
+      thumbsContainer.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+
+      currentIndex = index;
+      viewport.querySelector(`.carousel-slide[data-index="${index}"]`)?.classList.add('active');
+      dotsContainer.querySelector(`.carousel-dot[data-index="${index}"]`)?.classList.add('active');
+      const thumb = thumbsContainer.querySelector(`.thumb[data-index="${index}"]`);
+      thumb?.classList.add('active');
+      thumb?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+      updateCounter();
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+    nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+
+    dotsContainer.addEventListener('click', e => {
+      const dot = e.target.closest('.carousel-dot');
+      if (dot) goToSlide(parseInt(dot.dataset.index));
+    });
+
+    thumbsContainer.addEventListener('click', e => {
+      const thumb = e.target.closest('.thumb');
+      if (thumb) goToSlide(parseInt(thumb.dataset.index));
+    });
+
+    // Profile tabs
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentProfile = tab.dataset.profile;
+        renderCarousel();
+      });
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') goToSlide(currentIndex - 1);
+      if (e.key === 'ArrowRight') goToSlide(currentIndex + 1);
+    });
+
+    // Touch/swipe support
+    let touchStartX = 0;
+    viewport.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    viewport.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        goToSlide(currentIndex + (diff > 0 ? 1 : -1));
+      }
+    });
+
+    // Video play button
+    const video = document.getElementById('demoVideo');
+    const overlay = document.getElementById('videoOverlay');
+
+    overlay.addEventListener('click', () => {
+      video.play();
+      overlay.classList.add('hidden');
+    });
+
+    video.addEventListener('pause', () => overlay.classList.remove('hidden'));
+    video.addEventListener('ended', () => overlay.classList.remove('hidden'));
+
+    // Click on video to pause
+    video.addEventListener('click', () => {
+      if (!video.paused) {
+        video.pause();
+      }
+    });
+
+    // Init
+    renderCarousel();
+  </script>
+</body>
+</html>
