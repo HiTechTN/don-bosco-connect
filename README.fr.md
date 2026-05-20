@@ -29,25 +29,71 @@
   <a href="https://hitechtn.github.io/don-bosco-connect">
     <img src="https://img.shields.io/badge/🌐_Démo_en_ligne-hitechtn.github.io-2D2A24?style=for-the-badge" alt="Démo"/>
   </a>
-  <a href="demo/demo_don_bosco.mp4">
-    <img src="https://img.shields.io/badge/🎬_Vidéo_démo-3_min_13_s-c96442?style=for-the-badge" alt="Vidéo"/>
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/tag/v1.0.0-mobile-20260519">
+    <img src="https://img.shields.io/badge/📱_APK_Mobile-c96442?style=for-the-badge" alt="APK"/>
   </a>
 </p>
 
-<video src="https://github.com/HiTechTN/don-bosco-connect/raw/main/demo/demo_don_bosco.mp4" controls width="100%" poster="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/00_landing.png" style="border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.1);"></video>
+### 🎬 Vidéo de présentation
 
-<br/>
+<video src="https://github.com/HiTechTN/don-bosco-connect/raw/main/DonBoscoConnect_Presentation_v2.mp4" controls width="100%" poster="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/00_login.png" style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); max-width: 960px;"></video>
+
+### 📸 Aperçu de la plateforme
+
+<div align="center">
+
+**🛡️ Administration**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_02_dashboard.png" width="45%" alt="Admin Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_03_users.png" width="45%" alt="Admin Users" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_04_classes.png" width="45%" alt="Admin Classes" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_05_subjects.png" width="45%" alt="Admin Subjects" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_06_timetable.png" width="45%" alt="Admin Timetable" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_07_events.png" width="45%" alt="Admin Events" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_08_audit.png" width="45%" alt="Admin Audit" />
+
+---
+
+**👨‍🏫 Enseignant**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_02_dashboard.png" width="45%" alt="Teacher Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_03_courses.png" width="45%" alt="Teacher Courses" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_04_grades.png" width="45%" alt="Teacher Grades" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_05_absences.png" width="45%" alt="Teacher Absences" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_06_messages.png" width="45%" alt="Teacher Messages" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_07_ai.png" width="45%" alt="Teacher AI" />
+
+---
+
+**🧑‍🎓 Élève**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_02_dashboard.png" width="45%" alt="Student Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_03_grades.png" width="45%" alt="Student Grades" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_04_absences.png" width="45%" alt="Student Absences" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_05_timetable.png" width="45%" alt="Student Timetable" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_06_quizzes.png" width="45%" alt="Student Quizzes" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_07_ai.png" width="45%" alt="Student AI" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_08_gamification.png" width="45%" alt="Student Gamification" />
+
+---
+
+**👪 Parent**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_02_dashboard.png" width="45%" alt="Parent Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_03_grades.png" width="45%" alt="Parent Grades" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_04_absences.png" width="45%" alt="Parent Absences" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_05_messages.png" width="45%" alt="Parent Messages" />
+
+</div>
 
 <details>
-<summary><b>📸 Voir les 29 captures d'écran</b></summary>
+<summary><b>🔑 Comptes de démonstration</b></summary>
 <br/>
 
-| Profil | Aperçu |
-|--------|--------|
-| **🛡️ Admin** | [`Dashboard`](demo/screenshots/admin_02_dashboard.png) · [`Utilisateurs`](demo/screenshots/admin_03_users.png) · [`Classes`](demo/screenshots/admin_04_classes.png) · [`Emploi du temps`](demo/screenshots/admin_06_timetable.png) · [`Audit`](demo/screenshots/admin_07_audit.png) |
-| **👨‍🏫 Enseignant** | [`Dashboard`](demo/screenshots/teacher_02_dashboard.png) · [`Cours`](demo/screenshots/teacher_03_courses.png) · [`Notes`](demo/screenshots/teacher_04_grades.png) · [`Absences`](demo/screenshots/teacher_05_absences.png) · [`Messages`](demo/screenshots/teacher_06_messages.png) · [`IA`](demo/screenshots/teacher_07_ai.png) |
-| **🧑‍🎓 Élève** | [`Dashboard`](demo/screenshots/student_02_dashboard.png) · [`Notes`](demo/screenshots/student_03_grades.png) · [`Absences`](demo/screenshots/student_04_absences.png) · [`Emploi du temps`](demo/screenshots/student_05_timetable.png) · [`Quiz`](demo/screenshots/student_06_quizzes.png) · [`Mentor IA`](demo/screenshots/student_07_ai.png) · [`Gamification`](demo/screenshots/student_08_gamification.png) |
-| **👪 Parent** | [`Dashboard`](demo/screenshots/parent_02_dashboard.png) · [`Notes`](demo/screenshots/parent_03_grades.png) · [`Absences`](demo/screenshots/parent_04_absences.png) · [`Messages`](demo/screenshots/parent_05_messages.png) |
+| Rôle | Email | Mot de passe |
+|------|-------|-------------|
+| 🛡️ Admin | `admin@donbosco.tn` | `admin123!` |
+| 👨‍🏫 Enseignant | `karim.hamdi@donbosco.tn` | `teacher123!` |
+| 🧑‍🎓 Élève | `adam.slim@donbosco.tn` | `student123!` |
+| 👪 Parent | `ahmed.slim@parent.tn` | `parent123!` |
 
 </details>
 

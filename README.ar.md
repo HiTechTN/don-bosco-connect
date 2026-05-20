@@ -29,25 +29,71 @@
   <a href="https://hitechtn.github.io/don-bosco-connect">
     <img src="https://img.shields.io/badge/🌐_العرض_التجريبي-hitechtn.github.io-2D2A24?style=for-the-badge" alt="العرض التجريبي"/>
   </a>
-  <a href="demo/demo_don_bosco.mp4">
-    <img src="https://img.shields.io/badge/🎬_فيديو_تجريبي-3_د_13_ث-c96442?style=for-the-badge" alt="الفيديو"/>
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/tag/v1.0.0-mobile-20260519">
+    <img src="https://img.shields.io/badge/📱_APK_للموبايل-c96442?style=for-the-badge" alt="APK"/>
   </a>
 </p>
 
-<video src="https://github.com/HiTechTN/don-bosco-connect/raw/main/demo/demo_don_bosco.mp4" controls width="100%" poster="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/00_landing.png" style="border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.1);"></video>
+### 🎬 فيديو العرض التقديمي
 
-<br/>
+<video src="https://github.com/HiTechTN/don-bosco-connect/raw/main/DonBoscoConnect_Presentation_v2.mp4" controls width="100%" poster="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/00_login.png" style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); max-width: 960px;"></video>
+
+### 📸 معاينة المنصة
+
+<div align="center">
+
+**🛡️ الإدارة**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_02_dashboard.png" width="45%" alt="Admin Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_03_users.png" width="45%" alt="Admin Users" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_04_classes.png" width="45%" alt="Admin Classes" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_05_subjects.png" width="45%" alt="Admin Subjects" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_06_timetable.png" width="45%" alt="Admin Timetable" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_07_events.png" width="45%" alt="Admin Events" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_08_audit.png" width="45%" alt="Admin Audit" />
+
+---
+
+**👨‍🏫 المعلم**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_02_dashboard.png" width="45%" alt="Teacher Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_03_courses.png" width="45%" alt="Teacher Courses" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_04_grades.png" width="45%" alt="Teacher Grades" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_05_absences.png" width="45%" alt="Teacher Absences" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_06_messages.png" width="45%" alt="Teacher Messages" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_07_ai.png" width="45%" alt="Teacher AI" />
+
+---
+
+**🧑‍🎓 التلميذ**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_02_dashboard.png" width="45%" alt="Student Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_03_grades.png" width="45%" alt="Student Grades" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_04_absences.png" width="45%" alt="Student Absences" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_05_timetable.png" width="45%" alt="Student Timetable" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_06_quizzes.png" width="45%" alt="Student Quizzes" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_07_ai.png" width="45%" alt="Student AI" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_08_gamification.png" width="45%" alt="Student Gamification" />
+
+---
+
+**👪 ولي الأمر**
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_02_dashboard.png" width="45%" alt="Parent Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_03_grades.png" width="45%" alt="Parent Grades" />
+
+<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_04_absences.png" width="45%" alt="Parent Absences" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_05_messages.png" width="45%" alt="Parent Messages" />
+
+</div>
 
 <details>
-<summary><b>📸 عرض لقطات الشاشة (29 لقطة)</b></summary>
+<summary><b>🔑 حسابات العرض التجريبي</b></summary>
 <br/>
 
-| الدور | المعاينة |
-|-------|----------|
-| **🛡️ مدير** | [`لوحة التحكم`](demo/screenshots/admin_02_dashboard.png) · [`المستخدمين`](demo/screenshots/admin_03_users.png) · [`الفصول`](demo/screenshots/admin_04_classes.png) · [`الجدول`](demo/screenshots/admin_06_timetable.png) · [`التدقيق`](demo/screenshots/admin_07_audit.png) |
-| **👨‍🏫 معلم** | [`لوحة التحكم`](demo/screenshots/teacher_02_dashboard.png) · [`الدروس`](demo/screenshots/teacher_03_courses.png) · [`الدرجات`](demo/screenshots/teacher_04_grades.png) · [`الغياب`](demo/screenshots/teacher_05_absences.png) · [`الرسائل`](demo/screenshots/teacher_06_messages.png) · [`الذكاء`](demo/screenshots/teacher_07_ai.png) |
-| **🧑‍🎓 تلميذ** | [`لوحة التحكم`](demo/screenshots/student_02_dashboard.png) · [`الدرجات`](demo/screenshots/student_03_grades.png) · [`الغياب`](demo/screenshots/student_04_absences.png) · [`الجدول`](demo/screenshots/student_05_timetable.png) · [`الاختبارات`](demo/screenshots/student_06_quizzes.png) · [`مرشد الذكاء`](demo/screenshots/student_07_ai.png) · [`الألعاب`](demo/screenshots/student_08_gamification.png) |
-| **👪 ولي أمر** | [`لوحة التحكم`](demo/screenshots/parent_02_dashboard.png) · [`الدرجات`](demo/screenshots/parent_03_grades.png) · [`الغياب`](demo/screenshots/parent_04_absences.png) · [`الرسائل`](demo/screenshots/parent_05_messages.png) |
+| الدور | البريد الإلكتروني | كلمة المرور |
+|------|-------------------|-------------|
+| 🛡️ مدير | `admin@donbosco.tn` | `admin123!` |
+| 👨‍🏫 معلم | `karim.hamdi@donbosco.tn` | `teacher123!` |
+| 🧑‍🎓 تلميذ | `adam.slim@donbosco.tn` | `student123!` |
+| 👪 ولي أمر | `ahmed.slim@parent.tn` | `parent123!` |
 
 </details>
 
