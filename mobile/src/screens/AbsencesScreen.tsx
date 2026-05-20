@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
 import { getUser } from '../lib/auth';
+import { mockApi } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function AbsencesScreen() {
@@ -10,10 +10,10 @@ export default function AbsencesScreen() {
 
   useEffect(() => {
     (async () => {
-      const u = await getUser();
       try {
-        const res = await api.get(`/students/${u.id}/absences`);
-        setAbsences(res.data || []);
+        const u = await getUser();
+        const data = await mockApi.getAbsences(u.id);
+        setAbsences(data);
       } catch { } finally { setLoading(false); }
     })();
   }, []);

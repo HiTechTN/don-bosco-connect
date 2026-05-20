@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import api from '../services/api';
 import { getUser } from '../lib/auth';
+import { mockApi } from '../services/api';
 
 interface Props {
   navigation: any;
@@ -18,15 +18,15 @@ export default function StudentHomeScreen({ navigation }: Props) {
   }, []);
 
   const loadData = async () => {
-    const u = await getUser();
-    setUser(u);
     try {
-      const [gRes, aRes] = await Promise.all([
-        api.get(`/students/${u.id}/grades`),
-        api.get(`/students/${u.id}/absences`),
+      const u = await getUser();
+      setUser(u);
+      const [gData, aData] = await Promise.all([
+        mockApi.getGrades(u.id),
+        mockApi.getAbsences(u.id),
       ]);
-      setGrades(gRes.data);
-      setAbsences(aRes.data);
+      setGrades(gData);
+      setAbsences(aData);
     } catch (err) {
       console.error(err);
     } finally {

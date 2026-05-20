@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TextInput, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import api from '../services/api';
-import { getUser } from '../lib/auth';
+import { mockApi } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import Button from '../components/Button';
 
@@ -17,24 +16,21 @@ export default function MessagesScreen({ route }: Props) {
   useEffect(() => {
     (async () => {
       try {
-        const [mRes, uRes] = await Promise.all([
-          api.get('/messages').catch(() => ({ data: [] })),
-          api.get('/users').catch(() => ({ data: { items: [] } })),
+        const [mData, uData] = await Promise.all([
+          mockApi.getMessages(),
+          mockApi.getUsers(),
         ]);
-        setMessages(mRes.data.items || mRes.data || []);
-        setUsers(uRes.data.items || uRes.data || []);
+        setMessages(mData);
+        setUsers(uData);
       } catch { } finally { setLoading(false); }
     })();
   }, []);
 
   const send = async () => {
     if (!newMessage.trim() || !selectedUser) return;
-    try {
-      await api.post('/messages', { receiver_id: selectedUser.id, content: newMessage });
-      setNewMessage('');
-      const res = await api.get('/messages');
-      setMessages(res.data.items || res.data || []);
-    } catch { }
+    const msg = { id: `m${Date.now()}`, sender_id: 'student-uuid-001', receiver_id: selectedUser.id, content: newMessage, created_at: new Date().toISOString() };
+    setMessages((prev) => [...prev, msg]);
+    setNewMessage('');
   };
 
   if (loading) return <LoadingScreen />;

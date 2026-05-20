@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import api from '../services/api';
+import { mockApi } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function StudentQuizzesScreen() {
@@ -15,8 +15,8 @@ export default function StudentQuizzesScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get('/quizzes');
-        setQuizzes(res.data || []);
+        const data = await mockApi.getQuizzes();
+        setQuizzes(data);
       } catch { } finally { setLoading(false); }
     })();
   }, []);
@@ -24,8 +24,8 @@ export default function StudentQuizzesScreen() {
   const startQuiz = async (q: any) => {
     setActiveQuiz(q);
     try {
-      const res = await api.get(`/quizzes/${q.id}/questions`);
-      setQuestions(res.data.options || res.data || []);
+      const data = await mockApi.getQuizQuestions(q.id);
+      setQuestions(data);
     } catch { }
   };
 

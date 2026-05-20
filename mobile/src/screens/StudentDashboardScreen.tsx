@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatCard from '../components/StatCard';
+import Card from '../components/Card';
 import LoadingScreen from '../components/LoadingScreen';
 
 interface Props { navigation: any }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
-import { getUser } from '../lib/auth';
+import { mockApi } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function StudentTimetableScreen() {
@@ -11,8 +10,8 @@ export default function StudentTimetableScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get('/timetable/my');
-        setSlots(res.data || []);
+        const data = await mockApi.getTimetable();
+        setSlots(data);
       } catch { } finally { setLoading(false); }
     })();
   }, []);

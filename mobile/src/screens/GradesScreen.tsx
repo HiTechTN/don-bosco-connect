@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
 import { getUser } from '../lib/auth';
+import { mockApi } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function GradesScreen() {
@@ -10,10 +10,10 @@ export default function GradesScreen() {
 
   useEffect(() => {
     (async () => {
-      const u = await getUser();
       try {
-        const res = await api.get(`/students/${u.id}/grades`);
-        setGrades(res.data || []);
+        const u = await getUser();
+        const data = await mockApi.getGrades(u.id);
+        setGrades(data);
       } catch { } finally { setLoading(false); }
     })();
   }, []);

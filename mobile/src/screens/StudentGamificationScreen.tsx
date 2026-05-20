@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
+import { getUser } from '../lib/auth';
+import { mockApi } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function StudentGamificationScreen() {
@@ -13,16 +14,17 @@ export default function StudentGamificationScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const [pRes, bRes, lRes, xRes] = await Promise.all([
-          api.get('/gamification/profile'),
-          api.get('/gamification/badges'),
-          api.get('/gamification/leaderboard'),
-          api.get('/gamification/xp-history'),
+        const u = await getUser();
+        const [pData, bData, lData, xData] = await Promise.all([
+          mockApi.getGamificationProfile(u.id),
+          mockApi.getGamificationBadges(u.id),
+          mockApi.getGamificationLeaderboard(u.id),
+          mockApi.getGamificationXpHistory(u.id),
         ]);
-        setProfile(pRes.data);
-        setBadges(bRes.data || []);
-        setLeaderboard(lRes.data || []);
-        setXpHistory(xRes.data || []);
+        setProfile(pData);
+        setBadges(bData);
+        setLeaderboard(lData);
+        setXpHistory(xData);
       } catch { } finally { setLoading(false); }
     })();
   }, []);
