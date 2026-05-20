@@ -15,7 +15,7 @@ from app.models.base import User, UserRole
 TEST_DATABASE_URL = settings.DATABASE_URL
 
 
-@pytest_asyncio.fixture(scope="session", loop_scope="session")
+@pytest_asyncio.fixture
 async def engine():
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     async with engine.begin() as conn:
