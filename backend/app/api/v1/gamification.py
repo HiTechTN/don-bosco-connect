@@ -42,22 +42,20 @@ async def list_badges(
         return [BadgeResponse(**b) for b in cached]
     result = await db.execute(select(Badge))
     badges = result.scalars().all()
-    await set_cache(
-        cache_key,
-        [
-            {
-                "id": str(b.id),
-                "code": b.code,
-                "name": b.name,
-                "description": b.description,
-                "icon_url": b.icon_url,
-                "xp_reward": b.xp_reward,
-                "condition_type": b.condition_type,
-                "condition_value": b.condition_value,
-            }
-            for b in badges
-        ],
-    )
+    badge_data = [
+        {
+            "id": str(b.id),
+            "code": b.code,
+            "name": b.name,
+            "description": b.description,
+            "icon_url": b.icon_url,
+            "xp_reward": b.xp_reward,
+            "condition_type": b.condition_type,
+            "condition_value": b.condition_value,
+        }
+        for b in badges
+    ]
+    await set_cache(cache_key, badge_data)
     return badges
 
 
@@ -99,8 +97,9 @@ async def leaderboard(
     if cached:
         return [LeaderboardEntry(**entry) for entry in cached]
     data = await get_leaderboard(db, class_id, period)
-    await set_cache(cache_key, data, ttl=120)
-    return data
+    if data:
+        await set_cache(cache_key, data, ttl=120)
+    return data or []
 
 
 @router.get("/xp-history", response_model=list[XPTransactionResponse])

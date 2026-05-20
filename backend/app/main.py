@@ -3,6 +3,7 @@ from datetime import UTC
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.v1.router import v1_router
 from app.api.v1.websocket import router as websocket_router
@@ -61,12 +62,16 @@ async def health():
         pass
 
     all_ok = db_ok and redis_ok and minio_ok and ollama_ok
+    status_code = 200 if all_ok else 503
 
-    return {
-        "status": "ok" if all_ok else "degraded",
-        "db": "ok" if db_ok else "error",
-        "redis": "ok" if redis_ok else "error",
-        "minio": "ok" if minio_ok else "error",
-        "ollama": "ok" if ollama_ok else "error",
-        "timestamp": datetime.now(UTC).isoformat(),
-    }, 200 if all_ok else 503
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "ok" if all_ok else "degraded",
+            "db": "ok" if db_ok else "error",
+            "redis": "ok" if redis_ok else "error",
+            "minio": "ok" if minio_ok else "error",
+            "ollama": "ok" if ollama_ok else "error",
+            "timestamp": datetime.now(UTC).isoformat(),
+        },
+    )
