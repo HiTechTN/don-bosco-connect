@@ -1,11 +1,10 @@
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
-from datetime import datetime, timezone
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.base import MessageThread, ThreadParticipant, Message
-from app.core.security import encrypt_message, decrypt_message
+from app.core.security import decrypt_message, encrypt_message
+from app.models.base import Message, MessageThread, ThreadParticipant
 
 
 def _to_uuid(val: str | UUID) -> UUID:
@@ -38,7 +37,7 @@ async def send_message(db: AsyncSession, thread_id: str, sender_id: str, content
     db.add(msg)
     thread = await db.get(MessageThread, _to_uuid(thread_id))
     if thread:
-        thread.updated_at = datetime.now(timezone.utc)
+        thread.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(msg)
     msg.content = decrypt_message(msg.content, msg.content_iv)

@@ -1,5 +1,19 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, Integer, Float, Text, ForeignKey, Date, Time, ARRAY, Enum as SAEnum
+
+from sqlalchemy import (
+    ARRAY,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    Time,
+)
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
@@ -75,7 +89,11 @@ class TimetableSlot(Base):
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id", ondelete="CASCADE"))
     subject_id = Column(UUID(as_uuid=True), ForeignKey("subjects.id"))
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    day = Column(SAEnum("monday","tuesday","wednesday","thursday","friday","saturday", name="schedule_day"))
+    day = Column(
+        SAEnum(
+            "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", name="schedule_day"
+        )
+    )
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=False)
     room = Column(String(50))

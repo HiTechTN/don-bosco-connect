@@ -1,12 +1,9 @@
-from datetime import datetime, timezone
-from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.base import Notification, NotificationType, User, Absence
-from app.config import settings
+from app.models.base import Absence, Notification, NotificationType, User
 
 
 async def create_notification(
@@ -14,8 +11,8 @@ async def create_notification(
     user_id: str,
     type: NotificationType,
     title: str,
-    body: Optional[str] = None,
-    data: Optional[dict] = None,
+    body: str | None = None,
+    data: dict | None = None,
 ) -> Notification:
     uid = UUID(user_id) if isinstance(user_id, str) else user_id
     notification = Notification(
@@ -44,9 +41,7 @@ async def create_notification(
                 "body": body,
                 "data": data or {},
                 "created_at": (
-                    notification.created_at.isoformat()
-                    if notification.created_at
-                    else None
+                    notification.created_at.isoformat() if notification.created_at else None
                 ),
             },
         )
@@ -56,13 +51,11 @@ async def create_notification(
     return notification
 
 
-async def notify_parents_of_absence(db: AsyncSession, absence: Absence):
+async def notify_parents_of_absence(db: AsyncSession, absence: Absence) -> None:
     from app.models.base import StudentParentLink
 
     result = await db.execute(
-        select(StudentParentLink).where(
-            StudentParentLink.student_id == absence.student_id
-        )
+        select(StudentParentLink).where(StudentParentLink.student_id == absence.student_id)
     )
     links = result.scalars().all()
 
@@ -85,8 +78,8 @@ async def notify_parents_of_absence(db: AsyncSession, absence: Absence):
         )
 
 
-async def notify_students_of_grade_publish(db: AsyncSession, evaluation_id: str):
-    from app.models.base import Evaluation, ClassEnrollment
+async def notify_students_of_grade_publish(db: AsyncSession, evaluation_id: str) -> None:
+    from app.models.base import ClassEnrollment, Evaluation
 
     result = await db.execute(select(Evaluation).where(Evaluation.id == evaluation_id))
     evaluation = result.scalar_one_or_none()
@@ -111,8 +104,6 @@ async def notify_students_of_grade_publish(db: AsyncSession, evaluation_id: str)
             body=f"Les notes de l'évaluation '{evaluation.title}' sont disponibles.",
             data={
                 "evaluation_id": str(evaluation.id),
-                "subject_id": (
-                    str(evaluation.subject_id) if evaluation.subject_id else None
-                ),
+                "subject_id": (str(evaluation.subject_id) if evaluation.subject_id else None),
             },
         )

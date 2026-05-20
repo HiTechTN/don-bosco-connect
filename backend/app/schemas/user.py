@@ -1,15 +1,16 @@
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
-from app.models.base import UserRole, UserStatus
 import uuid
 from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field
+
+from app.models.base import UserRole, UserStatus
 
 
 class UserBase(BaseModel):
     email: EmailStr
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
-    phone: Optional[str] = Field(None, max_length=20)
+    phone: str | None = Field(None, max_length=20)
     preferred_language: str = Field(default="fr", pattern="^(fr|ar)$")
 
 
@@ -19,13 +20,13 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    role: Optional[UserRole] = None
-    first_name: Optional[str] = Field(None, min_length=1, max_length=100)
-    last_name: Optional[str] = Field(None, min_length=1, max_length=100)
-    phone: Optional[str] = Field(None, max_length=20)
-    preferred_language: Optional[str] = Field(None, pattern="^(fr|ar)$")
-    status: Optional[UserStatus] = None
+    email: EmailStr | None = None
+    role: UserRole | None = None
+    first_name: str | None = Field(None, min_length=1, max_length=100)
+    last_name: str | None = Field(None, min_length=1, max_length=100)
+    phone: str | None = Field(None, max_length=20)
+    preferred_language: str | None = Field(None, pattern="^(fr|ar)$")
+    status: UserStatus | None = None
 
 
 class UserResponse(UserBase):
@@ -33,7 +34,7 @@ class UserResponse(UserBase):
     role: UserRole
     status: UserStatus
     mfa_enabled: bool
-    last_login_at: Optional[datetime]
+    last_login_at: datetime | None
     created_at: datetime
     updated_at: datetime
 

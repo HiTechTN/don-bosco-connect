@@ -1,25 +1,24 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, select
+from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, update as sa_update
-from typing import Optional
-import uuid
 
-from app.database import get_db
 from app.api.deps import get_current_user
-from app.models.base import Notification, User
 from app.core.exceptions import NotFoundException
+from app.database import get_db
+from app.models.base import Notification, User
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
 @router.get("")
 async def list_notifications(
-    is_read: Optional[bool] = Query(None),
-    type: Optional[str] = Query(None),
+    is_read: bool | None = Query(None),
+    type: str | None = Query(None),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     query = select(Notification).where(Notification.user_id == current_user.id)
     if is_read is not None:
@@ -41,7 +40,7 @@ async def list_notifications(
         "items": [
             {
                 "id": str(n.id),
-                "type": n.type.value if hasattr(n.type, 'value') else str(n.type),
+                "type": n.type.value if hasattr(n.type, "value") else str(n.type),
                 "title": n.title,
                 "body": n.body,
                 "is_read": n.is_read,
@@ -61,7 +60,7 @@ async def list_notifications(
 async def mark_read(
     notification_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
         select(Notification).where(
@@ -79,14 +78,13 @@ async def mark_read(
 
 @router.patch("/read-all")
 async def mark_all_read(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     await db.execute(
         sa_update(Notification)
         .where(
             Notification.user_id == current_user.id,
-            Notification.is_read == False,
+            not Notification.is_read,
         )
         .values(is_read=True)
     )
@@ -98,7 +96,7 @@ async def mark_all_read(
 async def delete_notification(
     notification_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
         select(Notification).where(

@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -46,14 +45,17 @@ class Settings(BaseSettings):
     ENCRYPTION_KEY: str = ""
 
     MAX_UPLOAD_SIZE_MB: int = 200
-    ALLOWED_MIME_TYPES: str = "application/pdf,video/mp4,video/webm,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ALLOWED_MIME_TYPES: str = (
+        "application/pdf,video/mp4,video/webm,image/jpeg,image/png,"
+        "application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
     @property
-    def DATABASE_URL(self) -> str:
+    def DATABASE_URL(self) -> str:  # noqa: N802
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
-    def REDIS_URL(self) -> str:
+    def REDIS_URL(self) -> str:  # noqa: N802
         return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
 
     @property

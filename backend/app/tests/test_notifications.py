@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_list_notifications(client: AsyncClient, admin_token: str):
+async def test_list_notifications(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/notifications",
         headers={"Authorization": f"Bearer {admin_token}"},
@@ -12,7 +12,7 @@ async def test_list_notifications(client: AsyncClient, admin_token: str):
 
 
 @pytest.mark.asyncio
-async def test_mark_read_not_found(client: AsyncClient, admin_token: str):
+async def test_mark_read_not_found(client: AsyncClient, admin_token: str) -> None:
     resp = await client.patch(
         "/api/v1/notifications/00000000-0000-0000-0000-000000000000/read",
         headers={"Authorization": f"Bearer {admin_token}"},

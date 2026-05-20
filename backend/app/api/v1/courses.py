@@ -1,16 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from typing import Optional
 import uuid
+from datetime import UTC
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user
-from app.models.base import Course, CourseFile, User, UserRole
-from app.schemas.course import CourseCreate, CourseUpdate, CourseResponse, CourseFileResponse
-from app.services.course_service import create_course, upload_course_file
-from app.core.permissions import require_roles
 from app.core.exceptions import NotFoundException
+from app.core.permissions import require_roles
+from app.database import get_db
+from app.models.base import Course, CourseFile, User, UserRole
+from app.schemas.course import CourseCreate, CourseFileResponse, CourseResponse, CourseUpdate
+from app.services.course_service import create_course, upload_course_file
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/courses", tags=["courses"])
 async def create_new_course(
     body: CourseCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     course = await create_course(db, str(current_user.id), body.model_dump())
     return CourseResponse.model_validate(course)
@@ -27,11 +28,11 @@ async def create_new_course(
 
 @router.get("", response_model=list[CourseResponse])
 async def list_courses(
-    class_id: Optional[str] = Query(None),
-    subject_id: Optional[str] = Query(None),
-    teacher_id: Optional[str] = Query(None),
+    class_id: str | None = Query(None),
+    subject_id: str | None = Query(None),
+    teacher_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     query = select(Course)
     if class_id:
@@ -41,7 +42,7 @@ async def list_courses(
     if teacher_id:
         query = query.where(Course.teacher_id == uuid.UUID(teacher_id))
     if current_user.role == UserRole.student:
-        query = query.where(Course.is_published == True)
+        query = query.where(Course.is_published)
     result = await db.execute(query)
     courses = result.scalars().all()
     return [CourseResponse.model_validate(c) for c in courses]
@@ -51,7 +52,7 @@ async def list_courses(
 async def get_course(
     course_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         course_uuid = uuid.UUID(course_id)
@@ -71,7 +72,7 @@ async def update_course(
     course_id: str,
     body: CourseUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         course_uuid = uuid.UUID(course_id)
@@ -91,7 +92,7 @@ async def update_course(
 async def delete_course(
     course_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         course_uuid = uuid.UUID(course_id)
@@ -110,7 +111,7 @@ async def delete_course(
 async def publish_course(
     course_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         course_uuid = uuid.UUID(course_id)
@@ -121,8 +122,9 @@ async def publish_course(
     if not course:
         raise NotFoundException("Cours non trouvé")
     course.is_published = True
-    from datetime import datetime, timezone
-    course.published_at = datetime.now(timezone.utc)
+    from datetime import datetime
+
+    course.published_at = datetime.now(UTC)
     await db.commit()
     return {"message": "Cours publié"}
 
@@ -132,7 +134,7 @@ async def upload_file(
     course_id: str,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         course_uuid = uuid.UUID(course_id)
@@ -149,7 +151,7 @@ async def upload_file(
 async def list_files(
     course_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         course_uuid = uuid.UUID(course_id)
@@ -165,7 +167,7 @@ async def delete_file(
     course_id: str,
     file_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         course_uuid = uuid.UUID(course_id)
@@ -179,6 +181,7 @@ async def delete_file(
     if not cf:
         raise NotFoundException("Fichier non trouvé")
     from app.minio_client import get_minio
+
     minio_client = get_minio()
     minio_client.remove_object(cf.minio_bucket, cf.minio_key)
     await db.delete(cf)

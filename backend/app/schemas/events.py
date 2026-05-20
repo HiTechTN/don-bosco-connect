@@ -1,17 +1,17 @@
-from pydantic import BaseModel, Field
-from typing import Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class EventBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
-    description: Optional[str] = None
-    event_type: Optional[str] = Field(None, max_length=50)
+    description: str | None = None
+    event_type: str | None = Field(None, max_length=50)
     start_datetime: datetime
-    end_datetime: Optional[datetime] = None
+    end_datetime: datetime | None = None
     all_day: bool = False
-    target_classes: Optional[list[uuid.UUID]] = None
+    target_classes: list[uuid.UUID] | None = None
 
 
 class EventCreate(EventBase):
@@ -19,18 +19,18 @@ class EventCreate(EventBase):
 
 
 class EventUpdate(BaseModel):
-    title: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
-    event_type: Optional[str] = Field(None, max_length=50)
-    start_datetime: Optional[datetime] = None
-    end_datetime: Optional[datetime] = None
-    all_day: Optional[bool] = None
-    target_classes: Optional[list[uuid.UUID]] = None
+    title: str | None = Field(None, min_length=1, max_length=255)
+    description: str | None = None
+    event_type: str | None = Field(None, max_length=50)
+    start_datetime: datetime | None = None
+    end_datetime: datetime | None = None
+    all_day: bool | None = None
+    target_classes: list[uuid.UUID] | None = None
 
 
 class EventResponse(EventBase):
     id: uuid.UUID
-    created_by: Optional[uuid.UUID] = None
+    created_by: uuid.UUID | None = None
     created_at: datetime
 
     class Config:

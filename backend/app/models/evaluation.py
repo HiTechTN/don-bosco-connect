@@ -1,5 +1,19 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, Integer, Float, Text, ForeignKey, Date, Time, JSON, Enum as SAEnum
+
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    Time,
+)
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
@@ -11,7 +25,9 @@ class Evaluation(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    type = Column(SAEnum("quiz","devoir","examen","controle","oral","projet", name="evaluation_type"))
+    type = Column(
+        SAEnum("quiz", "devoir", "examen", "controle", "oral", "projet", name="evaluation_type")
+    )
     subject_id = Column(UUID(as_uuid=True), ForeignKey("subjects.id"))
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"))
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
@@ -43,7 +59,9 @@ class Quiz(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"))
     title = Column(String(255), nullable=False)
-    difficulty = Column(SAEnum("remediation","normal","advanced", name="difficulty_level"), default="normal")
+    difficulty = Column(
+        SAEnum("remediation", "normal", "advanced", name="difficulty_level"), default="normal"
+    )
     is_ai_generated = Column(Boolean, default=True)
     time_limit_seconds = Column(Integer)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -73,8 +91,12 @@ class QuizAttempt(Base):
     max_score = Column(Float)
     duration_seconds = Column(Integer)
     completed_at = Column(DateTime(timezone=True))
-    adaptive_level_before = Column(SAEnum("remediation","normal","advanced", name="difficulty_level"))
-    adaptive_level_after = Column(SAEnum("remediation","normal","advanced", name="difficulty_level"))
+    adaptive_level_before = Column(
+        SAEnum("remediation", "normal", "advanced", name="difficulty_level")
+    )
+    adaptive_level_after = Column(
+        SAEnum("remediation", "normal", "advanced", name="difficulty_level")
+    )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -85,11 +107,14 @@ class Absence(Base):
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"))
     subject_id = Column(UUID(as_uuid=True), ForeignKey("subjects.id"))
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    type = Column(SAEnum("absence","retard","exclusion", name="absence_type"), default="absence")
+    type = Column(SAEnum("absence", "retard", "exclusion", name="absence_type"), default="absence")
     date = Column(Date, nullable=False)
     start_time = Column(Time)
     end_time = Column(Time)
-    justification_status = Column(SAEnum("pending","justified","unjustified", name="justification_status"), default="pending")
+    justification_status = Column(
+        SAEnum("pending", "justified", "unjustified", name="justification_status"),
+        default="pending",
+    )
     justification_text = Column(Text)
     justification_document_url = Column(Text)
     notified_parent = Column(Boolean, default=False)

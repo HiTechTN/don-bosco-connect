@@ -1,12 +1,14 @@
+import httpx
 from fastapi import APIRouter
 from sqlalchemy import text
-from app.database import engine
-from app.redis_client import redis_client
-from app.minio_client import minio_client
-import httpx
+
 from app.config import settings
+from app.database import engine
+from app.minio_client import minio_client
+from app.redis_client import redis_client
 
 router = APIRouter()
+
 
 @router.get("/health")
 async def health_check():

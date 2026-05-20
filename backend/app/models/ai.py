@@ -1,5 +1,7 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey, Float, ARRAY, Enum as SAEnum
+
+from sqlalchemy import ARRAY, Column, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
@@ -21,8 +23,10 @@ class AIConversation(Base):
 class AIMessage(Base):
     __tablename__ = "ai_messages"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    conversation_id = Column(UUID(as_uuid=True), ForeignKey("ai_conversations.id", ondelete="CASCADE"))
-    role = Column(SAEnum("user","assistant","system", name="message_role"))
+    conversation_id = Column(
+        UUID(as_uuid=True), ForeignKey("ai_conversations.id", ondelete="CASCADE")
+    )
+    role = Column(SAEnum("user", "assistant", "system", name="message_role"))
     content = Column(Text, nullable=False)
     chunks_used = Column(ARRAY(UUID))
     confidence_score = Column(Float, default=None)

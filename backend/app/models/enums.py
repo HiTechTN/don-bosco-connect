@@ -1,20 +1,20 @@
 import enum
 
 
-class UserRole(str, enum.Enum):
+class UserRole(enum.StrEnum):
     admin = "admin"
     teacher = "teacher"
     student = "student"
     parent = "parent"
 
 
-class UserStatus(str, enum.Enum):
+class UserStatus(enum.StrEnum):
     active = "active"
     inactive = "inactive"
     suspended = "suspended"
 
 
-class ScheduleDay(str, enum.Enum):
+class ScheduleDay(enum.StrEnum):
     monday = "monday"
     tuesday = "tuesday"
     wednesday = "wednesday"
@@ -23,7 +23,7 @@ class ScheduleDay(str, enum.Enum):
     saturday = "saturday"
 
 
-class FileType(str, enum.Enum):
+class FileType(enum.StrEnum):
     pdf = "pdf"
     video = "video"
     image = "image"
@@ -32,14 +32,14 @@ class FileType(str, enum.Enum):
     other = "other"
 
 
-class ProcessingStatus(str, enum.Enum):
+class ProcessingStatus(enum.StrEnum):
     pending = "pending"
     processing = "processing"
     indexed = "indexed"
     failed = "failed"
 
 
-class EvaluationType(str, enum.Enum):
+class EvaluationType(enum.StrEnum):
     quiz = "quiz"
     devoir = "devoir"
     examen = "examen"
@@ -48,31 +48,31 @@ class EvaluationType(str, enum.Enum):
     projet = "projet"
 
 
-class DifficultyLevel(str, enum.Enum):
+class DifficultyLevel(enum.StrEnum):
     remediation = "remediation"
     normal = "normal"
     advanced = "advanced"
 
 
-class MessageRole(str, enum.Enum):
+class MessageRole(enum.StrEnum):
     user = "user"
     assistant = "assistant"
     system = "system"
 
 
-class AbsenceType(str, enum.Enum):
+class AbsenceType(enum.StrEnum):
     absence = "absence"
     retard = "retard"
     exclusion = "exclusion"
 
 
-class JustificationStatus(str, enum.Enum):
+class JustificationStatus(enum.StrEnum):
     pending = "pending"
     justified = "justified"
     unjustified = "unjustified"
 
 
-class NotificationType(str, enum.Enum):
+class NotificationType(enum.StrEnum):
     absence = "absence"
     grade_published = "grade_published"
     message = "message"

@@ -1,9 +1,13 @@
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker, AsyncEngine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import declarative_base
 
 from app.config import settings
-
 
 engine: AsyncEngine = create_async_engine(
     settings.DATABASE_URL,
@@ -40,4 +44,3 @@ async def check_db_connection() -> bool:
         return True
     except Exception:
         return False
-

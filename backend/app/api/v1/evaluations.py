@@ -1,16 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from typing import Optional
 import uuid
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user
-from app.models.base import Evaluation, Grade, User, UserRole
-from app.schemas.evaluation import EvaluationCreate, EvaluationUpdate, EvaluationResponse, BulkGradeInput, GradeResponse
-from app.services.grade_service import create_evaluation, bulk_insert_grades, publish_evaluation
-from app.core.permissions import require_roles
 from app.core.exceptions import NotFoundException
+from app.core.permissions import require_roles
+from app.database import get_db
+from app.models.base import Evaluation, Grade, User, UserRole
+from app.schemas.evaluation import (
+    BulkGradeInput,
+    EvaluationCreate,
+    EvaluationResponse,
+    EvaluationUpdate,
+    GradeResponse,
+)
+from app.services.grade_service import bulk_insert_grades, create_evaluation, publish_evaluation
 
 router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 
@@ -19,7 +25,7 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 async def create_new_evaluation(
     body: EvaluationCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     eval_ = await create_evaluation(db, str(current_user.id), body.model_dump())
     return EvaluationResponse.model_validate(eval_)
@@ -27,10 +33,10 @@ async def create_new_evaluation(
 
 @router.get("", response_model=list[EvaluationResponse])
 async def list_evaluations(
-    class_id: Optional[str] = Query(None),
-    subject_id: Optional[str] = Query(None),
+    class_id: str | None = Query(None),
+    subject_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     query = select(Evaluation)
     if class_id:
@@ -38,7 +44,7 @@ async def list_evaluations(
     if subject_id:
         query = query.where(Evaluation.subject_id == uuid.UUID(subject_id))
     if current_user.role == UserRole.student:
-        query = query.where(Evaluation.is_published == True)
+        query = query.where(Evaluation.is_published)
     result = await db.execute(query)
     evals = result.scalars().all()
     return [EvaluationResponse.model_validate(e) for e in evals]
@@ -48,7 +54,7 @@ async def list_evaluations(
 async def get_evaluation(
     evaluation_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         eval_uuid = uuid.UUID(evaluation_id)
@@ -68,7 +74,7 @@ async def update_evaluation(
     evaluation_id: str,
     body: EvaluationUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         eval_uuid = uuid.UUID(evaluation_id)
@@ -88,7 +94,7 @@ async def update_evaluation(
 async def delete_evaluation(
     evaluation_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         eval_uuid = uuid.UUID(evaluation_id)
@@ -107,7 +113,7 @@ async def delete_evaluation(
 async def get_grades(
     evaluation_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         eval_uuid = uuid.UUID(evaluation_id)
@@ -121,7 +127,9 @@ async def get_grades(
         if not eval_.is_published:
             raise HTTPException(status_code=403, detail="Notes non disponibles")
         result = await db.execute(
-            select(Grade).where(Grade.evaluation_id == eval_uuid, Grade.student_id == current_user.id)
+            select(Grade).where(
+                Grade.evaluation_id == eval_uuid, Grade.student_id == current_user.id
+            )
         )
     else:
         result = await db.execute(select(Grade).where(Grade.evaluation_id == eval_uuid))
@@ -134,7 +142,7 @@ async def add_grades(
     evaluation_id: str,
     body: BulkGradeInput,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     try:
         eval_uuid = uuid.UUID(evaluation_id)
@@ -151,7 +159,7 @@ async def add_grades(
 async def publish_evaluation_endpoint(
     evaluation_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     await publish_evaluation(db, evaluation_id)
     return {"message": "Notes publiées"}

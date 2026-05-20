@@ -1,24 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, delete
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
 from datetime import datetime
 from uuid import uuid4
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user
 from app.core.permissions import require_roles
+from app.database import get_db
 from app.models import SchoolEvent, User, UserRole
-from app.schemas.events import EventCreate, EventUpdate, EventResponse, EventListResponse
+from app.schemas.events import EventCreate, EventListResponse, EventResponse, EventUpdate
 
 router = APIRouter(tags=["events"])
 
 
 @router.get("/events", response_model=EventListResponse)
 async def list_events(
-    from_date: Optional[datetime] = Query(None, alias="from"),
-    to_date: Optional[datetime] = Query(None, alias="to"),
-    class_id: Optional[str] = None,
+    from_date: datetime | None = Query(None, alias="from"),
+    to_date: datetime | None = Query(None, alias="to"),
+    class_id: str | None = None,
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -91,7 +91,7 @@ async def delete_event(
     event_id: str,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_roles([UserRole.admin])),
-):
+) -> None:
     result = await db.execute(select(SchoolEvent).where(SchoolEvent.id == event_id))
     event = result.scalar_one_or_none()
     if not event:

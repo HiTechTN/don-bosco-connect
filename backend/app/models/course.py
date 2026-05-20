@@ -1,7 +1,20 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, Integer, Text, ForeignKey, BigInteger, ARRAY, JSON, Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
+
 from pgvector.sqlalchemy import Vector
+from sqlalchemy import (
+    ARRAY,
+    JSON,
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -32,10 +45,15 @@ class CourseFile(Base):
     stored_filename = Column(String(255), nullable=False)
     minio_bucket = Column(String(100), nullable=False)
     minio_key = Column(Text, nullable=False)
-    file_type = Column(SAEnum("pdf","video","image","document","audio","other", name="file_type"))
+    file_type = Column(
+        SAEnum("pdf", "video", "image", "document", "audio", "other", name="file_type")
+    )
     file_size_bytes = Column(BigInteger)
     mime_type = Column(String(100))
-    ai_processing_status = Column(SAEnum("pending","processing","indexed","failed", name="processing_status"), default="pending")
+    ai_processing_status = Column(
+        SAEnum("pending", "processing", "indexed", "failed", name="processing_status"),
+        default="pending",
+    )
     ai_chunk_count = Column(Integer, default=0)
     ai_error_message = Column(Text)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))

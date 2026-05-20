@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_create_absence(client: AsyncClient, teacher_token: str):
+async def test_create_absence(client: AsyncClient, teacher_token: str) -> None:
     resp = await client.post(
         "/api/v1/absences",
         json={
@@ -18,7 +18,7 @@ async def test_create_absence(client: AsyncClient, teacher_token: str):
 
 
 @pytest.mark.asyncio
-async def test_list_absences(client: AsyncClient, student_token: str):
+async def test_list_absences(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/absences",
         headers={"Authorization": f"Bearer {student_token}"},
@@ -27,7 +27,7 @@ async def test_list_absences(client: AsyncClient, student_token: str):
 
 
 @pytest.mark.asyncio
-async def test_justify_absence_not_found(client: AsyncClient, admin_token: str):
+async def test_justify_absence_not_found(client: AsyncClient, admin_token: str) -> None:
     resp = await client.patch(
         "/api/v1/absences/00000000-0000-0000-0000-000000000000/justify",
         json={"justification_status": "justified"},

@@ -1,5 +1,5 @@
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
-from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,10 +25,12 @@ async def create_evaluation(db: AsyncSession, teacher_id: str, data: dict) -> Ev
     return eval_
 
 
-async def bulk_insert_grades(db: AsyncSession, evaluation_id: str, grades_data: list, teacher_id: str):
+async def bulk_insert_grades(
+    db: AsyncSession, evaluation_id: str, grades_data: list, teacher_id: str
+) -> None:
     eval_uuid = _to_uuid(evaluation_id)
     teacher_uuid = _to_uuid(teacher_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for g in grades_data:
         grade = Grade(
             id=uuid4(),
@@ -44,7 +46,7 @@ async def bulk_insert_grades(db: AsyncSession, evaluation_id: str, grades_data: 
     await db.commit()
 
 
-async def publish_evaluation(db: AsyncSession, evaluation_id: str):
+async def publish_evaluation(db: AsyncSession, evaluation_id: str) -> None:
     eval_ = await db.get(Evaluation, _to_uuid(evaluation_id))
     if eval_:
         eval_.is_published = True

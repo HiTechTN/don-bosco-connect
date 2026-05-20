@@ -1,11 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import get_db
+
 from app.api.deps import get_current_user
+from app.core.security import hash_password, verify_password
+from app.database import get_db
 from app.models.base import User
-from app.schemas.auth import LoginRequest, TokenResponse, RefreshRequest, PasswordChangeRequest, MFAVerifyRequest
-from app.services.auth_service import authenticate_user, generate_tokens, refresh_access_token, setup_mfa, verify_mfa, revoke_refresh_token
-from app.core.security import verify_password, hash_password
+from app.schemas.auth import (
+    LoginRequest,
+    MFAVerifyRequest,
+    PasswordChangeRequest,
+    RefreshRequest,
+    TokenResponse,
+)
+from app.services.auth_service import (
+    authenticate_user,
+    generate_tokens,
+    refresh_access_token,
+    revoke_refresh_token,
+    setup_mfa,
+    verify_mfa,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,7 +30,10 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     if error:
         raise HTTPException(status_code=401, detail=error)
     if user.mfa_enabled:
-        raise HTTPException(status_code=403, detail="MFA requis. Utilisez /auth/mfa/verify avec le token temporaire.")
+        raise HTTPException(
+            status_code=403,
+            detail="MFA requis. Utilisez /auth/mfa/verify avec le token temporaire.",
+        )
     access, refresh = await generate_tokens(db, user)
     return TokenResponse(access_token=access, refresh_token=refresh)
 
@@ -36,7 +53,9 @@ async def logout(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/mfa/setup")
-async def mfa_setup(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def mfa_setup(
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+):
     if current_user.mfa_enabled:
         raise HTTPException(status_code=400, detail="MFA déjà activé")
     data = await setup_mfa(db, current_user)
@@ -44,14 +63,22 @@ async def mfa_setup(current_user: User = Depends(get_current_user), db: AsyncSes
 
 
 @router.post("/mfa/verify")
-async def mfa_verify(body: MFAVerifyRequest, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def mfa_verify(
+    body: MFAVerifyRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     if not await verify_mfa(db, current_user, body.code):
         raise HTTPException(status_code=400, detail="Code invalide")
     return {"message": "MFA activé"}
 
 
 @router.post("/password/change")
-async def change_password(body: PasswordChangeRequest, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def change_password(
+    body: PasswordChangeRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     if not verify_password(body.old_password, current_user.password_hash):
         raise HTTPException(status_code=400, detail="Ancien mot de passe incorrect")
     current_user.password_hash = hash_password(body.new_password)

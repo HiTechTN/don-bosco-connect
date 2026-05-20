@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_admin_dashboard(client: AsyncClient, admin_token: str):
+async def test_admin_dashboard(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/analytics/dashboard",
         headers={"Authorization": f"Bearer {admin_token}"},
@@ -14,7 +14,7 @@ async def test_admin_dashboard(client: AsyncClient, admin_token: str):
 
 
 @pytest.mark.asyncio
-async def test_teacher_dashboard(client: AsyncClient, teacher_token: str):
+async def test_teacher_dashboard(client: AsyncClient, teacher_token: str) -> None:
     resp = await client.get(
         "/api/v1/analytics/teacher",
         headers={"Authorization": f"Bearer {teacher_token}"},
@@ -23,7 +23,7 @@ async def test_teacher_dashboard(client: AsyncClient, teacher_token: str):
 
 
 @pytest.mark.asyncio
-async def test_teacher_dashboard_forbidden(client: AsyncClient, student_token: str):
+async def test_teacher_dashboard_forbidden(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/analytics/teacher",
         headers={"Authorization": f"Bearer {student_token}"},
@@ -32,7 +32,7 @@ async def test_teacher_dashboard_forbidden(client: AsyncClient, student_token: s
 
 
 @pytest.mark.asyncio
-async def test_grade_distribution(client: AsyncClient, admin_token: str):
+async def test_grade_distribution(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/analytics/grades",
         headers={"Authorization": f"Bearer {admin_token}"},
@@ -41,7 +41,7 @@ async def test_grade_distribution(client: AsyncClient, admin_token: str):
 
 
 @pytest.mark.asyncio
-async def test_ai_usage(client: AsyncClient, admin_token: str):
+async def test_ai_usage(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/analytics/ai-usage",
         headers={"Authorization": f"Bearer {admin_token}"},
@@ -50,7 +50,7 @@ async def test_ai_usage(client: AsyncClient, admin_token: str):
 
 
 @pytest.mark.asyncio
-async def test_quiz_stats(client: AsyncClient, admin_token: str):
+async def test_quiz_stats(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/analytics/quiz-stats",
         headers={"Authorization": f"Bearer {admin_token}"},

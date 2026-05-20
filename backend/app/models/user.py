@@ -1,6 +1,18 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, Integer, Text, BigInteger, JSON, ForeignKey, Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID, INET
+
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import INET, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 

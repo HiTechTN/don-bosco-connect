@@ -1,49 +1,49 @@
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_
 
-from app.database import get_db
 from app.api.deps import get_current_user
-from app.models.base import (
-    User, UserRole, Grade, Evaluation, Course, CourseFile,
-    Absence, AIConversation, AIMessage, QuizAttempt, Quiz,
-    StudentProfile, ClassEnrollment,
-)
 from app.core.permissions import require_roles
+from app.database import get_db
+from app.models.base import (
+    Absence,
+    AIConversation,
+    AIMessage,
+    Course,
+    Evaluation,
+    Grade,
+    Quiz,
+    QuizAttempt,
+    User,
+    UserRole,
+)
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 @router.get("/dashboard")
 async def admin_dashboard(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(require_roles(UserRole.admin))
 ):
     result = await db.execute(select(func.count(User.id)))
     total_users = result.scalar()
-    result = await db.execute(
-        select(func.count(User.id)).where(User.role == UserRole.teacher)
-    )
+    result = await db.execute(select(func.count(User.id)).where(User.role == UserRole.teacher))
     total_teachers = result.scalar()
-    result = await db.execute(
-        select(func.count(User.id)).where(User.role == UserRole.student)
-    )
+    result = await db.execute(select(func.count(User.id)).where(User.role == UserRole.student))
     total_students = result.scalar()
-    result = await db.execute(
-        select(func.count(User.id)).where(User.role == UserRole.parent)
-    )
+    result = await db.execute(select(func.count(User.id)).where(User.role == UserRole.parent))
     total_parents = result.scalar()
     result = await db.execute(select(func.count(Course.id)))
     total_courses = result.scalar()
     result = await db.execute(
-        select(func.count(Grade.id)).where(Grade.graded_at >= datetime.now(timezone.utc) - timedelta(days=30))
+        select(func.count(Grade.id)).where(
+            Grade.graded_at >= datetime.now(UTC) - timedelta(days=30)
+        )
     )
     grades_30d = result.scalar()
-    result = await db.execute(
-        select(func.count(AIConversation.id))
-    )
+    result = await db.execute(select(func.count(AIConversation.id)))
     total_ai_convs = result.scalar()
 
     return {
@@ -59,8 +59,7 @@ async def admin_dashboard(
 
 @router.get("/teacher")
 async def teacher_dashboard(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role not in ("admin", "teacher"):
         raise HTTPException(status_code=403, detail="Réservé aux enseignants")
@@ -68,9 +67,7 @@ async def teacher_dashboard(
     teacher_id = current_user.id
 
     # Courses taught
-    result = await db.execute(
-        select(func.count(Course.id)).where(Course.teacher_id == teacher_id)
-    )
+    result = await db.execute(select(func.count(Course.id)).where(Course.teacher_id == teacher_id))
     total_courses = result.scalar()
 
     # Evaluations created
@@ -85,7 +82,7 @@ async def teacher_dashboard(
         .join(Evaluation, Grade.evaluation_id == Evaluation.id)
         .where(
             Evaluation.teacher_id == teacher_id,
-            Grade.graded_at >= datetime.now(timezone.utc) - timedelta(days=30),
+            Grade.graded_at >= datetime.now(UTC) - timedelta(days=30),
         )
     )
     grades_30d = result.scalar()
@@ -118,7 +115,7 @@ async def grade_distribution(
     class_id: str | None = Query(None),
     subject_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     query = select(Grade).join(Evaluation)
     if class_id:
@@ -135,8 +132,7 @@ async def grade_distribution(
 
     bins = [(0, 5), (5, 10), (10, 12), (12, 15), (15, 18), (18, 21)]
     distribution = [
-        {"min": lo, "max": hi, "count": sum(1 for s in scores if lo <= s < hi)}
-        for lo, hi in bins
+        {"min": lo, "max": hi, "count": sum(1 for s in scores if lo <= s < hi)} for lo, hi in bins
     ]
 
     return {
@@ -152,25 +148,26 @@ async def grade_distribution(
 async def ai_usage_stats(
     days: int = Query(30, ge=1, le=365),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = datetime.now(UTC) - timedelta(days=days)
 
     result = await db.execute(
-        select(func.count(AIConversation.id))
-        .where(AIConversation.created_at >= since)
+        select(func.count(AIConversation.id)).where(AIConversation.created_at >= since)
     )
     total_convs = result.scalar()
 
     result = await db.execute(
-        select(func.count(AIMessage.id))
-        .where(AIMessage.created_at >= since, AIMessage.role == "user")
+        select(func.count(AIMessage.id)).where(
+            AIMessage.created_at >= since, AIMessage.role == "user"
+        )
     )
     total_questions = result.scalar()
 
     result = await db.execute(
-        select(func.coalesce(func.avg(AIMessage.token_count), 0))
-        .where(AIMessage.role == "assistant", AIMessage.created_at >= since)
+        select(func.coalesce(func.avg(AIMessage.token_count), 0)).where(
+            AIMessage.role == "assistant", AIMessage.created_at >= since
+        )
     )
     avg_tokens = result.scalar()
 
@@ -185,19 +182,18 @@ async def ai_usage_stats(
 @router.get("/quiz-stats")
 async def quiz_stats(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher))
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.teacher)),
 ):
     result = await db.execute(select(func.count(Quiz.id)))
     total_quizzes = result.scalar()
 
-    result = await db.execute(
-        select(func.count(QuizAttempt.id))
-    )
+    result = await db.execute(select(func.count(QuizAttempt.id)))
     total_attempts = result.scalar()
 
     result = await db.execute(
-        select(func.avg(QuizAttempt.score * 1.0 / func.nullif(QuizAttempt.max_score, 0)))
-        .where(QuizAttempt.max_score > 0)
+        select(func.avg(QuizAttempt.score * 1.0 / func.nullif(QuizAttempt.max_score, 0))).where(
+            QuizAttempt.max_score > 0
+        )
     )
     pass_rate = result.scalar()
 

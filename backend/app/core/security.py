@@ -1,12 +1,14 @@
+import base64
 import hashlib
+import os
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from jose import jwt
 from passlib.context import CryptContext
 
 from app.config import settings
-
 
 pwd_context = CryptContext(schemes=["bcrypt"], bcrypt__rounds=12)
 
@@ -24,8 +26,8 @@ def create_access_token(user_id: str, role: str) -> str:
         "sub": user_id,
         "role": role,
         "type": "access",
-        "iat": datetime.now(timezone.utc),
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        "iat": datetime.now(UTC),
+        "exp": datetime.now(UTC) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
@@ -43,11 +45,6 @@ def decode_token(token: str) -> dict | None:
         return None
 
 
-import os
-import base64
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-
-
 def _get_encryption_key() -> bytes:
     key = settings.ENCRYPTION_KEY
     if not key:
@@ -56,7 +53,7 @@ def _get_encryption_key() -> bytes:
     if len(key) == 32:
         return key.encode() if isinstance(key, str) else key
     key_bytes = bytes.fromhex(key) if len(key) == 64 else key.encode()
-    return key_bytes[:32] if len(key_bytes) > 32 else key_bytes.ljust(32, b'\0')[:32]
+    return key_bytes[:32] if len(key_bytes) > 32 else key_bytes.ljust(32, b"\0")[:32]
 
 
 def encrypt_message(content: str) -> tuple[str, str]:

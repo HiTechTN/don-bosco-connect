@@ -1,17 +1,16 @@
 import uuid
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
 from app.api.deps import get_current_user
-from app.models.base import MessageThread, ThreadParticipant, Message, User
-from app.schemas.messaging import ThreadCreate, MessageSend, MessageResponse
-from app.services.messaging_service import create_thread, send_message
+from app.core.exceptions import ForbiddenException
 from app.core.security import decrypt_message
-from app.core.exceptions import NotFoundException, ForbiddenException
+from app.database import get_db
+from app.models.base import Message, MessageThread, ThreadParticipant, User
+from app.schemas.messaging import MessageSend, ThreadCreate
+from app.services.messaging_service import create_thread, send_message
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -20,16 +19,15 @@ router = APIRouter(prefix="/messages", tags=["messages"])
 async def create_new_thread(
     body: ThreadCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     thread = await create_thread(db, str(current_user.id), body.subject, body.participant_ids)
     return {"id": str(thread.id), "subject": thread.subject, "created_at": str(thread.created_at)}
 
 
-@router.get("/threads", response_model=List[dict])
+@router.get("/threads", response_model=list[dict])
 async def list_threads(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     result = await db.execute(
         select(MessageThread)
@@ -52,20 +50,22 @@ async def list_threads(
                 last_msg_content = decrypt_message(last_msg.content, last_msg.content_iv)
             except Exception:
                 last_msg_content = "***"
-        resp.append({
-            "id": str(t.id),
-            "subject": t.subject,
-            "last_message": last_msg_content,
-            "updated_at": t.updated_at.isoformat() if t.updated_at else None,
-        })
+        resp.append(
+            {
+                "id": str(t.id),
+                "subject": t.subject,
+                "last_message": last_msg_content,
+                "updated_at": t.updated_at.isoformat() if t.updated_at else None,
+            }
+        )
     return resp
 
 
-@router.get("/threads/{thread_id}", response_model=List[dict])
+@router.get("/threads/{thread_id}", response_model=list[dict])
 async def get_messages(
     thread_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         tid = uuid.UUID(thread_id)
@@ -74,8 +74,7 @@ async def get_messages(
 
     part = await db.execute(
         select(ThreadParticipant).where(
-            ThreadParticipant.thread_id == tid,
-            ThreadParticipant.user_id == current_user.id
+            ThreadParticipant.thread_id == tid, ThreadParticipant.user_id == current_user.id
         )
     )
     if not part.scalar_one_or_none():
@@ -90,9 +89,7 @@ async def get_messages(
             "id": str(msg.id),
             "thread_id": str(msg.thread_id),
             "sender_id": str(msg.sender_id),
-            "content": decrypt_message(msg.content, msg.content_iv)
-            if msg.content_iv
-            else "***",
+            "content": decrypt_message(msg.content, msg.content_iv) if msg.content_iv else "***",
             "created_at": msg.created_at.isoformat() if msg.created_at else None,
         }
         for msg in messages
@@ -104,7 +101,7 @@ async def post_message(
     thread_id: str,
     body: MessageSend,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         tid = uuid.UUID(thread_id)
@@ -113,8 +110,7 @@ async def post_message(
 
     part = await db.execute(
         select(ThreadParticipant).where(
-            ThreadParticipant.thread_id == tid,
-            ThreadParticipant.user_id == current_user.id
+            ThreadParticipant.thread_id == tid, ThreadParticipant.user_id == current_user.id
         )
     )
     if not part.scalar_one_or_none():

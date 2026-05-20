@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_create_thread(client: AsyncClient, admin_token: str):
+async def test_create_thread(client: AsyncClient, admin_token: str) -> None:
     resp = await client.post(
         "/api/v1/messages/threads",
         json={"subject": "Test", "participant_ids": []},
@@ -13,7 +13,7 @@ async def test_create_thread(client: AsyncClient, admin_token: str):
 
 
 @pytest.mark.asyncio
-async def test_list_threads(client: AsyncClient, admin_token: str):
+async def test_list_threads(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/messages/threads",
         headers={"Authorization": f"Bearer {admin_token}"},

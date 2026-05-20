@@ -1,19 +1,16 @@
 import asyncio
 import uuid
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
-import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy import text
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.main import app
-from app.database import Base, get_db
 from app.config import settings
+from app.core.security import create_access_token, hash_password
+from app.database import Base, get_db
+from app.main import app
 from app.models.base import User, UserRole
-from app.core.security import hash_password, create_access_token
-
 
 TEST_DATABASE_URL = settings.DATABASE_URL
 

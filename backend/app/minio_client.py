@@ -2,7 +2,6 @@ from minio import Minio
 
 from app.config import settings
 
-
 minio_client: Minio | None = None
 
 
@@ -27,7 +26,7 @@ def check_minio_connection() -> bool:
         return False
 
 
-def ensure_buckets():
+def ensure_buckets() -> None:
     client = get_minio()
     for bucket in [settings.MINIO_BUCKET_COURSES, settings.MINIO_BUCKET_AVATARS]:
         if not client.bucket_exists(bucket):

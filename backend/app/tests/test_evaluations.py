@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_create_evaluation(client: AsyncClient, teacher_token: str):
+async def test_create_evaluation(client: AsyncClient, teacher_token: str) -> None:
     resp = await client.post(
         "/api/v1/evaluations",
         json={
@@ -19,7 +19,7 @@ async def test_create_evaluation(client: AsyncClient, teacher_token: str):
 
 
 @pytest.mark.asyncio
-async def test_list_evaluations(client: AsyncClient, student_token: str):
+async def test_list_evaluations(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/evaluations",
         headers={"Authorization": f"Bearer {student_token}"},
@@ -28,7 +28,7 @@ async def test_list_evaluations(client: AsyncClient, student_token: str):
 
 
 @pytest.mark.asyncio
-async def test_get_evaluation_not_found(client: AsyncClient, admin_token: str):
+async def test_get_evaluation_not_found(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/evaluations/00000000-0000-0000-0000-000000000000",
         headers={"Authorization": f"Bearer {admin_token}"},

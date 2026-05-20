@@ -1,12 +1,17 @@
+from datetime import date, timedelta
 from uuid import UUID, uuid4
-from datetime import date, timedelta, datetime, timezone
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.base import (
-    User, StudentProfile, Badge, StudentBadge, XPTransaction,
-    Absence, ClassEnrollment,
+    Absence,
+    Badge,
+    ClassEnrollment,
+    StudentBadge,
+    StudentProfile,
+    User,
+    XPTransaction,
 )
 
 XP_REWARDS = {
@@ -43,8 +48,11 @@ async def get_or_create_profile(db: AsyncSession, student_id: str) -> StudentPro
     profile = result.scalar_one_or_none()
     if not profile:
         profile = StudentProfile(
-            id=uuid4(), student_id=_to_uuid(student_id),
-            xp_total=0, level=1, streak_days=0,
+            id=uuid4(),
+            student_id=_to_uuid(student_id),
+            xp_total=0,
+            level=1,
+            streak_days=0,
         )
         db.add(profile)
         await db.commit()
@@ -58,7 +66,7 @@ async def award_xp(
     reason: str,
     amount: int,
     reference_id: str | None = None,
-):
+) -> None:
     profile = await get_or_create_profile(db, student_id)
 
     # Streak logic: check last activity BEFORE updating
@@ -103,10 +111,8 @@ async def award_xp(
     await db.commit()
 
 
-async def award_badge(db: AsyncSession, student_id: str, badge_code: str):
-    badge = (
-        await db.execute(select(Badge).where(Badge.code == badge_code))
-    ).scalar_one_or_none()
+async def award_badge(db: AsyncSession, student_id: str, badge_code: str) -> None:
+    badge = (await db.execute(select(Badge).where(Badge.code == badge_code))).scalar_one_or_none()
     if not badge:
         return
     already = (
@@ -173,9 +179,9 @@ async def get_at_risk_students(
 ) -> list[dict]:
     query = select(User).where(User.role == "student")
     if class_id:
-        query = query.join(
-            ClassEnrollment, ClassEnrollment.student_id == User.id
-        ).where(ClassEnrollment.class_id == _to_uuid(class_id))
+        query = query.join(ClassEnrollment, ClassEnrollment.student_id == User.id).where(
+            ClassEnrollment.class_id == _to_uuid(class_id)
+        )
 
     result = await db.execute(query)
     students = result.scalars().all()
@@ -186,8 +192,7 @@ async def get_at_risk_students(
     for student in students:
         absence_count = (
             await db.execute(
-                select(func.count())
-                .where(
+                select(func.count()).where(
                     Absence.student_id == student.id,
                     Absence.date >= thirty_days_ago,
                 )
@@ -195,9 +200,7 @@ async def get_at_risk_students(
         ).scalar() or 0
 
         profile = (
-            await db.execute(
-                select(StudentProfile).where(StudentProfile.student_id == student.id)
-            )
+            await db.execute(select(StudentProfile).where(StudentProfile.student_id == student.id))
         ).scalar_one_or_none()
 
         adaptive_level = profile.adaptive_level if profile else "normal"
@@ -219,14 +222,16 @@ async def get_at_risk_students(
         risk = round(min(risk, 1.0), 2)
 
         if risk > 0.4:
-            risk_students.append({
-                "student_id": str(student.id),
-                "first_name": student.first_name,
-                "last_name": student.last_name,
-                "risk_score": risk,
-                "absences_last_30d": absence_count,
-                "adaptive_level": adaptive_level,
-                "streak_days": streak,
-            })
+            risk_students.append(
+                {
+                    "student_id": str(student.id),
+                    "first_name": student.first_name,
+                    "last_name": student.last_name,
+                    "risk_score": risk,
+                    "absences_last_30d": absence_count,
+                    "adaptive_level": adaptive_level,
+                    "streak_days": streak,
+                }
+            )
 
     return sorted(risk_students, key=lambda x: x["risk_score"], reverse=True)

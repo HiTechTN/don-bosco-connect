@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from typing import Optional
 import uuid
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user
-from app.models.base import Subject, User, UserRole
-from app.schemas.subject import SubjectResponse, SubjectCreate, SubjectUpdate, SubjectListResponse
+from app.core.exceptions import ConflictException, NotFoundException
 from app.core.permissions import require_roles
-from app.core.exceptions import NotFoundException, ConflictException
+from app.database import get_db
+from app.models.base import Subject, User, UserRole
+from app.schemas.subject import SubjectCreate, SubjectListResponse, SubjectResponse, SubjectUpdate
 
 router = APIRouter(prefix="/subjects", tags=["subjects"])
 
@@ -19,7 +19,7 @@ async def list_subjects(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     query = select(Subject)
     count_query = select(func.count()).select_from(query.subquery())
@@ -34,7 +34,7 @@ async def list_subjects(
         total=total,
         page=page,
         per_page=per_page,
-        pages=pages
+        pages=pages,
     )
 
 
@@ -42,7 +42,7 @@ async def list_subjects(
 async def create_subject(
     subject_data: SubjectCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     result = await db.execute(select(Subject).where(Subject.code == subject_data.code))
     if result.scalar_one_or_none():
@@ -66,7 +66,7 @@ async def create_subject(
 async def get_subject(
     subject_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         subject_uuid = uuid.UUID(subject_id)
@@ -84,7 +84,7 @@ async def update_subject(
     subject_id: str,
     subject_data: SubjectUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     try:
         subject_uuid = uuid.UUID(subject_id)
@@ -115,7 +115,7 @@ async def update_subject(
 async def delete_subject(
     subject_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     try:
         subject_uuid = uuid.UUID(subject_id)

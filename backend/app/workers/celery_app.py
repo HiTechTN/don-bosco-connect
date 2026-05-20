@@ -1,4 +1,5 @@
 from celery import Celery
+
 from app.config import settings
 
 celery_app = Celery(
@@ -29,6 +30,8 @@ celery_app.conf.update(
     },
 )
 
-from app.workers import document_tasks  # noqa: E402, F401
-from app.workers import notification_tasks  # noqa: E402, F401
-from app.workers import ai_tasks  # noqa: E402, F401
+from app.workers import (  # noqa: E402
+    ai_tasks,  # noqa: F401
+    document_tasks,  # noqa: F401
+    notification_tasks,  # noqa: F401
+)

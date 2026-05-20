@@ -1,8 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 import uuid
 from datetime import date, datetime
-from app.models.base import ScheduleDay
+
+from pydantic import BaseModel, Field
 
 
 class AcademicYearBase(BaseModel):
@@ -27,8 +26,8 @@ class AcademicYearResponse(AcademicYearBase):
 class ClassBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
     level: str = Field(..., min_length=1, max_length=30)
-    section: Optional[str] = Field(None, max_length=10)
-    main_teacher_id: Optional[uuid.UUID] = None
+    section: str | None = Field(None, max_length=10)
+    main_teacher_id: uuid.UUID | None = None
     max_students: int = Field(default=30, ge=1, le=100)
 
 
@@ -37,18 +36,18 @@ class ClassCreate(ClassBase):
 
 
 class ClassUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=50)
-    level: Optional[str] = Field(None, min_length=1, max_length=30)
-    section: Optional[str] = Field(None, max_length=10)
-    main_teacher_id: Optional[uuid.UUID] = None
-    max_students: Optional[int] = Field(None, ge=1, le=100)
+    name: str | None = Field(None, min_length=1, max_length=50)
+    level: str | None = Field(None, min_length=1, max_length=30)
+    section: str | None = Field(None, max_length=10)
+    main_teacher_id: uuid.UUID | None = None
+    max_students: int | None = Field(None, ge=1, le=100)
 
 
 class ClassResponse(ClassBase):
     id: uuid.UUID
     academic_year_id: uuid.UUID
     enrollment_count: int = 0
-    main_teacher_name: Optional[str] = None
+    main_teacher_name: str | None = None
     created_at: datetime
 
     class Config:

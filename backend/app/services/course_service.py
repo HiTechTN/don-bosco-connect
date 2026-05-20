@@ -1,11 +1,11 @@
-from uuid import UUID, uuid4
 import os
+from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.base import Course, CourseFile
 from app.config import settings
 from app.minio_client import get_minio
+from app.models.base import Course, CourseFile
 
 BUCKET = settings.MINIO_BUCKET_COURSES
 
@@ -26,9 +26,7 @@ async def create_course(db: AsyncSession, teacher_id: str, data: dict) -> Course
     return course
 
 
-async def upload_course_file(
-    db: AsyncSession, course_id: str, file, user_id: str
-) -> CourseFile:
+async def upload_course_file(db: AsyncSession, course_id: str, file, user_id: str) -> CourseFile:
     minio_client = get_minio()
     ext = os.path.splitext(file.filename)[1] if file.filename else ""
     stored_name = f"{uuid4()}{ext}"

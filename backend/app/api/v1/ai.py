@@ -1,31 +1,41 @@
-from uuid import uuid4
-from datetime import datetime, timezone
 import json
-import asyncio
 import logging
 import re
+from datetime import UTC, datetime
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 import httpx
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
-from app.database import get_db
 from app.api.deps import get_current_user
-from app.core.permissions import require_roles
-from app.schemas.ai import (
-    ChatMessageRequest, QuizGenerateRequest, QuizSubmitRequest,
-    ConversationResponse, MessageResponse, QuizResponse, QuizAttemptResponse,
-)
-from app.models.base import (
-    AIConversation, AIMessage, Quiz, QuizQuestion, QuizAttempt,
-    User, Course, DocumentChunk, StudentProfile,
-)
-from app.services.rag_service import query_rag
-from app.services.adaptive_service import compute_adaptive_score, get_adaptive_level
-from app.services.gamification_service import get_or_create_profile, award_xp
 from app.config import settings
+from app.core.permissions import require_roles
+from app.database import get_db
+from app.models.base import (
+    AIConversation,
+    AIMessage,
+    Course,
+    DocumentChunk,
+    Quiz,
+    QuizAttempt,
+    QuizQuestion,
+    User,
+)
+from app.schemas.ai import (
+    ChatMessageRequest,
+    ConversationResponse,
+    MessageResponse,
+    QuizAttemptResponse,
+    QuizGenerateRequest,
+    QuizResponse,
+    QuizSubmitRequest,
+)
+from app.services.adaptive_service import compute_adaptive_score, get_adaptive_level
+from app.services.gamification_service import award_xp, get_or_create_profile
+from app.services.rag_service import query_rag
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai", tags=["ai"])
@@ -33,10 +43,10 @@ router = APIRouter(prefix="/ai", tags=["ai"])
 
 # ── Conversations ──────────────────────────────────────────────
 
+
 @router.get("/conversations", response_model=list[ConversationResponse])
 async def list_conversations(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     result = await db.execute(
         select(AIConversation).where(AIConversation.student_id == current_user.id)
@@ -50,7 +60,7 @@ async def create_conversation(
     subject_id: str | None = None,
     title: str | None = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "teacher", "student"))
+    current_user: User = Depends(require_roles("admin", "teacher", "student")),
 ):
     conv = AIConversation(
         id=uuid4(),
@@ -69,7 +79,7 @@ async def create_conversation(
 async def get_messages(
     conversation_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     conv = await db.get(AIConversation, conversation_id)
     if not conv or conv.student_id != current_user.id:
@@ -87,7 +97,7 @@ async def send_message(
     conversation_id: str,
     body: ChatMessageRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     conv = await db.get(AIConversation, conversation_id)
     if not conv or conv.student_id != current_user.id:
@@ -114,7 +124,9 @@ async def send_message(
 
     async def event_stream():
         full_response = ""
-        async for token in query_rag(db, body.content, str(current_user.id), conv.course_id, history):
+        async for token in query_rag(
+            db, body.content, str(current_user.id), conv.course_id, history
+        ):
             full_response += token
             yield {"event": "token", "data": json.dumps({"token": token})}
 
@@ -147,7 +159,7 @@ async def message_feedback(
     message_id: str,
     feedback: int = Query(1, ge=-1, le=1),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     msg = await db.get(AIMessage, message_id)
     if not msg or str(msg.conversation_id) != conversation_id:
@@ -159,11 +171,12 @@ async def message_feedback(
 
 # ── Quiz generation ────────────────────────────────────────────
 
+
 @router.post("/quiz/generate", response_model=QuizResponse)
 async def generate_quiz(
     body: QuizGenerateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "teacher"))
+    current_user: User = Depends(require_roles("admin", "teacher")),
 ):
     course = await db.get(Course, body.course_id)
     if not course:
@@ -176,7 +189,8 @@ async def generate_quiz(
     context = "\n\n".join(c.content for c in chunks)
 
     prompt = (
-        f"Génère {body.num_questions} questions de quiz sur ce cours en difficulté {body.difficulty}.\n"
+        f"Génère {body.num_questions} questions de quiz sur ce cours "
+        f"en difficulté {body.difficulty}.\n"
         f"Types demandés : {', '.join(body.question_types)}.\n"
         f"Format JSON uniquement, avec ce schema :\n"
         f'{{"questions": [{{"question": "...", "type": "mcq", '
@@ -202,7 +216,7 @@ async def generate_quiz(
         quiz_data = json.loads(data["response"])
     except json.JSONDecodeError:
         # Try extracting JSON from markdown code fences
-        match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', data["response"])
+        match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", data["response"])
         if match:
             quiz_data = json.loads(match.group(1))
         else:
@@ -256,7 +270,7 @@ router_quiz = APIRouter(prefix="/quizzes", tags=["quizzes"])
 async def list_quizzes(
     course_id: str | None = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     query = select(Quiz)
     if course_id:
@@ -267,9 +281,7 @@ async def list_quizzes(
 
 @router_quiz.get("/{quiz_id}", response_model=QuizResponse)
 async def get_quiz(
-    quiz_id: str,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    quiz_id: str, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     quiz = await db.get(Quiz, quiz_id)
     if not quiz:
@@ -282,31 +294,38 @@ async def submit_quiz(
     quiz_id: str,
     body: QuizSubmitRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("student"))
+    current_user: User = Depends(require_roles("student")),
 ):
     quiz = await db.get(Quiz, quiz_id)
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz non trouvé")
 
     questions = (
-        await db.execute(
-            select(QuizQuestion).where(QuizQuestion.quiz_id == quiz_id).order_by(QuizQuestion.order_index)
+        (
+            await db.execute(
+                select(QuizQuestion)
+                .where(QuizQuestion.quiz_id == quiz_id)
+                .order_by(QuizQuestion.order_index)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     score = 0
     max_score = len(questions)
-    
+
     for i, q in enumerate(questions):
         user_answer = body.answers[i]["answer"] if i < len(body.answers) else None
         if q.question_type == "mcq" and q.options:
-            correct_option = next(
-                (opt for opt in q.options if opt.get("is_correct")), None
-            )
+            correct_option = next((opt for opt in q.options if opt.get("is_correct")), None)
             if correct_option and user_answer == correct_option.get("text"):
                 score += 1
         elif q.question_type == "true_false":
-            if user_answer is not None and str(user_answer).lower() == str(q.correct_answer).lower():
+            if (
+                user_answer is not None
+                and str(user_answer).lower() == str(q.correct_answer).lower()
+            ):
                 score += 1
 
     # Get or create profile for adaptive tracking
@@ -330,7 +349,7 @@ async def submit_quiz(
         answers=body.answers,
         score=score,
         max_score=max_score,
-        completed_at=datetime.now(timezone.utc),
+        completed_at=datetime.now(UTC),
         adaptive_level_before=adaptive_before,
         adaptive_level_after=adaptive_level,
     )

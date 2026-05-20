@@ -1,5 +1,7 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, Integer, Text, ForeignKey, Float, Date, JSON, Enum as SAEnum
+
+from sqlalchemy import JSON, Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -15,7 +17,9 @@ class StudentProfile(Base):
     level = Column(Integer, default=1)
     streak_days = Column(Integer, default=0)
     last_activity_date = Column(Date)
-    adaptive_level = Column(SAEnum("remediation","normal","advanced", name="difficulty_level"), default="normal")
+    adaptive_level = Column(
+        SAEnum("remediation", "normal", "advanced", name="difficulty_level"), default="normal"
+    )
     adaptive_score = Column(Float, default=0.5)
     avatar_config = Column(JSON, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())

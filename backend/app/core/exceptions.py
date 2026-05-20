@@ -2,7 +2,13 @@ from fastapi import HTTPException, status
 
 
 class AppException(HTTPException):
-    def __init__(self, code: str, message: str, details: str | None = None, status_code: int = status.HTTP_400_BAD_REQUEST):
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        details: str | None = None,
+        status_code: int = status.HTTP_400_BAD_REQUEST,
+    ) -> None:
         super().__init__(
             status_code=status_code,
             detail={"error": {"code": code, "message": message, "details": details}},
@@ -10,7 +16,7 @@ class AppException(HTTPException):
 
 
 class NotFoundException(AppException):
-    def __init__(self, resource: str = "resource"):
+    def __init__(self, resource: str = "resource") -> None:
         super().__init__(
             code="not_found",
             message=f"{resource} not found",
@@ -19,7 +25,7 @@ class NotFoundException(AppException):
 
 
 class UnauthorizedException(AppException):
-    def __init__(self, message: str = "Not authenticated"):
+    def __init__(self, message: str = "Not authenticated") -> None:
         super().__init__(
             code="unauthorized",
             message=message,
@@ -28,7 +34,7 @@ class UnauthorizedException(AppException):
 
 
 class ForbiddenException(AppException):
-    def __init__(self, message: str = "Insufficient permissions"):
+    def __init__(self, message: str = "Insufficient permissions") -> None:
         super().__init__(
             code="forbidden",
             message=message,
@@ -37,7 +43,7 @@ class ForbiddenException(AppException):
 
 
 class ConflictException(AppException):
-    def __init__(self, message: str = "Resource already exists"):
+    def __init__(self, message: str = "Resource already exists") -> None:
         super().__init__(
             code="conflict",
             message=message,

@@ -48,9 +48,12 @@ jobs:
       - run: pip install pytest pytest-asyncio pytest-cov httpx
       - run: pytest app/tests/ --cov=app --cov-report=html --cov-fail-under=70
         env:
-          DATABASE_URL: postgresql+asyncpg://donbosco_user:donbosco_test@localhost:5432/donbosco_test
+          DB_HOST: localhost
+          DB_PASSWORD: donbosco_test
+          DB_NAME: donbosco_test
           SECRET_KEY: test-secret-key-not-for-production
-          REDIS_URL: redis://:test@localhost:6379/0
+          REDIS_PASSWORD: test
+          REDIS_HOST: localhost
           ENVIRONMENT: test
 
   lint-frontend:

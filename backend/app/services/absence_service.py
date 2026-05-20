@@ -1,5 +1,7 @@
 from uuid import UUID, uuid4
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.base import Absence
 from app.services.notification_service import notify_parents_of_absence
 

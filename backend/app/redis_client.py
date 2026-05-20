@@ -2,7 +2,6 @@ import redis.asyncio as redis
 
 from app.config import settings
 
-
 redis_client: redis.Redis | None = None
 
 
@@ -25,7 +24,7 @@ async def check_redis_connection() -> bool:
         return False
 
 
-async def close_redis():
+async def close_redis() -> None:
     global redis_client
     if redis_client:
         await redis_client.close()

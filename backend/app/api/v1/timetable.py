@@ -1,33 +1,41 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, or_
-from typing import Optional
 import uuid
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import and_, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user
-from app.models.base import TimetableSlot, Subject, Class, User, UserRole, ClassEnrollment, AcademicYear
-from app.schemas.timetable import TimetableSlotResponse, TimetableSlotCreate, TimetableSlotUpdate
+from app.core.exceptions import ConflictException, NotFoundException
 from app.core.permissions import require_roles
-from app.core.exceptions import NotFoundException, ConflictException
+from app.database import get_db
+from app.models.base import (
+    Class,
+    ClassEnrollment,
+    Subject,
+    TimetableSlot,
+    User,
+    UserRole,
+)
+from app.schemas.timetable import TimetableSlotCreate, TimetableSlotResponse, TimetableSlotUpdate
 
 router = APIRouter(prefix="/timetable", tags=["timetable"])
 
 
 @router.get("/my")
 async def get_my_timetable(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role not in (UserRole.student, UserRole.teacher):
         raise HTTPException(status_code=403, detail="Réservé aux élèves et enseignants")
 
     if current_user.role == UserRole.student:
         result = await db.execute(
-            select(ClassEnrollment).where(
+            select(ClassEnrollment)
+            .where(
                 ClassEnrollment.student_id == current_user.id,
-                ClassEnrollment.status == 'active',
-            ).limit(1)
+                ClassEnrollment.status == "active",
+            )
+            .limit(1)
         )
         enrollment = result.scalar_one_or_none()
         if not enrollment:
@@ -42,7 +50,11 @@ async def get_my_timetable(
         class_id = cls.id
 
     result = await db.execute(
-        select(TimetableSlot, Subject, User).join(Subject, TimetableSlot.subject_id == Subject.id, isouter=True).join(User, TimetableSlot.teacher_id == User.id, isouter=True).where(TimetableSlot.class_id == class_id).order_by(TimetableSlot.day, TimetableSlot.start_time)
+        select(TimetableSlot, Subject, User)
+        .join(Subject, TimetableSlot.subject_id == Subject.id, isouter=True)
+        .join(User, TimetableSlot.teacher_id == User.id, isouter=True)
+        .where(TimetableSlot.class_id == class_id)
+        .order_by(TimetableSlot.day, TimetableSlot.start_time)
     )
     rows = result.all()
     return [
@@ -62,10 +74,10 @@ async def get_my_timetable(
 
 @router.get("/", response_model=list[TimetableSlotResponse])
 async def list_timetable(
-    class_id: Optional[str] = Query(None),
-    academic_year_id: Optional[str] = Query(None),
+    class_id: str | None = Query(None),
+    academic_year_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     query = select(TimetableSlot)
     if class_id:
@@ -81,7 +93,7 @@ async def list_timetable(
 async def create_timetable_slot(
     slot_data: TimetableSlotCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     result = await db.execute(select(Class).where(Class.id == slot_data.class_id))
     if not result.scalar_one_or_none():
@@ -103,9 +115,9 @@ async def create_timetable_slot(
                 or_(
                     and_(
                         TimetableSlot.start_time < slot_data.end_time,
-                        TimetableSlot.end_time > slot_data.start_time
+                        TimetableSlot.end_time > slot_data.start_time,
                     )
-                )
+                ),
             )
         )
     )
@@ -133,7 +145,7 @@ async def update_timetable_slot(
     slot_id: str,
     slot_data: TimetableSlotUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     try:
         slot_uuid = uuid.UUID(slot_id)
@@ -164,7 +176,7 @@ async def update_timetable_slot(
 async def delete_timetable_slot(
     slot_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     try:
         slot_uuid = uuid.UUID(slot_id)

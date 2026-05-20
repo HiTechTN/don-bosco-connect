@@ -1,13 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from typing import Optional
 import uuid
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user
-from app.models.base import User, UserRole, Grade, Evaluation, Absence, Subject, ClassEnrollment, StudentProfile
 from app.core.exceptions import NotFoundException
+from app.database import get_db
+from app.models.base import (
+    Absence,
+    ClassEnrollment,
+    Evaluation,
+    Grade,
+    Subject,
+    User,
+    UserRole,
+)
 
 router = APIRouter(prefix="/students", tags=["reports"])
 
@@ -15,10 +23,10 @@ router = APIRouter(prefix="/students", tags=["reports"])
 @router.get("/{student_id}/grades")
 async def get_student_grades(
     student_id: str,
-    subject_id: Optional[str] = Query(None),
-    academic_year_id: Optional[str] = Query(None),
+    subject_id: str | None = Query(None),
+    academic_year_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """Get grades for a student. Accessible by the student, their parents, teachers, and admin."""
     try:
@@ -31,6 +39,7 @@ async def get_student_grades(
         raise HTTPException(status_code=403, detail="Accès refusé")
     if current_user.role == UserRole.parent:
         from app.models.base import StudentParentLink
+
         result = await db.execute(
             select(StudentParentLink).where(
                 StudentParentLink.parent_id == current_user.id,
@@ -46,7 +55,7 @@ async def get_student_grades(
     if academic_year_id:
         query = query.where(Evaluation.academic_year_id == uuid.UUID(academic_year_id))
 
-    query = query.where(Evaluation.is_published == True)
+    query = query.where(Evaluation.is_published)
     result = await db.execute(query)
     grades = result.scalars().all()
 
@@ -66,10 +75,10 @@ async def get_student_grades(
 @router.get("/{student_id}/absences")
 async def get_student_absences(
     student_id: str,
-    from_date: Optional[str] = Query(None),
-    to_date: Optional[str] = Query(None),
+    from_date: str | None = Query(None),
+    to_date: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """Get absences for a student."""
     try:
@@ -89,8 +98,10 @@ async def get_student_absences(
         {
             "id": str(a.id),
             "date": a.date.isoformat() if a.date else None,
-            "type": a.type.value if hasattr(a.type, 'value') else str(a.type),
-            "justification_status": a.justification_status.value if hasattr(a.justification_status, 'value') else str(a.justification_status),
+            "type": a.type.value if hasattr(a.type, "value") else str(a.type),
+            "justification_status": a.justification_status.value
+            if hasattr(a.justification_status, "value")
+            else str(a.justification_status),
             "subject_id": str(a.subject_id) if a.subject_id else None,
         }
         for a in absences
@@ -100,9 +111,9 @@ async def get_student_absences(
 @router.get("/{student_id}/report")
 async def get_student_report(
     student_id: str,
-    academic_year_id: Optional[str] = Query(None),
+    academic_year_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """Get a student's report (bulletin) as JSON data for PDF generation."""
     try:
@@ -124,7 +135,8 @@ async def get_student_report(
     )
     enrollments = result.scalars().all()
 
-    from app.models.base import Class, AcademicYear
+    from app.models.base import AcademicYear, Class
+
     report_data = {
         "student_name": f"{student.first_name} {student.last_name}",
         "classes": [],
@@ -145,7 +157,7 @@ async def get_student_report(
         eval_result = await db.execute(
             select(Evaluation).where(
                 Evaluation.class_id == class_.id,
-                Evaluation.is_published == True,
+                Evaluation.is_published,
             )
         )
         evaluations = eval_result.scalars().all()
@@ -158,7 +170,9 @@ async def get_student_report(
 
         subject_totals = {}
         for evaluation in evaluations:
-            subj_result = await db.execute(select(Subject).where(Subject.id == evaluation.subject_id))
+            subj_result = await db.execute(
+                select(Subject).where(Subject.id == evaluation.subject_id)
+            )
             subject = subj_result.scalar_one_or_none()
             if not subject:
                 continue
@@ -175,17 +189,22 @@ async def get_student_report(
 
             subj_name = subject.name
             if subj_name not in subject_totals:
-                subject_totals[subj_name] = {"scores": [], "coefficient": float(subject.coefficient or 1.0)}
+                subject_totals[subj_name] = {
+                    "scores": [],
+                    "coefficient": float(subject.coefficient or 1.0),
+                }
             subject_totals[subj_name]["scores"].append(float(grade.score))
 
         for subj_name, data in subject_totals.items():
             avg = sum(data["scores"]) / len(data["scores"]) if data["scores"] else 0
-            class_data["subjects"].append({
-                "name": subj_name,
-                "average": round(avg, 2),
-                "coefficient": data["coefficient"],
-                "total_scores": len(data["scores"]),
-            })
+            class_data["subjects"].append(
+                {
+                    "name": subj_name,
+                    "average": round(avg, 2),
+                    "coefficient": data["coefficient"],
+                    "total_scores": len(data["scores"]),
+                }
+            )
 
         report_data["classes"].append(class_data)
 

@@ -1,19 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, or_, update, delete
-from typing import Optional
 import uuid
 
-from app.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import and_, delete, func, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user
+from app.core.exceptions import ConflictException, NotFoundException
+from app.core.permissions import require_roles
+from app.database import get_db
 from app.models.base import AcademicYear, Class, ClassEnrollment, User, UserRole
 from app.schemas.academic import (
-    AcademicYearResponse, AcademicYearCreate,
-    ClassResponse, ClassCreate, ClassUpdate,
-    ClassEnrollmentResponse, EnrollmentRequest
+    AcademicYearCreate,
+    AcademicYearResponse,
+    ClassCreate,
+    ClassEnrollmentResponse,
+    ClassResponse,
+    ClassUpdate,
+    EnrollmentRequest,
 )
-from app.core.permissions import require_roles
-from app.core.exceptions import NotFoundException, ConflictException
 
 router = APIRouter(prefix="/academic-years", tags=["academic-years"])
 
@@ -22,20 +26,22 @@ router = APIRouter(prefix="/academic-years", tags=["academic-years"])
 async def create_academic_year(
     year_data: AcademicYearCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     result = await db.execute(select(AcademicYear).where(AcademicYear.name == year_data.name))
     existing_year = result.scalar_one_or_none()
     if existing_year:
         raise ConflictException("Une année scolaire avec ce nom existe déjà")
     if year_data.is_current:
-        await db.execute(update(AcademicYear).where(AcademicYear.is_current == True).values(is_current=False))
+        await db.execute(
+            update(AcademicYear).where(AcademicYear.is_current).values(is_current=False)
+        )
     year = AcademicYear(
         id=uuid.uuid4(),
         name=year_data.name,
         start_date=year_data.start_date,
         end_date=year_data.end_date,
-        is_current=year_data.is_current
+        is_current=year_data.is_current,
     )
     db.add(year)
     await db.commit()
@@ -45,8 +51,7 @@ async def create_academic_year(
 
 @router.get("/", response_model=list[AcademicYearResponse])
 async def list_academic_years(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     result = await db.execute(select(AcademicYear).order_by(AcademicYear.start_date.desc()))
     years = result.scalars().all()
@@ -60,9 +65,11 @@ class_router = APIRouter(prefix="/classes", tags=["classes"])
 async def create_class(
     class_data: ClassCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
-    result = await db.execute(select(AcademicYear).where(AcademicYear.id == class_data.academic_year_id))
+    result = await db.execute(
+        select(AcademicYear).where(AcademicYear.id == class_data.academic_year_id)
+    )
     academic_year = result.scalar_one_or_none()
     if not academic_year:
         raise NotFoundException("Année scolaire non trouvée")
@@ -78,7 +85,7 @@ async def create_class(
         level=class_data.level,
         section=class_data.section,
         main_teacher_id=class_data.main_teacher_id,
-        max_students=class_data.max_students
+        max_students=class_data.max_students,
     )
     db.add(new_class)
     await db.commit()
@@ -88,10 +95,10 @@ async def create_class(
 
 @class_router.get("/", response_model=list[ClassResponse])
 async def list_classes(
-    academic_year_id: Optional[str] = Query(None),
-    teacher_id: Optional[str] = Query(None),
+    academic_year_id: str | None = Query(None),
+    teacher_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     query = select(Class)
     if academic_year_id:
@@ -104,8 +111,7 @@ async def list_classes(
     for cls in classes:
         count_result = await db.execute(
             select(func.count(ClassEnrollment.id)).where(
-                ClassEnrollment.class_id == cls.id,
-                ClassEnrollment.status == 'active'
+                ClassEnrollment.class_id == cls.id, ClassEnrollment.status == "active"
             )
         )
         enrollment_count = count_result.scalar() or 0
@@ -126,7 +132,7 @@ async def list_classes(
 async def get_class(
     class_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         class_uuid = uuid.UUID(class_id)
@@ -144,7 +150,7 @@ async def update_class(
     class_id: str,
     class_data: ClassUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     try:
         class_uuid = uuid.UUID(class_id)
@@ -177,8 +183,8 @@ async def update_class(
 async def delete_class(
     class_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
-):
+    current_user: User = Depends(require_roles(UserRole.admin)),
+) -> None:
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
@@ -199,17 +205,16 @@ enrollment_router = APIRouter(prefix="/classes/{class_id}/students", tags=["enro
 async def list_class_students(
     class_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="ID classe invalide")
     result = await db.execute(
-        select(ClassEnrollment, User).join(User, ClassEnrollment.student_id == User.id).where(
-            ClassEnrollment.class_id == class_uuid,
-            ClassEnrollment.status == 'active'
-        )
+        select(ClassEnrollment, User)
+        .join(User, ClassEnrollment.student_id == User.id)
+        .where(ClassEnrollment.class_id == class_uuid, ClassEnrollment.status == "active")
     )
     rows = result.all()
     return [
@@ -229,7 +234,7 @@ async def enroll_student(
     class_id: str,
     enrollment_data: EnrollmentRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     try:
         class_uuid = uuid.UUID(class_id)
@@ -253,7 +258,7 @@ async def enroll_student(
             and_(
                 ClassEnrollment.student_id == student_uuid,
                 ClassEnrollment.class_id == class_uuid,
-                ClassEnrollment.academic_year_id == academic_year_uuid
+                ClassEnrollment.academic_year_id == academic_year_uuid,
             )
         )
     )
@@ -264,7 +269,7 @@ async def enroll_student(
             and_(
                 ClassEnrollment.class_id == class_uuid,
                 ClassEnrollment.academic_year_id == academic_year_uuid,
-                ClassEnrollment.status == 'active'
+                ClassEnrollment.status == "active",
             )
         )
     )
@@ -274,7 +279,7 @@ async def enroll_student(
         id=uuid.uuid4(),
         student_id=student_uuid,
         class_id=class_uuid,
-        academic_year_id=academic_year_uuid
+        academic_year_id=academic_year_uuid,
     )
     db.add(enrollment)
     await db.commit()
@@ -288,7 +293,7 @@ async def unenroll_student(
     student_id: str,
     academic_year_id: str = Query(...),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     try:
         class_uuid = uuid.UUID(class_id)
@@ -301,7 +306,7 @@ async def unenroll_student(
             and_(
                 ClassEnrollment.student_id == student_uuid,
                 ClassEnrollment.class_id == class_uuid,
-                ClassEnrollment.academic_year_id == academic_year_uuid
+                ClassEnrollment.academic_year_id == academic_year_uuid,
             )
         )
     )
@@ -320,8 +325,8 @@ enrollment_delete_router = APIRouter(prefix="/classes/enrollments", tags=["enrol
 async def delete_enrollment(
     enrollment_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin))
-):
+    current_user: User = Depends(require_roles(UserRole.admin)),
+) -> None:
     try:
         enr_uuid = uuid.UUID(enrollment_id)
     except ValueError:

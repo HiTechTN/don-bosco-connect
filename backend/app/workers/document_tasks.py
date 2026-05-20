@@ -15,7 +15,7 @@ engine = create_async_engine(settings.DATABASE_URL, echo=False, pool_size=5)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def _index_course_file(file_id: str):
+async def _index_course_file(file_id: str) -> None:
     async with AsyncSessionLocal() as db:
         result = await db.execute(select(CourseFile).where(CourseFile.id == file_id))
         cf = result.scalar_one_or_none()
@@ -90,6 +90,7 @@ def _extract_text(cf: CourseFile) -> str | None:
 
 def _extract_pdf_text(raw: bytes) -> str:
     import fitz
+
     doc = fitz.open(stream=raw, filetype="pdf")
     text = "\n".join(page.get_text() for page in doc)
     doc.close()
@@ -98,16 +99,18 @@ def _extract_pdf_text(raw: bytes) -> str:
 
 def _extract_docx_text(raw: bytes) -> str:
     try:
-        import zipfile
-        import xml.etree.ElementTree as ET
         import io
+        import xml.etree.ElementTree as ET
+        import zipfile
 
         with zipfile.ZipFile(io.BytesIO(raw)) as z:
             with z.open("word/document.xml") as f:
                 tree = ET.parse(f)
                 root = tree.getroot()
                 texts = []
-                for t in root.iter("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t"):
+                for t in root.iter(
+                    "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t"
+                ):
                     if t.text:
                         texts.append(t.text)
                 return "\n".join(texts)
@@ -128,6 +131,7 @@ def _chunk_text(text: str, max_tokens: int = 500, overlap: int = 50) -> list[str
     return chunks
 
 
-def index_course_file(file_id: str):
+def index_course_file(file_id: str) -> None:
     import asyncio
+
     asyncio.run(_index_course_file(file_id))

@@ -1,5 +1,7 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, Text, ForeignKey, JSON, Enum as SAEnum
+
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -43,7 +45,19 @@ class Notification(Base):
     __tablename__ = "notifications"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    type = Column(SAEnum("absence","grade_published","message","ai_response","quiz_available","event","system","decrochage_alert", name="notification_type"))
+    type = Column(
+        SAEnum(
+            "absence",
+            "grade_published",
+            "message",
+            "ai_response",
+            "quiz_available",
+            "event",
+            "system",
+            "decrochage_alert",
+            name="notification_type",
+        )
+    )
     title = Column(String(255), nullable=False)
     body = Column(Text)
     data = Column(JSON, default={})

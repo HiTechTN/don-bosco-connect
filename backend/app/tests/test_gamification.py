@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_gamification_profile(client: AsyncClient, student_token: str):
+async def test_gamification_profile(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/gamification/profile",
         headers={"Authorization": f"Bearer {student_token}"},
@@ -12,7 +12,7 @@ async def test_gamification_profile(client: AsyncClient, student_token: str):
 
 
 @pytest.mark.asyncio
-async def test_leaderboard(client: AsyncClient, student_token: str):
+async def test_leaderboard(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/gamification/leaderboard",
         headers={"Authorization": f"Bearer {student_token}"},
@@ -21,7 +21,7 @@ async def test_leaderboard(client: AsyncClient, student_token: str):
 
 
 @pytest.mark.asyncio
-async def test_badges(client: AsyncClient, student_token: str):
+async def test_badges(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/gamification/badges",
         headers={"Authorization": f"Bearer {student_token}"},
@@ -30,7 +30,7 @@ async def test_badges(client: AsyncClient, student_token: str):
 
 
 @pytest.mark.asyncio
-async def test_dropout_risk_forbidden(client: AsyncClient, student_token: str):
+async def test_dropout_risk_forbidden(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/gamification/at-risk",
         headers={"Authorization": f"Bearer {student_token}"},
@@ -39,7 +39,7 @@ async def test_dropout_risk_forbidden(client: AsyncClient, student_token: str):
 
 
 @pytest.mark.asyncio
-async def test_dropout_risk_admin(client: AsyncClient, admin_token: str):
+async def test_dropout_risk_admin(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/gamification/at-risk",
         headers={"Authorization": f"Bearer {admin_token}"},
