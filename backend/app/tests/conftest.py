@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 from collections.abc import AsyncGenerator
 
@@ -14,13 +13,6 @@ from app.main import app
 from app.models.base import User, UserRole
 
 TEST_DATABASE_URL = settings.DATABASE_URL
-
-
-@pytest_asyncio.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest_asyncio.fixture(scope="session")
