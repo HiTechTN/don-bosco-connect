@@ -29,60 +29,25 @@
   <a href="https://hitechtn.github.io/don-bosco-connect">
     <img src="https://img.shields.io/badge/🌐_العرض_التجريبي-hitechtn.github.io-2D2A24?style=for-the-badge" alt="العرض التجريبي"/>
   </a>
+  <a href="https://hitechtn.github.io/don-bosco-connect/demo.html">
+    <img src="https://img.shields.io/badge/🎬_عرض_تفاعلي-فيديو_+_كاروسيل-c96442?style=for-the-badge" alt="عرض تفاعلي"/>
+  </a>
   <a href="https://github.com/HiTechTN/don-bosco-connect/releases/tag/v1.0.0-mobile-20260519">
-    <img src="https://img.shields.io/badge/📱_APK_للموبايل-c96442?style=for-the-badge" alt="APK"/>
+    <img src="https://img.shields.io/badge/📱_APK_للموبايل-7C3AED?style=for-the-badge" alt="APK"/>
   </a>
 </p>
 
-### 🎬 فيديو العرض التقديمي
+### 🎬 فيديو و كاروسيل تفاعلي
 
-<video src="https://github.com/HiTechTN/don-bosco-connect/raw/main/DonBoscoConnect_Presentation_v2.mp4" controls width="100%" poster="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/00_login.png" style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); max-width: 960px;"></video>
+<p align="center">
+  <a href="https://hitechtn.github.io/don-bosco-connect/demo.html">
+    <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/00_login.png" width="80%" alt="عرض تفاعلي — انقر لمشاهدة الفيديو والكاروسيل" style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12);" />
+  </a>
+</p>
 
-### 📸 معاينة المنصة
-
-<div align="center">
-
-**🛡️ الإدارة**
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_02_dashboard.png" width="45%" alt="Admin Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_03_users.png" width="45%" alt="Admin Users" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_04_classes.png" width="45%" alt="Admin Classes" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_05_subjects.png" width="45%" alt="Admin Subjects" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_06_timetable.png" width="45%" alt="Admin Timetable" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_07_events.png" width="45%" alt="Admin Events" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/admin_08_audit.png" width="45%" alt="Admin Audit" />
-
----
-
-**👨‍🏫 المعلم**
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_02_dashboard.png" width="45%" alt="Teacher Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_03_courses.png" width="45%" alt="Teacher Courses" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_04_grades.png" width="45%" alt="Teacher Grades" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_05_absences.png" width="45%" alt="Teacher Absences" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_06_messages.png" width="45%" alt="Teacher Messages" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/teacher_07_ai.png" width="45%" alt="Teacher AI" />
-
----
-
-**🧑‍🎓 التلميذ**
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_02_dashboard.png" width="45%" alt="Student Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_03_grades.png" width="45%" alt="Student Grades" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_04_absences.png" width="45%" alt="Student Absences" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_05_timetable.png" width="45%" alt="Student Timetable" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_06_quizzes.png" width="45%" alt="Student Quizzes" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_07_ai.png" width="45%" alt="Student AI" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/student_08_gamification.png" width="45%" alt="Student Gamification" />
-
----
-
-**👪 ولي الأمر**
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_02_dashboard.png" width="45%" alt="Parent Dashboard" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_03_grades.png" width="45%" alt="Parent Grades" />
-
-<img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_04_absences.png" width="45%" alt="Parent Absences" /> <img src="https://raw.githubusercontent.com/HiTechTN/don-bosco-connect/main/demo/screenshots/parent_05_messages.png" width="45%" alt="Parent Messages" />
-
-</div>
+<p align="center">
+  <sub>▶️ انقر لتشغيل فيديو العرض والتنقل بين لقطات الشاشة حسب الملف الشخصي</sub>
+</p>
 
 <details>
 <summary><b>🔑 حسابات العرض التجريبي</b></summary>
