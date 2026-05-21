@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Web
         run: |
-          cd web
+          cd frontend
           npm install
           npm run build
 
@@ -39,7 +39,7 @@ jobs:
 
       - name: Package builds
         run: |
-          cd web/dist && zip -r ../../don-bosco-connect-web.zip . && cd ../..
+          cd frontend/dist && zip -r ../../don-bosco-connect-web.zip . && cd ../..
           cd mobile/dist && zip -r ../../don-bosco-connect-mobile.zip . && cd ../..
 
       - name: Create Release
