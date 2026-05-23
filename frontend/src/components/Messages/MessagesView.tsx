@@ -3,8 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Card, CardBody } from '../ui/Card';
+import type { MessageThread } from '../../types';
 
-export default function MessagesView({ role }: { role: string }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function MessagesView(_props: { role: string }) {
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
   const [newMsg, setNewMsg] = useState('');
   const queryClient = useQueryClient();
@@ -35,7 +37,7 @@ export default function MessagesView({ role }: { role: string }) {
       <div className="w-80 flex-shrink-0">
         <h2 className="text-lg font-semibold mb-3">Messages</h2>
         <div className="space-y-2">
-          {threads?.map((t: any) => (
+          {threads?.map((t: MessageThread) => (
             <button
               key={t.id}
               onClick={() => setSelectedThread(t.id)}
@@ -58,7 +60,7 @@ export default function MessagesView({ role }: { role: string }) {
           <>
             <Card className="flex-1 flex flex-col">
               <CardBody className="flex-1 overflow-y-auto space-y-3">
-                {messages?.map((m: any) => (
+                {messages?.map((m: Record<string, unknown>) => (
                   <div key={m.id} className={`flex ${m.is_mine ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[70%] px-4 py-2 rounded-xl text-sm ${
                       m.is_mine ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'

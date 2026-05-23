@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BookOpen, Calendar, ClipboardList,
   GraduationCap, UserCheck, MessageSquare, BrainCircuit, Gamepad2,
-  LogOut, ChevronLeft, School, Bell, CalendarDays,
+  LogOut, ChevronLeft, School, CalendarDays,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState } from 'react';

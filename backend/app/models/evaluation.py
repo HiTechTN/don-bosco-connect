@@ -103,8 +103,10 @@ class QuizAttempt(Base):
 class Absence(Base):
     __tablename__ = "absences"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    student_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True
+    )
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"), nullable=True)
     subject_id = Column(UUID(as_uuid=True), ForeignKey("subjects.id"))
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
