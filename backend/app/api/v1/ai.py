@@ -26,6 +26,7 @@ from app.models.base import (
 )
 from app.schemas.ai import (
     ChatMessageRequest,
+    ChatRequest,
     ConversationResponse,
     MessageResponse,
     QuizAttemptResponse,
@@ -167,6 +168,39 @@ async def message_feedback(
     msg.feedback = feedback
     await db.commit()
     return {"message": "Feedback enregistré"}
+
+
+# ── Quick chat streaming (no conversation) ─────────────────────
+
+
+@router.post("/chat/stream")
+async def chat_stream(
+    body: ChatRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """SSE streaming chat without an existing conversation."""
+
+    async def event_generator():
+        try:
+            async for token in query_rag(
+                db, body.message, str(current_user.id), None, []
+            ):
+                yield f"data: {json.dumps({'token': token})}\n\n"
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    from fastapi.responses import StreamingResponse
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # ── Quiz generation ────────────────────────────────────────────

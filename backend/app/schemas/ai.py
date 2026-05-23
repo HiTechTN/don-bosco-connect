@@ -9,6 +9,11 @@ class ChatMessageRequest(BaseModel):
     course_id: str | None = None
 
 
+class ChatRequest(BaseModel):
+    message: str
+    context_type: str = "general"
+
+
 class ConversationResponse(BaseModel):
     id: UUID
     student_id: UUID

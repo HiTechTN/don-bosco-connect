@@ -1,10 +1,12 @@
+import asyncio
+import json
+
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
 from app.core.security import decode_token
+from app.redis_client import get_redis
 
 router = APIRouter()
-
-active_connections: dict[str, set[WebSocket]] = {}
 
 
 async def get_user_from_token(token: str) -> dict | None:
@@ -27,17 +29,32 @@ async def websocket_notifications(
     user_id = payload["sub"]
     await websocket.accept()
 
-    if user_id not in active_connections:
-        active_connections[user_id] = set()
-    active_connections[user_id].add(websocket)
+    redis = await get_redis()
+    pubsub = redis.pubsub()
+    await pubsub.subscribe(f"user:{user_id}", "broadcast")
+
+    async def listen():
+        async for msg in pubsub.listen():
+            if msg["type"] == "message":
+                try:
+                    text = msg["data"]
+                    if isinstance(text, bytes):
+                        text = text.decode()
+                    await websocket.send_text(text)
+                except Exception:
+                    pass
+
+    listen_task = asyncio.create_task(listen())
 
     try:
         while True:
-            await websocket.receive_text()
+            try:
+                await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+            except asyncio.TimeoutError:
+                await websocket.send_text(json.dumps({"type": "ping"}))
     except WebSocketDisconnect:
-        active_connections[user_id].discard(websocket)
-        if not active_connections[user_id]:
-            del active_connections[user_id]
+        listen_task.cancel()
+        await pubsub.unsubscribe(f"user:{user_id}", "broadcast")
 
 
 @router.websocket("/ws/v1/ai/stream/{conversation_id}")
@@ -60,10 +77,9 @@ async def websocket_ai_stream(
 
 
 async def send_notification_to_user(user_id: str, message: dict) -> None:
-    """Send a notification to a specific user via WebSocket."""
-    if user_id in active_connections:
-        for ws in active_connections[user_id]:
-            try:
-                await ws.send_json(message)
-            except Exception:
-                active_connections[user_id].discard(ws)
+    """Send a notification to a specific user via Redis Pub/Sub."""
+    try:
+        redis = await get_redis()
+        await redis.publish(f"user:{user_id}", json.dumps(message))
+    except Exception:
+        pass
