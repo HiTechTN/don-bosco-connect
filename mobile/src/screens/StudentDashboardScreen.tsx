@@ -1,48 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/StatCard';
 import Card from '../components/Card';
-import LoadingScreen from '../components/LoadingScreen';
 
 interface Props { navigation: any }
 
-const MOCK_STATS = {
-  grades: 8,
-  absences: 3,
-  xp: 2450,
-};
+const MOCK_STATS = { grades: 8, absences: 3, xp: 2450 };
 
 export default function StudentDashboardScreen({ navigation }: Props) {
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [stats] = useState(MOCK_STATS);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const userStr = await AsyncStorage.getItem('user');
-      if (userStr) setUser(JSON.parse(userStr));
-      setLoading(false);
-    })();
-  }, []);
-
-  const handleLogout = async () => {
-    await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
-
-  if (loading) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.gradientHeader}>
-        <Text style={styles.greeting}>Bonjour, {user?.first_name} 👋</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.greeting}>Bonjour, {user?.first_name} 👋</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {(user?.first_name || 'É')[0]}{(user?.last_name || 'T')[0]}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.level}>Niveau {Math.floor(stats.xp / 500) + 1} • {stats.xp} XP</Text>
         <View style={styles.xpBar}><View style={[styles.xpFill, { width: `${(stats.xp % 500) / 5}%` }]} /></View>
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logout}>Déconnexion</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
@@ -77,12 +62,14 @@ export default function StudentDashboardScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F9FAFB' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   gradientHeader: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24, backgroundColor: '#4F46E5' },
   greeting: { fontSize: 22, fontWeight: '700', color: '#fff' },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.3)', justifyContent: 'center', alignItems: 'center' },
+  avatarText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   level: { fontSize: 14, color: '#C7D2FE', marginTop: 4 },
   xpBar: { height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3, marginTop: 8, overflow: 'hidden' },
   xpFill: { height: '100%', backgroundColor: '#FCD34D', borderRadius: 3 },
-  logout: { color: '#C7D2FE', fontSize: 14, marginTop: 8, textAlign: 'right' },
   content: { flex: 1, padding: 16 },
   statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20, marginTop: -10 },
   stat: { flex: 1, marginTop: -16 },

@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import LoadingScreen from '../components/LoadingScreen';
+import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/Card';
 
 interface Props { navigation: any }
@@ -12,24 +11,8 @@ const MOCK_CHILDREN = [
 ];
 
 export default function ParentDashboardScreen({ navigation }: Props) {
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [children] = useState(MOCK_CHILDREN);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const userStr = await AsyncStorage.getItem('user');
-      if (userStr) setUser(JSON.parse(userStr));
-      setLoading(false);
-    })();
-  }, []);
-
-  const handleLogout = async () => {
-    await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
-
-  if (loading) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -38,8 +21,12 @@ export default function ParentDashboardScreen({ navigation }: Props) {
           <Text style={styles.greeting}>Bonjour, {user?.first_name}</Text>
           <Text style={styles.role}>Parent</Text>
         </View>
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logout}>Déconnexion</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {(user?.first_name || 'P')[0]}{(user?.last_name || 'T')[0]}
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -74,7 +61,6 @@ export default function ParentDashboardScreen({ navigation }: Props) {
           <View style={styles.quickActions}>
             {[
               { title: 'Messages', icon: '💬', screen: 'Messages' },
-              { title: 'Notifications', icon: '🔔', screen: 'ParentHome' },
             ].map((item) => (
               <TouchableOpacity key={item.screen} style={styles.actionBtn} onPress={() => navigation.navigate(item.screen)}>
                 <Text style={styles.actionIcon}>{item.icon}</Text>
@@ -93,20 +79,21 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
   greeting: { fontSize: 20, fontWeight: '700', color: '#1F2937' },
   role: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  logout: { color: '#EF4444', fontSize: 14, fontWeight: '500' },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#DC2626', justifyContent: 'center', alignItems: 'center' },
+  avatarText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   content: { flex: 1, padding: 16 },
-  empty: { color: '#9CA3AF', fontSize: 14, textAlign: 'center', paddingVertical: 20 },
-  childCard: { flexDirection: 'row', backgroundColor: '#F9FAFB', padding: 14, borderRadius: 12, marginBottom: 10 },
-  childAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#4F46E5', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  childCard: { flexDirection: 'row', backgroundColor: '#F9FAFB', borderRadius: 12, padding: 14, marginBottom: 10 },
+  childAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#D97706', justifyContent: 'center', alignItems: 'center' },
   childAvatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },
-  childInfo: { flex: 1 },
+  childInfo: { flex: 1, marginLeft: 12 },
   childName: { fontSize: 16, fontWeight: '600', color: '#1F2937' },
-  childEmail: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  childEmail: { fontSize: 13, color: '#6B7280', marginTop: 2 },
   childActions: { flexDirection: 'row', gap: 8, marginTop: 8 },
-  childBtn: { backgroundColor: '#4F46E5', paddingVertical: 6, paddingHorizontal: 14, borderRadius: 6 },
-  childBtnText: { color: '#fff', fontSize: 12, fontWeight: '500' },
-  quickActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  actionBtn: { alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: '#F9FAFB', flex: 1 },
-  actionIcon: { fontSize: 28, marginBottom: 4 },
-  actionLabel: { fontSize: 12, fontWeight: '500', color: '#374151' },
+  childBtn: { backgroundColor: '#fff', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 14, borderWidth: 1, borderColor: '#E5E7EB' },
+  childBtnText: { fontSize: 13, fontWeight: '500', color: '#374151' },
+  empty: { textAlign: 'center', color: '#9CA3AF', paddingVertical: 20 },
+  quickActions: { gap: 8, marginTop: 8 },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: '#F9FAFB', borderRadius: 12, gap: 12 },
+  actionIcon: { fontSize: 24 },
+  actionLabel: { fontSize: 15, fontWeight: '500', color: '#374151' },
 });

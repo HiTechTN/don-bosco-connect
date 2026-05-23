@@ -1,38 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/StatCard';
-import LoadingScreen from '../components/LoadingScreen';
 
 interface Props { navigation: any }
 
-const MOCK_STATS = {
-  users: 9,
-  classes: 3,
-  subjects: 8,
-  events: 5,
-};
+const MOCK_STATS = { users: 9, classes: 3, subjects: 8, events: 5 };
 
 export default function AdminDashboardScreen({ navigation }: Props) {
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [stats] = useState(MOCK_STATS);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const userStr = await AsyncStorage.getItem('user');
-      if (userStr) setUser(JSON.parse(userStr));
-      setLoading(false);
-    })();
-  }, []);
-
-  const handleLogout = async () => {
-    await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
-
-  if (loading) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -41,8 +19,12 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           <Text style={styles.greeting}>Bonjour, {user?.first_name}</Text>
           <Text style={styles.role}>Administrateur</Text>
         </View>
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logout}>Déconnexion</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {(user?.first_name || 'A')[0]}{(user?.last_name || 'P')[0]}
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -80,7 +62,8 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
   greeting: { fontSize: 20, fontWeight: '700', color: '#1F2937' },
   role: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  logout: { color: '#EF4444', fontSize: 14, fontWeight: '500' },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#4F46E5', justifyContent: 'center', alignItems: 'center' },
+  avatarText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   content: { flex: 1, padding: 16 },
   statsRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },
   stat: { flex: 1 },
