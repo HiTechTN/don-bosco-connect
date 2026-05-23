@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/github/actions/workflow/status/HiTechTN/don-bosco-connect/ci.yml?branch=main&style=flat-square&label=CI&color=c96442" alt="CI"/>
   <img src="https://img.shields.io/github/actions/workflow/status/HiTechTN/don-bosco-connect/deploy-pages.yml?branch=main&style=flat-square&label=Pages&color=c96442" alt="Pages"/>
   <img src="https://img.shields.io/github/actions/workflow/status/HiTechTN/don-bosco-connect/publish.yml?branch=main&style=flat-square&label=Docker&color=c96442" alt="Docker"/>
+  <img src="https://img.shields.io/github/actions/workflow/status/HiTechTN/don-bosco-connect/build.yml?branch=main&style=flat-square&label=Build&color=7C3AED" alt="Build"/>
   <img src="https://img.shields.io/github/v/release/HiTechTN/don-bosco-connect?style=flat-square&color=7C3AED" alt="Release"/>
   <img src="https://img.shields.io/github/license/HiTechTN/don-bosco-connect?style=flat-square&color=6B7280" alt="License"/>
 </p>
@@ -18,7 +19,8 @@
 <p align="center">
   <a href="https://hitechtn.github.io/don-bosco-connect">🌐 Démo en ligne</a> ·
   <a href="https://github.com/HiTechTN/don-bosco-connect/releases/tag/v1.0.0-mobile-20260519">📱 APK Mobile</a> ·
-  <a href="README.fr.md">🇫🇷 Français</a> ·
+  <a href="CHANGELOG.md">📋 CHANGELOG</a> ·
+  <a href="README.fr.md">🇫🇷 Français</a> &#124;
   <a href="README.ar.md">🇦🇪 العربية</a>
 </p>
 
@@ -83,9 +85,23 @@
 | Technologie | Description |
 |-------------|-------------|
 | **RAG locale** | PDF déposé → indexé → l'IA répond sur le contenu du cours uniquement |
+| **Streaming SSE** | Réponses IA en temps réel via Server-Sent Events |
 | **Quiz adaptatif** | Score selon rapidité + historique → niveau remediation / normal / advanced |
 | **Décrochage prédictif** | Algorithme : absences 35%, niveau 30%, régularité 15% |
 | **Assistant IA** | DeepSeek R1 14B + nomic-embed-text via Ollama |
+| **Cache embeddings** | SHA256 + Redis (TTL 24h) pour vectorisation rapide |
+
+### ⚡ Nouveautés v2.1.0
+
+| Feature | Description |
+|---------|-------------|
+| **TanStack Query** | 15 hooks typés (useAuth, useGrades, useAbsences, useSchedule, etc.) |
+| **SSE streaming** | Réponses IA temps réel via `POST /chat/stream` |
+| **WebSocket Redis** | Pub/Sub pour notifications en temps réel scalables |
+| **Cache Redis** | Embeddings IA (24h) + emplois du temps (1h) |
+| **CI/CD complet** | 5 jobs — ruff, pytest + coverage 50%, tsc, eslint, Docker build, Bandit |
+| **Migration DB** | `0002` — colonnes Absence rendues nullables |
+| **Sécurité** | Secrets auto-générés, `.env.production` purgé de l'historique git |
 
 ### 📱 Application Mobile
 
@@ -102,22 +118,24 @@ React Native / Expo — iOS & Android avec notifications push, biométrie, et mo
 ## 🏗️ Architecture
 
 ```
-                     ┌──────────────────────┐
-                     │  React 18 + Vite      │  ← Web (SPA)
-                     │  React Native (Expo)  │  ← Mobile
-                     └──────────┬───────────┘
-                                │ HTTP / WebSocket
-                     ┌──────────▼───────────┐
-                     │  Nginx 1.25           │  :8080
-                     │  Rate limiting · CSP  │
-                     └──────────┬───────────┘
+                     ┌──────────────────────────┐
+                     │  React 18 + Vite          │  ← Web (SPA)
+                     │  TanStack Query v5        │  ← Hooks API
+                     │  React Native (Expo)      │  ← Mobile
+                     └──────────┬───────────────┘
+                                │ HTTP / WebSocket / SSE
+                     ┌──────────▼───────────────┐
+                     │  Nginx 1.25               │  :8080
+                     │  Rate limiting · CSP      │
+                     └──────────┬───────────────┘
                                 │
-               ┌────────────────┼────────────────┐
-               │                │                │
-     ┌─────────▼──────┐  ┌─────▼──────┐  ┌──────▼──────┐
-     │  FastAPI        │  │  Redis 7   │  │  Celery      │
-     │  SQLAlchemy 2.0 │  │  Cache     │  │  Workers     │
-     │  JWT + MFA      │  │  Queue     │  └─────────────┘
+               ┌────────────────┼──────────────────┐
+               │                │                  │
+     ┌─────────▼──────┐  ┌─────▼──────┐  ┌────────▼───────┐
+     │  FastAPI        │  │  Redis 7   │  │  Celery         │
+     │  SQLAlchemy 2.0 │  │  Cache     │  │  Workers        │
+     │  JWT + MFA      │  │  Pub/Sub   │  └────────────────┘
+     │  SSE Streaming  │  │  Queue     │
      └─────────┬───────┘  └───────────┘
                │
      ┌─────────▼──────────────────────┐  ┌──────────────────────┐
@@ -207,6 +225,7 @@ cd don-bosco-connect
 | `scripts/healthcheck.sh` | Diagnostic des services |
 | `scripts/backup.sh` | Sauvegarde PostgreSQL |
 | `scripts/init_db.py` | Seed des données de démonstration |
+| `scripts/validate.sh` | Validation production (6 étapes) |
 
 ---
 
@@ -244,13 +263,17 @@ don-bosco-connect/
 ├── backend/          # FastAPI · SQLAlchemy · Alembic · Celery
 │   ├── app/api/v1    # Routeurs REST
 │   ├── app/models    # Modèles SQLAlchemy
-│   ├── app/schemas   # Pydantic
-│   └── app/workers   # Tâches Celery
-├── frontend/         # React 18 · Vite · Tailwind · shadcn/ui
+│   ├── app/schemas   # Pydantic v2
+│   ├── app/services  # Business logic
+│   ├── app/workers   # Tâches Celery
+│   └── app/tests     # Tests pytest-asyncio
+├── frontend/         # React 18 · Vite · TanStack Query · Tailwind
 │   └── src/
+│       ├── hooks/    # 15 hooks TanStack Query (SEUL point d'appel API)
 │       ├── pages/    # Tableaux de bord (admin, teacher, student, parent)
 │       ├── components/ # Composants réutilisables
-│       └── lib/      # Mock API, services
+│       ├── types/    # Interfaces TypeScript strictes
+│       └── lib/      # API client, query client, constantes
 ├── mobile/           # React Native / Expo
 │   └── src/
 │       ├── screens/  # 22 écrans
@@ -258,10 +281,11 @@ don-bosco-connect/
 │       └── navigation/
 ├── demo/             # Vidéo · Captures d'écran
 ├── nginx/            # Configuration reverse proxy
-├── scripts/          # Installation · Maintenance
+├── scripts/          # Installation · Maintenance · Validation
 ├── monitoring/       # Prometheus · Grafana
-├── .github/          # Workflows CI/CD
+├── .github/          # Workflows CI/CD (Build, CI, Release, Docker, Pages)
 ├── docker-compose.yml
+├── docker-compose.prod.yml
 └── .env.example
 ```
 
@@ -272,7 +296,10 @@ don-bosco-connect/
 <p align="center">
   <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React"/>
+  <img src="https://img.shields.io/badge/TanStack_Query-FF4154?style=flat-square&logo=reactquery&logoColor=white" alt="TanStack Query"/>
   <img src="https://img.shields.io/badge/React_Native-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React Native"/>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind"/>
   <img src="https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
   <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker"/>
   <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white" alt="Redis"/>
@@ -280,8 +307,6 @@ don-bosco-connect/
   <img src="https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white" alt="Nginx"/>
   <img src="https://img.shields.io/badge/MinIO-C72E49?style=flat-square&logo=minio&logoColor=white" alt="MinIO"/>
   <img src="https://img.shields.io/badge/Ollama-000000?style=flat-square&logo=ollama&logoColor=white" alt="Ollama"/>
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/>
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind"/>
   <img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat-square&logo=prometheus&logoColor=white" alt="Prometheus"/>
   <img src="https://img.shields.io/badge/Grafana-F46800?style=flat-square&logo=grafana&logoColor=white" alt="Grafana"/>
 </p>
