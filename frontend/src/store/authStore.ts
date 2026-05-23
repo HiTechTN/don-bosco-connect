@@ -28,12 +28,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
   login: (accessToken, refreshToken, user) => {
-    sessionStorage.setItem('access_token', accessToken);
-    sessionStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
     set({ user, isAuthenticated: true });
   },
   logout: () => {
-    sessionStorage.clear();
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     set({ user: null, isAuthenticated: false });
     if (logoutCallback) {
       logoutCallback();

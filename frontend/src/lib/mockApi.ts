@@ -421,7 +421,7 @@ interface MockRequest {
 }
 
 function extractToken(req: MockRequest): string {
-  const sessionToken = sessionStorage.getItem('access_token');
+  const sessionToken = localStorage.getItem('access_token');
   if (sessionToken) return sessionToken;
   const authHeader = req.headers?.Authorization || req.headers?.authorization || '';
   const match = authHeader.match(/^Bearer\s+(.+)$/i);

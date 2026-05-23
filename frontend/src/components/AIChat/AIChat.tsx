@@ -29,51 +29,21 @@ export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta quest
     setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
     setStreaming(true);
 
-    const token = sessionStorage.getItem('access_token');
+    const token = localStorage.getItem('access_token');
+
     try {
-      const response = await fetch(`/api/v1/ai/conversations/${cid}/messages`, {
+      const res = await fetch('/api/v1/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ content: userMsg }),
+        body: JSON.stringify({ message: userMsg, context_type: 'general' }),
       });
 
-      if (!response.ok) throw new Error('API error');
-      if (!response.body) throw new Error('No response body');
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let assistantMsg = '';
-
-      setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.token) {
-                assistantMsg += data.token;
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  updated[updated.length - 1] = { role: 'assistant', content: assistantMsg };
-                  return updated;
-                });
-              }
-            } catch { /* skip malformed */ }
-          }
-        }
-      }
+      if (!res.ok) throw new Error('Erreur API');
+      const data = await res.json();
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.response }]);
     } catch {
       setMessages((prev) => [...prev, { role: 'assistant', content: "Erreur de communication avec l'assistant" }]);
     } finally {
