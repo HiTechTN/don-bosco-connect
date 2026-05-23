@@ -53,8 +53,8 @@ export function useAIStream() {
           }
         }
       }
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name !== 'AbortError') {
         setState(s => ({ ...s, isStreaming: false, error: err.message }))
       }
     }

@@ -23,7 +23,10 @@ export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta quest
 
   const sendMsg = async () => {
     if (!input.trim() || streaming) return;
-    const cid = convId || (await createConv.mutateAsync()).id;
+    if (!convId) {
+      const res = await createConv.mutateAsync();
+      setConvId(res.id);
+    }
     const userMsg = input;
     setInput('');
     setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);

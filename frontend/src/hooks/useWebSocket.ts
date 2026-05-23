@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 type WSMessage = {
@@ -11,8 +11,9 @@ export function useWebSocket(userId: string | undefined) {
   const reconnectTimeout = useRef<ReturnType<typeof setTimeout>>()
   const retriesRef = useRef(0)
   const qc = useQueryClient()
+  const connectRef = useRef<() => void>()
 
-  const connect = useCallback(() => {
+  connectRef.current = () => {
     if (!userId) return
     const token = localStorage.getItem('access_token')
     if (!token) return
@@ -37,20 +38,25 @@ export function useWebSocket(userId: string | undefined) {
     ws.current.onclose = () => {
       retriesRef.current += 1
       const delay = Math.min(1000 * 2 ** retriesRef.current, 30000)
-      reconnectTimeout.current = setTimeout(connect, delay)
+      reconnectTimeout.current = setTimeout(connectRef.current!, delay)
     }
 
     ws.current.onerror = () => ws.current?.close()
-  }, [userId, qc])
+  }
 
   useEffect(() => {
     retriesRef.current = 0
-    connect()
+    connectRef.current?.()
     return () => {
       clearTimeout(reconnectTimeout.current)
       ws.current?.close()
     }
-  }, [connect])
+  }, [userId])
 
-  return { disconnect: () => { clearTimeout(reconnectTimeout.current); ws.current?.close() } }
+  const disconnect = () => {
+    clearTimeout(reconnectTimeout.current)
+    ws.current?.close()
+  }
+
+  return { disconnect }
 }
