@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -16,6 +17,7 @@ from app.models.base import (
     User,
     UserRole,
 )
+from app.redis_client import get_redis
 from app.schemas.timetable import TimetableSlotCreate, TimetableSlotResponse, TimetableSlotUpdate
 
 router = APIRouter(prefix="/timetable", tags=["timetable"])
@@ -79,6 +81,15 @@ async def list_timetable(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    cache_key = f"timetable:{class_id or 'all'}:{academic_year_id or 'all'}"
+    try:
+        redis = await get_redis()
+        cached = await redis.get(cache_key)
+        if cached:
+            return json.loads(cached)
+    except Exception:
+        pass
+
     query = select(TimetableSlot)
     if class_id:
         query = query.where(TimetableSlot.class_id == uuid.UUID(class_id))
@@ -86,7 +97,15 @@ async def list_timetable(
         query = query.where(TimetableSlot.academic_year_id == uuid.UUID(academic_year_id))
     result = await db.execute(query.order_by(TimetableSlot.day, TimetableSlot.start_time))
     slots = result.scalars().all()
-    return [TimetableSlotResponse.model_validate(slot) for slot in slots]
+    data = [TimetableSlotResponse.model_validate(slot).model_dump(mode="json") for slot in slots]
+
+    try:
+        redis = await get_redis()
+        await redis.setex(cache_key, 3600, json.dumps(data, default=str))
+    except Exception:
+        pass
+
+    return data
 
 
 @router.post("/slots", response_model=TimetableSlotResponse)

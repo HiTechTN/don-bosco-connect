@@ -1,3 +1,4 @@
+import hashlib
 import json
 from collections.abc import AsyncGenerator
 
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models import DocumentChunk
+from app.redis_client import get_redis
 
 SYSTEM_PROMPT = """Tu es le tuteur IA de {subject_name} au collège Don Bosco Tunis.
 Tu aides les élèves à comprendre leur programme de cours.
@@ -23,6 +25,17 @@ RÈGLES STRICTES :
 
 
 async def embed_text(text: str) -> list[float]:
+    text_hash = hashlib.sha256(text.encode()).hexdigest()
+    cache_key = f"embedding:{text_hash}"
+
+    try:
+        redis = await get_redis()
+        cached = await redis.get(cache_key)
+        if cached:
+            return json.loads(cached)
+    except Exception:
+        pass
+
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{settings.OLLAMA_BASE_URL}/api/embeddings",
@@ -30,7 +43,15 @@ async def embed_text(text: str) -> list[float]:
             timeout=30.0,
         )
         resp.raise_for_status()
-        return resp.json()["embedding"]
+        embedding = resp.json()["embedding"]
+
+    try:
+        redis = await get_redis()
+        await redis.setex(cache_key, 86400, json.dumps(embedding))
+    except Exception:
+        pass
+
+    return embedding
 
 
 async def search_similar_chunks(
