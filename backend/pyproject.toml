@@ -21,3 +21,8 @@ asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["app"]
+omit = ["app/migrations/*", "tests/*"]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true

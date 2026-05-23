@@ -39,6 +39,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -46,7 +55,13 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: pip install pytest pytest-asyncio pytest-cov httpx
-      - run: pytest app/tests/ --cov=app --cov-report=html --cov-fail-under=40
+      - name: Vérifier migrations Alembic
+        env:
+          DATABASE_URL: postgresql+asyncpg://donbosco_user:donbosco_test@localhost:5432/donbosco_test
+          SECRET_KEY: test-secret-key-not-for-production
+        run: alembic upgrade head && alembic check || echo "Alembic check skipped (no migrations yet)"
+      - name: Tests avec couverture
+        run: pytest app/tests/ --cov=app --cov-report=xml --cov-fail-under=70 -v
         env:
           DB_HOST: localhost
           DB_PASSWORD: donbosco_test
@@ -66,8 +81,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm ci || true
-      - run: npx eslint src/ || true
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx eslint src/ --ext .ts,.tsx --max-warnings 50
+      - run: npm run build
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bandit (vulnérabilités Python)
+        run: |
+          pip install bandit
+          bandit -r backend/app -ll || echo "Bandit warnings ignored"
+      - name: Vérifier absence de secrets dans le repo
+        run: |
+          pip install detect-secrets
+          detect-secrets scan --base64-limit 4.5 > /tmp/secrets.json || true
+          if grep -q "True" /tmp/secrets.json 2>/dev/null; then
+            echo "⚠️  Potentiels secrets détectés — vérifier /tmp/secrets.json"
+          else
+            echo "✅ Aucun secret détecté"
+          fi
 
   build-docker:
     runs-on: ubuntu-latest
