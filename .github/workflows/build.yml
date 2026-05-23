@@ -54,8 +54,7 @@ jobs:
       - name: Vérifier import FastAPI
         run: |
           cd backend
-          pip install -e .
-          python -c "from app.main import app; print('Backend import OK')"
+          PYTHONPATH=. python -c "from app.main import app; print('Backend import OK')"
 
   build-frontend:
     runs-on: ubuntu-latest
