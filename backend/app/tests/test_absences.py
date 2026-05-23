@@ -7,8 +7,8 @@ async def test_create_absence(client: AsyncClient, teacher_token: str) -> None:
     resp = await client.post(
         "/api/v1/absences",
         json={
-            "student_id": "",
-            "class_id": "",
+            "student_id": "00000000-0000-0000-0000-000000000001",
+            "class_id": "00000000-0000-0000-0000-000000000002",
             "type": "absence",
             "date": "2026-05-15",
         },
