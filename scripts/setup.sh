@@ -55,21 +55,31 @@ if [ ! -f .env ]; then
 
     if [ -n "${SECRET_KEY:-}" ]; then
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s/SECRET_KEY=$/SECRET_KEY=$SECRET_KEY/" .env
-            sed -i '' "s/ENCRYPTION_KEY=$/ENCRYPTION_KEY=$ENCRYPTION_KEY/" .env
+            sed -i '' "s/SECRET_KEY=.*/SECRET_KEY=$SECRET_KEY/" .env
+            sed -i '' "s/ENCRYPTION_KEY=.*/ENCRYPTION_KEY=$ENCRYPTION_KEY/" .env
             sed -i '' "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASS/" .env
             sed -i '' "s/REDIS_PASSWORD=.*/REDIS_PASSWORD=$REDIS_PASS/" .env
             sed -i '' "s/MINIO_ROOT_PASSWORD=.*/MINIO_ROOT_PASSWORD=$MINIO_PASS/" .env
             sed -i '' "s/GRAFANA_PASSWORD=.*/GRAFANA_PASSWORD=$GRAFANA_PASS/" .env
         else
-            sed -i "s/SECRET_KEY=$/SECRET_KEY=$SECRET_KEY/" .env
-            sed -i "s/ENCRYPTION_KEY=$/ENCRYPTION_KEY=$ENCRYPTION_KEY/" .env
+            sed -i "s/SECRET_KEY=.*/SECRET_KEY=$SECRET_KEY/" .env
+            sed -i "s/ENCRYPTION_KEY=.*/ENCRYPTION_KEY=$ENCRYPTION_KEY/" .env
             sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASS/" .env
             sed -i "s/REDIS_PASSWORD=.*/REDIS_PASSWORD=$REDIS_PASS/" .env
             sed -i "s/MINIO_ROOT_PASSWORD=.*/MINIO_ROOT_PASSWORD=$MINIO_PASS/" .env
             sed -i "s/GRAFANA_PASSWORD=.*/GRAFANA_PASSWORD=$GRAFANA_PASS/" .env
         fi
         pass_msg "Clés sécurisées générées dans .env"
+        echo ""
+        echo "╔══════════════════════════════════════════════════╗"
+        echo "║  📋 Notez ces valeurs (affichage unique)        ║"
+        echo "║                                                  ║"
+        printf "║  DB_PASSWORD     = %-30s ║\n" "$DB_PASS"
+        printf "║  REDIS_PASSWORD  = %-30s ║\n" "$REDIS_PASS"
+        printf "║  MINIO_ROOT_PASSWORD = %-26s ║\n" "$MINIO_PASS"
+        printf "║  GRAFANA_PASSWORD = %-28s ║\n" "$GRAFANA_PASS"
+        printf "║  SECRET_KEY       = %-30s ║\n" "$SECRET_KEY"
+        echo "╚══════════════════════════════════════════════════╝"
     else
         warn_msg "Ni python3 ni openssl trouvés. Configurez .env manuellement."
     fi

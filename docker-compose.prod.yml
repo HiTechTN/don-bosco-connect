@@ -14,6 +14,22 @@ services:
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  backup:
+    image: prodrigestivill/postgres-backup-local:16
+    restart: unless-stopped
+    volumes:
+      - ./backups:/backups
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=${DB_NAME:-donbosco_db}
+      - POSTGRES_USER=${DB_USER:-donbosco}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - SCHEDULE=${BACKUP_SCHEDULE:-0 2 * * *}
+      - BACKUP_KEEP_DAYS=${BACKUP_RETENTION_DAYS:-30}
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=3
+    depends_on:
+      - db
 volumes:
   certbot-etc:
   certbot-var:
