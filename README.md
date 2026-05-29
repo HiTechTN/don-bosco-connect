@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://hitechtn.github.io/don-bosco-connect">🌐 Démo en ligne</a> ·
-  <a href="[https://github.com/HiTechTN/don-bosco-connect/releases/tag/v1.0.0-mobile-20260519](https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk)">📱 APK Mobile</a> ·
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk">📱 APK Mobile</a> ·
   <a href="CHANGELOG.md">📋 CHANGELOG</a> ·
   <a href="README.fr.md">🇫🇷 Français</a> &#124;
   <a href="README.ar.md">🇦🇪 العربية</a>
@@ -35,7 +35,7 @@
   <a href="https://hitechtn.github.io/don-bosco-connect/demo.html">
     <img src="https://img.shields.io/badge/🎬_Démo_interactive-Vidéo_+_Carousel-c96442?style=for-the-badge" alt="Démo interactive"/>
   </a>
-  <a href="[https://github.com/HiTechTN/don-bosco-connect/releases/tag/v1.0.0-mobile-20260519](https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk)">
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk">
     <img src="https://img.shields.io/badge/📱_APK_Mobile-7C3AED?style=for-the-badge" alt="APK"/>
   </a>
 </p>
@@ -108,7 +108,7 @@
 React Native / Expo — iOS & Android avec notifications push, biométrie, et mode hors-ligne.
 
 <p align="center">
-  <a href="[https://github.com/HiTechTN/don-bosco-connect/releases/tag/v1.0.0-mobile-20260519](https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk)">
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk">
     <img src="https://img.shields.io/badge/📥_Télécharger_l'APK-c96442?style=for-the-badge" alt="APK Download"/>
   </a>
 </p>
