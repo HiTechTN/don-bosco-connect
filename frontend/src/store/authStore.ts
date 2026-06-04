@@ -13,7 +13,7 @@ export interface User {
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  login: (accessToken: string, refreshToken: string, user: User) => void;
+  login: (user: User) => void;
   logout: () => void;
   setUser: (user: User) => void;
 }
@@ -27,14 +27,16 @@ export const setLogoutCallback = (callback: () => void) => {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  login: (accessToken, refreshToken, user) => {
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
+  login: (user) => {
+    // Tokens are now stored in HttpOnly cookies set by the server
     set({ user, isAuthenticated: true });
   },
   logout: () => {
+    // Clear any legacy localStorage tokens
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    // Server-side: call /auth/logout to clear HttpOnly cookies
+    fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
     set({ user: null, isAuthenticated: false });
     if (logoutCallback) {
       logoutCallback();

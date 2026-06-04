@@ -7,11 +7,6 @@ interface LoginRequest {
   password: string
 }
 
-interface TokenResponse {
-  access_token: string
-  refresh_token: string
-}
-
 export const authKeys = {
   me: ['auth', 'me'] as const,
 }
@@ -20,7 +15,7 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: authKeys.me,
     queryFn: () => api.get<User>('/auth/me'),
-    enabled: !!localStorage.getItem('access_token'),
+    retry: false, // Don't retry if not authenticated (cookie missing)
   })
 }
 
@@ -28,10 +23,9 @@ export function useLogin() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: LoginRequest) =>
-      api.post<TokenResponse>('/auth/login', data),
-    onSuccess: (data) => {
-      localStorage.setItem('access_token', data.access_token)
-      localStorage.setItem('refresh_token', data.refresh_token)
+      api.post<{ user: User }>('/auth/login', data),
+    onSuccess: () => {
+      // Server sets HttpOnly cookies; invalidate to refetch user
       qc.invalidateQueries({ queryKey: authKeys.me })
     },
   })
@@ -42,8 +36,6 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => api.post('/auth/logout', {}),
     onSettled: () => {
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
       qc.clear()
       window.location.href = '/login'
     },

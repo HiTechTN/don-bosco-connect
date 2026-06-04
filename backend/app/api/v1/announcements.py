@@ -1,0 +1,192 @@
+"""Admin announcement endpoints (RBAC admin only)."""
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_current_user
+from app.core.permissions import require_roles
+from app.database import get_db
+from app.models.base import User, UserRole
+from app.services.announcement_service import AnnouncementService
+
+router = APIRouter(tags=["announcements"])
+
+
+@router.get("/announcements")
+async def list_announcements(
+    status: str | None = None,
+    category: str | None = None,
+    q: str | None = None,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.admin])),
+):
+    """List all announcements (draft+published+archived). Admin only."""
+    return await AnnouncementService.list_admin(db, page, per_page, status, category, q)
+
+
+@router.get("/announcements/{announcement_id}")
+async def get_announcement(
+    announcement_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.admin])),
+):
+    """Get announcement details. Admin only."""
+    ann = await AnnouncementService.get_by_id(db, announcement_id)
+    if not ann:
+        raise HTTPException(status_code=404, detail="Annonce non trouvée")
+    from app.services.announcement_service import AnnouncementResponse_dict, _get_reactions_aggregate
+
+    data = AnnouncementResponse_dict(ann)
+    data["reactions"] = await _get_reactions_aggregate(db, ann.id)
+    return data
+
+
+@router.post("/announcements", status_code=201)
+async def create_announcement(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.admin])),
+):
+    """Create a new announcement (draft by default)."""
+    ann = await AnnouncementService.create(db, data, str(current_user.id))
+    from app.services.announcement_service import AnnouncementResponse_dict
+
+    return AnnouncementResponse_dict(ann)
+
+
+@router.patch("/announcements/{announcement_id}")
+async def update_announcement(
+    announcement_id: str,
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.admin])),
+):
+    """Update an announcement."""
+    ann = await AnnouncementService.update(db, announcement_id, data)
+    if not ann:
+        raise HTTPException(status_code=404, detail="Annonce non trouvée")
+    from app.services.announcement_service import AnnouncementResponse_dict
+
+    return AnnouncementResponse_dict(ann)
+
+
+@router.post("/announcements/{announcement_id}/publish")
+async def publish_announcement(
+    announcement_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.admin])),
+):
+    """Publish an announcement (status → published)."""
+    ann = await AnnouncementService.publish(db, announcement_id)
+    if not ann:
+        raise HTTPException(status_code=404, detail="Annonce non trouvée")
+    from app.services.announcement_service import AnnouncementResponse_dict
+
+    return AnnouncementResponse_dict(ann)
+
+
+@router.post("/announcements/{announcement_id}/archive")
+async def archive_announcement(
+    announcement_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.admin])),
+):
+    """Archive an announcement."""
+    ann = await AnnouncementService.archive(db, announcement_id)
+    if not ann:
+        raise HTTPException(status_code=404, detail="Annonce non trouvée")
+    from app.services.announcement_service import AnnouncementResponse_dict
+
+    return AnnouncementResponse_dict(ann)
+
+
+@router.delete("/announcements/{announcement_id}", status_code=204)
+async def delete_announcement(
+    announcement_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.admin])),
+) -> None:
+    """Delete an announcement (hard delete)."""
+    ok = await AnnouncementService.delete(db, announcement_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Annonce non trouvée")
+
+
+@router.post("/announcements/{announcement_id}/reactions")
+async def add_reaction(
+    announcement_id: str,
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Add a reaction emoji to an announcement."""
+    from app.models.announcement import AnnouncementReaction
+    import uuid as _uuid
+
+    emoji = data.get("emoji", "")
+    if not emoji:
+        raise HTTPException(status_code=400, detail="Emoji requis")
+
+    # Check if reaction already exists
+    from sqlalchemy import select
+
+    existing = await db.execute(
+        select(AnnouncementReaction).where(
+            AnnouncementReaction.announcement_id == announcement_id,
+            AnnouncementReaction.user_id == current_user.id,
+            AnnouncementReaction.emoji == emoji,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Réaction déjà ajoutée")
+
+    reaction = AnnouncementReaction(
+        id=_uuid.uuid4(),
+        announcement_id=announcement_id,
+        user_id=current_user.id,
+        emoji=emoji,
+    )
+    db.add(reaction)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.get("/announcements/{announcement_id}/reactions")
+async def get_reactions(
+    announcement_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get aggregated reactions for an announcement."""
+    from app.services.announcement_service import _get_reactions_aggregate
+
+    return await _get_reactions_aggregate(db, announcement_id)
+
+
+@router.delete("/announcements/{announcement_id}/reactions/{emoji}")
+async def remove_reaction(
+    announcement_id: str,
+    emoji: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Remove a specific reaction from the current user."""
+    from sqlalchemy import delete, select
+    from app.models.announcement import AnnouncementReaction
+
+    result = await db.execute(
+        select(AnnouncementReaction).where(
+            AnnouncementReaction.announcement_id == announcement_id,
+            AnnouncementReaction.user_id == current_user.id,
+            AnnouncementReaction.emoji == emoji,
+        )
+    )
+    reaction = result.scalar_one_or_none()
+    if not reaction:
+        raise HTTPException(status_code=404, detail="Réaction non trouvée")
+
+    await db.delete(reaction)
+    await db.commit()
+    return {"ok": True}

@@ -9,8 +9,10 @@ from app.api.v1.classes import class_router, enrollment_delete_router, enrollmen
 from app.api.v1.classes import router as classes_router
 from app.api.v1.courses import router as courses_router
 from app.api.v1.evaluations import router as evaluations_router
+from app.api.v1.announcements import router as announcements_router
 from app.api.v1.events import router as events_router
 from app.api.v1.gamification import router as gamification_router
+from app.api.v1.public import router as public_router
 from app.api.v1.messages import router as messages_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.reports import router as reports_router
@@ -39,4 +41,6 @@ v1_router.include_router(reports_router)
 v1_router.include_router(ai_router)
 v1_router.include_router(gamification_router)
 v1_router.include_router(events_router)
+v1_router.include_router(public_router)
+v1_router.include_router(announcements_router)
 # WebSocket router is included directly in main.py (no prefix)

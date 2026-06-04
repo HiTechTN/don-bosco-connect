@@ -1,13 +1,28 @@
 from contextlib import asynccontextmanager
-from datetime import UTC
+from datetime import timezone
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from prometheus_client import Counter, Histogram
 
 from app.api.v1.router import v1_router
 from app.api.v1.websocket import router as websocket_router
 from app.config import settings
+
+# ── Prometheus custom metrics for announcements ──────────────
+announcements_published_total = Counter(
+    'announcements_published_total', 'Annonces publiées',
+    ['category', 'visibility']
+)
+announcements_views_total = Counter(
+    'announcements_views_total', 'Vues annonces',
+    ['slug']
+)
+public_api_latency = Histogram(
+    'public_api_request_duration_seconds', 'Latence API publique',
+    ['endpoint']
+)
 
 
 @asynccontextmanager
@@ -72,6 +87,6 @@ async def health():
             "redis": "ok" if redis_ok else "error",
             "minio": "ok" if minio_ok else "error",
             "ollama": "ok" if ollama_ok else "error",
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         },
     )

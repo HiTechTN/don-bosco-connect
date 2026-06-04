@@ -22,33 +22,45 @@ export function useWebSocket(userId: string | undefined) {
     const connect = () => {
       const uid = userIdRef.current
       if (!uid) return
-      const token = localStorage.getItem('access_token')
-      if (!token) return
 
-      const wsUrl = `${import.meta.env.VITE_WS_URL ?? 'ws://localhost:8080/ws'}/v1/notifications?token=${token}`
-      ws.current = new WebSocket(wsUrl)
+      const wsUrl = `${import.meta.env.VITE_WS_URL ?? 'ws://localhost:8080/ws'}/v1/notifications`
 
-      ws.current.onmessage = (event) => {
-        let msg: WSMessage
-        try {
-          msg = JSON.parse(event.data)
-        } catch {
-          return
-        }
-        if (msg.type === 'ping') return
+      // Verify cookie-based auth is valid before connecting WS
+      fetch('/api/v1/auth/me', { credentials: 'include' })
+        .then(res => {
+          if (!res.ok) throw new Error('Not authenticated')
+          return res.json()
+        })
+        .then(() => {
+          // Auth valid — connect WebSocket with userId
+          const socket = new WebSocket(`${wsUrl}?user_id=${uid}`)
+          ws.current = socket
 
-        if (msg.type === 'grade') qc.invalidateQueries({ queryKey: ['grades'] })
-        if (msg.type === 'absence') qc.invalidateQueries({ queryKey: ['absences'] })
-        if (msg.type === 'message') qc.invalidateQueries({ queryKey: ['messages'] })
-      }
+          socket.onmessage = (event) => {
+            let msg: WSMessage
+            try {
+              msg = JSON.parse(event.data)
+            } catch {
+              return
+            }
+            if (msg.type === 'ping') return
 
-      ws.current.onclose = () => {
-        retriesRef.current += 1
-        const delay = Math.min(1000 * 2 ** retriesRef.current, 30000)
-        reconnectTimeout.current = setTimeout(connect, delay)
-      }
+            if (msg.type === 'grade') qc.invalidateQueries({ queryKey: ['grades'] })
+            if (msg.type === 'absence') qc.invalidateQueries({ queryKey: ['absences'] })
+            if (msg.type === 'message') qc.invalidateQueries({ queryKey: ['messages'] })
+          }
 
-      ws.current.onerror = () => ws.current?.close()
+          socket.onclose = () => {
+            retriesRef.current += 1
+            const delay = Math.min(1000 * 2 ** retriesRef.current, 30000)
+            reconnectTimeout.current = setTimeout(connect, delay)
+          }
+
+          socket.onerror = () => socket.close()
+        })
+        .catch(() => {
+          // Not authenticated — don't connect WS
+        })
     }
 
     connect()

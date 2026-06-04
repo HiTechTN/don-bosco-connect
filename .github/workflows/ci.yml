@@ -7,6 +7,22 @@ on:
     branches: [main]
 
 jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check no secrets committed
+        run: |
+          if git log --all -- .env.production | grep -q commit; then
+            echo "ERREUR: .env.production détecté dans l'historique Git!"
+            exit 1
+          fi
+          echo "✅ Pas de .env.production dans l'historique Git"
+      - name: Check .env.production in .gitignore
+        run: |
+          grep -q ".env.production" .gitignore || (echo "ERREUR: .env.production absent du .gitignore" && exit 1)
+          echo "✅ .env.production présent dans .gitignore"
+
   lint-backend:
     runs-on: ubuntu-latest
     defaults:
@@ -54,7 +70,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - run: pip install pytest pytest-asyncio pytest-cov httpx
+      - run: pip install pytest pytest-asyncio pytest-cov httpx anyio
       - name: Vérifier migrations Alembic
         env:
           DB_HOST: localhost

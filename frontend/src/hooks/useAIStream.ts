@@ -19,15 +19,13 @@ export function useAIStream() {
     abortRef.current = new AbortController()
 
     setState({ content: '', isStreaming: true, error: null })
-
-    const token = localStorage.getItem('access_token')
     try {
       const res = await fetch('/api/v1/ai/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ message, context_type: contextType }),
         signal: abortRef.current.signal,
       })

@@ -10,6 +10,7 @@ if (useMock) {
 const api = axios.create({
   baseURL: '/api/v1',
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,  // Send cookies automatically
 });
 
 if (useMock) {
@@ -54,13 +55,8 @@ if (useMock) {
   });
 }
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// For non-mock mode: no Bearer header needed — cookies are sent automatically via withCredentials
+// For mock mode: keep Bearer header for the mock interceptor
 
 api.interceptors.response.use(
   (response) => response,
@@ -69,20 +65,12 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
-        try {
-          const { data } = await axios.post('/api/v1/auth/refresh', { refresh_token: refreshToken });
-          localStorage.setItem('access_token', data.access_token);
-          localStorage.setItem('refresh_token', data.refresh_token);
-          originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-          return api(originalRequest);
-        } catch {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
-        }
-      } else {
+      try {
+        // Refresh via cookie (httpOnly refresh_token cookie is sent automatically)
+        await axios.post('/api/v1/auth/refresh', undefined, { withCredentials: true });
+        return api(originalRequest);
+      } catch {
+        // Refresh failed — redirect to login
         window.location.href = '/login';
       }
     }

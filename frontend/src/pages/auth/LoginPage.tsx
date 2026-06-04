@@ -21,15 +21,16 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      const userRes = await api.get('/users/me', {
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      });
-      login(data.access_token, data.refresh_token, userRes.data);
-      const role = userRes.data.role;
-      if (role === 'admin') navigate('/admin/dashboard');
-      else if (role === 'teacher') navigate('/teacher/dashboard');
-      else if (role === 'student') navigate('/student/dashboard');
-      else if (role === 'parent') navigate('/parent/dashboard');
+      // Server sets HttpOnly cookies; response contains user data
+      const user = data.user;
+      if (user) {
+        login(user);
+        const role = user.role;
+        if (role === 'admin') navigate('/admin/dashboard');
+        else if (role === 'teacher') navigate('/teacher/dashboard');
+        else if (role === 'student') navigate('/student/dashboard');
+        else if (role === 'parent') navigate('/parent/dashboard');
+      }
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail;
       if (errorMessage?.includes('non trouvé')) {

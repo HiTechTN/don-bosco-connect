@@ -32,15 +32,14 @@ export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta quest
     setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
     setStreaming(true);
 
-    const token = localStorage.getItem('access_token');
-
+    // Cookies are sent automatically via credentials: 'include'
     try {
       const res = await fetch('/api/v1/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ message: userMsg, context_type: 'general' }),
       });
 

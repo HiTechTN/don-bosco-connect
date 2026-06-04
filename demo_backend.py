@@ -20,7 +20,7 @@ app = FastAPI(title="Don Bosco Connect - Demo", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://hitechtn.github.io", "http://localhost:5173", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -106,7 +106,8 @@ def create_access_token(user_id: str, role: str):
 
 def create_refresh_token(user_id: str):
     token_raw = str(uuid.uuid4()) + str(uuid.uuid4())
-    token_hash = str(hash(token_raw))
+    import hashlib
+token_hash = hashlib.sha256(token_raw.encode()).hexdigest()
     conn = get_db()
     conn.execute(
         "INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)",
@@ -146,7 +147,18 @@ async def login(body: LoginRequest):
 
 @app.post("/api/v1/auth/refresh")
 async def refresh(body: RefreshRequest):
-    return {"access_token": create_access_token("demo", "admin"), "refresh_token": body.refresh_token}
+    import hashlib
+    token_hash = hashlib.sha256(body.refresh_token.encode()).hexdigest()
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM refresh_tokens WHERE token_hash=? AND revoked_at IS NULL AND expires_at > ?",
+        (token_hash, datetime.now(timezone.utc).isoformat())
+    ).fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=401, detail="Refresh token invalide")
+    access_token = create_access_token(row["user_id"], "student")
+    return {"access_token": access_token, "refresh_token": body.refresh_token}
 
 @app.get("/api/v1/users/me")
 async def get_current_user(authorization: str = Header("")):
@@ -158,10 +170,10 @@ async def get_current_user(authorization: str = Header("")):
     except Exception:
         pass
     conn = get_db()
-    if user_id:
-        user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
-    else:
-        user = conn.execute("SELECT * FROM users LIMIT 1").fetchone()
+    if not user_id:
+        conn.close()
+        raise HTTPException(status_code=401, detail="Token invalide")
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     conn.close()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")

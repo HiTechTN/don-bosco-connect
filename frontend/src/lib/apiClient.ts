@@ -11,22 +11,23 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem('access_token')
+  // No Bearer header needed — cookies are sent automatically via credentials: 'include'
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers })
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+    credentials: 'include',  // Send cookies automatically
+  })
 
   if (res.status === 401) {
     const refreshed = await attemptRefresh()
     if (refreshed) {
       return request<T>(path, options)
     }
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
     window.location.href = '/login'
     throw new ApiError(401, 'Session expirée')
   }
@@ -41,18 +42,13 @@ async function request<T>(
 }
 
 async function attemptRefresh(): Promise<boolean> {
-  const refreshToken = localStorage.getItem('refresh_token')
-  if (!refreshToken) return false
+  // Refresh via cookie — the httpOnly refresh_token cookie is sent automatically
   try {
     const res = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'include',
     })
-    if (!res.ok) return false
-    const data = await res.json()
-    localStorage.setItem('access_token', data.access_token)
-    return true
+    return res.ok
   } catch {
     return false
   }

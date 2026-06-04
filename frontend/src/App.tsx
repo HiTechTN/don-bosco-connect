@@ -4,6 +4,9 @@ import { Layout } from './components/layout/Layout';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import LoginPage from './pages/auth/LoginPage';
 import LandingDemo from './components/LandingDemo';
+import HomePage from './pages/public/HomePage';
+import AnnouncesPage from './pages/public/AnnouncesPage';
+import AnnounceDetailPage from './pages/public/AnnounceDetailPage';
 
 // Admin
 import DashboardPage from './pages/admin/DashboardPage';
@@ -13,6 +16,8 @@ import SubjectsPage from './pages/admin/SubjectsPage';
 import TimetablePage from './pages/admin/TimetablePage';
 import AuditPage from './pages/admin/AuditPage';
 import EventsPage from './pages/admin/EventsPage';
+import AnnouncementsPage from './pages/admin/AnnouncementsPage';
+import AnnouncementEditorPage from './pages/admin/AnnouncementEditorPage';
 
 // Teacher
 import TeacherDashboard from './pages/teacher/DashboardPage';
@@ -47,8 +52,11 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<LandingDemo />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/annonces" element={<AnnouncesPage />} />
+          <Route path="/annonces/:slug" element={<AnnounceDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/demo" element={<LandingDemo />} />
           <Route path="/admin" element={<Layout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
@@ -58,6 +66,9 @@ function App() {
             <Route path="timetable" element={<TimetablePage />} />
             <Route path="audit" element={<AuditPage />} />
             <Route path="events" element={<EventsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="announcements/new" element={<AnnouncementEditorPage />} />
+            <Route path="announcements/edit/:id" element={<AnnouncementEditorPage />} />
           </Route>
           <Route path="/teacher" element={<Layout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
