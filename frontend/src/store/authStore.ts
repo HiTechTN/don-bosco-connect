@@ -28,13 +28,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
   login: (user) => {
-    // Tokens are now stored in HttpOnly cookies set by the server
+    // HttpOnly cookies are set by the server on /auth/login
     set({ user, isAuthenticated: true });
   },
   logout: () => {
-    // Clear any legacy localStorage tokens
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
     // Server-side: call /auth/logout to clear HttpOnly cookies
     fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
     set({ user: null, isAuthenticated: false });
