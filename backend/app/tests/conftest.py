@@ -62,6 +62,44 @@ async def engine():
             pass  # pgvector extension not installed locally
         await conn.run_sync(Base.metadata.create_all)
     yield engine
+    # Teardown: truncate all test-populated tables to prevent
+    # data accumulation across repeated local runs.
+    tables_to_truncate = [
+        "announcements",
+        "grades",
+        "absences",
+        "notifications",
+        "quiz_attempts",
+        "quiz_questions",
+        "quizzes",
+        "evaluations",
+        "audit_logs",
+        "refresh_tokens",
+        "users",
+        "subjects",
+        "classes",
+        "academic_years",
+        "school_events",
+        "timetable_slots",
+        "teacher_subject_assignments",
+        "class_enrollments",
+        "student_parent_links",
+        "student_profiles",
+        "student_badges",
+        "xp_transactions",
+        "badges",
+        "ai_messages",
+        "ai_conversations",
+        "course_files",
+        "document_chunks",
+        "courses",
+        "messages",
+        "thread_participants",
+        "message_threads",
+    ]
+    async with engine.begin() as conn:
+        for table in tables_to_truncate:
+            await conn.execute(text(f"TRUNCATE TABLE {table} CASCADE"))
     await engine.dispose()
 
 
