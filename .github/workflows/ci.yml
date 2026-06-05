@@ -70,7 +70,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - run: pip install "pytest>=8.3,<9" "pytest-asyncio>=0.25" pytest-cov httpx anyio
+      - run: pip install "pytest>=8.3,<9" "pytest-asyncio>=0.25,<0.26" pytest-cov httpx anyio
       - name: Vérifier migrations Alembic
         env:
           DB_HOST: localhost
