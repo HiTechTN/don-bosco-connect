@@ -21,9 +21,10 @@ from app.models.academic import (
     Subject,
 )
 from app.models.announcement import Announcement
+from app.models.enums import UserRole
 from app.models.evaluation import Absence, Evaluation, Grade
 from app.models.messaging import Notification
-from app.models.user import User, UserRole
+from app.models.user import User
 
 # ---------------------------------------------------------------------------
 # Helpers
