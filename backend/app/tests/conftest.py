@@ -151,17 +151,23 @@ async def _create_user(
 
 @pytest_asyncio.fixture
 async def admin_user(db_session: AsyncSession) -> User:
-    return await _create_user(db_session, UserRole.admin, "admin@test.tn")
+    return await _create_user(
+        db_session, UserRole.admin, f"admin_{uuid.uuid4().hex[:8]}@test.tn"
+    )
 
 
 @pytest_asyncio.fixture
 async def teacher_user(db_session: AsyncSession) -> User:
-    return await _create_user(db_session, UserRole.teacher, "teacher@test.tn")
+    return await _create_user(
+        db_session, UserRole.teacher, f"teacher_{uuid.uuid4().hex[:8]}@test.tn"
+    )
 
 
 @pytest_asyncio.fixture
 async def student_user(db_session: AsyncSession) -> User:
-    return await _create_user(db_session, UserRole.student, "student@test.tn")
+    return await _create_user(
+        db_session, UserRole.student, f"student_{uuid.uuid4().hex[:8]}@test.tn"
+    )
 
 
 # ---------------------------------------------------------------------------
