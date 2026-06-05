@@ -1,8 +1,6 @@
-import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
 async def test_create_evaluation(client: AsyncClient, teacher_token: str) -> None:
     resp = await client.post(
         "/api/v1/evaluations",
@@ -18,7 +16,6 @@ async def test_create_evaluation(client: AsyncClient, teacher_token: str) -> Non
     assert resp.status_code in (201, 422)
 
 
-@pytest.mark.asyncio
 async def test_list_evaluations(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/evaluations",
@@ -27,7 +24,6 @@ async def test_list_evaluations(client: AsyncClient, student_token: str) -> None
     assert resp.status_code == 200
 
 
-@pytest.mark.asyncio
 async def test_get_evaluation_not_found(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/evaluations/00000000-0000-0000-0000-000000000000",

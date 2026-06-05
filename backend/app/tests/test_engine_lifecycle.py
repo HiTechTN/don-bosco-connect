@@ -10,7 +10,6 @@ it silently corrupts test outcomes or is merely a teardown warning.
 import uuid
 from datetime import date, time
 
-import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -51,7 +50,6 @@ def _user(**overrides: object) -> User:
 # 1. Bulk insert — stress the connection pool
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_bulk_insert_users(db_session: AsyncSession) -> None:
     """Insert 50 users in one transaction, then read them back."""
     users = [_user(email=f"bulk{i}@test.tn") for i in range(50)]
@@ -67,7 +65,6 @@ async def test_bulk_insert_users(db_session: AsyncSession) -> None:
 # 2. Multi-table inserts per test
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_multi_table_insert(db_session: AsyncSession) -> None:
     """Create a user, an academic year, a class, and a subject in one test."""
     teacher = _user(role=UserRole.teacher, email="multi_teacher@test.tn")
@@ -102,7 +99,6 @@ async def test_multi_table_insert(db_session: AsyncSession) -> None:
 # 3. CRUD cycle — insert → update → delete
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_crud_announcement(db_session: AsyncSession) -> None:
     """Full CRUD cycle on announcements."""
     admin = _user(role=UserRole.admin, email="crud_admin@test.tn")
@@ -148,7 +144,6 @@ async def test_crud_announcement(db_session: AsyncSession) -> None:
 # 4. Multiple independent transactions
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_sequential_transactions(db_session: AsyncSession) -> None:
     """Run 10 independent commits to stress the connection pool."""
     for i in range(10):
@@ -166,7 +161,6 @@ async def test_sequential_transactions(db_session: AsyncSession) -> None:
 # 5. Mixed operations across tables
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_evaluation_with_grades(db_session: AsyncSession) -> None:
     """Create an evaluation and attach multiple grades."""
     teacher = _user(role=UserRole.teacher, email="eval_teacher@test.tn")
@@ -203,7 +197,6 @@ async def test_evaluation_with_grades(db_session: AsyncSession) -> None:
 # 6. Absences batch insert
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_absences_batch(db_session: AsyncSession) -> None:
     """Create 20 absence records to test batch operations."""
     student = _user(role=UserRole.student, email="abs_student@test.tn")
@@ -234,7 +227,6 @@ async def test_absences_batch(db_session: AsyncSession) -> None:
 # 7. Notifications CRUD
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_notifications_crud(db_session: AsyncSession) -> None:
     """Create, read, update, and delete notifications."""
     user = _user(role=UserRole.student, email="notif_student@test.tn")
@@ -269,7 +261,6 @@ async def test_notifications_crud(db_session: AsyncSession) -> None:
 # 8. Concurrent-like rapid commits
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_rapid_fire_commits(db_session: AsyncSession) -> None:
     """25 rapid sequential commits to stress event loop and connection pool."""
     for i in range(25):
@@ -294,7 +285,6 @@ async def test_rapid_fire_commits(db_session: AsyncSession) -> None:
 # 9. Read-heavy test (many SELECTs on different tables)
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_heavy_reads(db_session: AsyncSession) -> None:
     """Perform many SELECT queries across different tables."""
     for _ in range(10):
@@ -312,7 +302,6 @@ async def test_heavy_reads(db_session: AsyncSession) -> None:
 # 10. Large record with JSON payload
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_large_json_payload(db_session: AsyncSession) -> None:
     """Insert an announcement with a large content_json payload."""
     big_payload = {
@@ -341,7 +330,6 @@ async def test_large_json_payload(db_session: AsyncSession) -> None:
 # 11. Cross-table foreign key operations
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_cascade_relationships(db_session: AsyncSession) -> None:
     """Create related records across multiple tables and verify they coexist."""
     teacher = _user(role=UserRole.teacher, email="cascade_teacher@test.tn")
@@ -381,7 +369,6 @@ async def test_cascade_relationships(db_session: AsyncSession) -> None:
 # 12. Stress test: 100 records across two tables
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
 async def test_stress_two_tables(db_session: AsyncSession) -> None:
     """Insert 50 users + 50 announcements in rapid succession."""
     users = [_user(email=f"stress_u{i}@test.tn") for i in range(50)]

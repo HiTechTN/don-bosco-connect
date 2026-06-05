@@ -1,8 +1,6 @@
-import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
 async def test_create_conversation(client: AsyncClient, student_token: str) -> None:
     resp = await client.post(
         "/api/v1/ai/conversations",
@@ -12,7 +10,6 @@ async def test_create_conversation(client: AsyncClient, student_token: str) -> N
     assert resp.status_code == 201
 
 
-@pytest.mark.asyncio
 async def test_list_conversations(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/ai/conversations",
@@ -21,7 +18,6 @@ async def test_list_conversations(client: AsyncClient, student_token: str) -> No
     assert resp.status_code == 200
 
 
-@pytest.mark.asyncio
 async def test_get_conversation_not_found(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/ai/conversations/00000000-0000-0000-0000-000000000000",
@@ -30,7 +26,6 @@ async def test_get_conversation_not_found(client: AsyncClient, student_token: st
     assert resp.status_code == 404
 
 
-@pytest.mark.asyncio
 async def test_quiz_generate_requires_auth(client: AsyncClient) -> None:
     resp = await client.post(
         "/api/v1/ai/quiz/generate",
@@ -39,7 +34,6 @@ async def test_quiz_generate_requires_auth(client: AsyncClient) -> None:
     assert resp.status_code == 403
 
 
-@pytest.mark.asyncio
 async def test_list_quizzes(client: AsyncClient, student_token: str) -> None:
     resp = await client.get(
         "/api/v1/ai/quizzes",

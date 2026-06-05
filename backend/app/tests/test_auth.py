@@ -1,7 +1,3 @@
-import pytest
-
-
-@pytest.mark.asyncio
 async def test_health_check(client) -> None:
     response = await client.get("/health")
     assert response.status_code in (200, 503)

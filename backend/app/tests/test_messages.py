@@ -1,8 +1,6 @@
-import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
 async def test_create_thread(client: AsyncClient, admin_token: str) -> None:
     resp = await client.post(
         "/api/v1/messages/threads",
@@ -12,7 +10,6 @@ async def test_create_thread(client: AsyncClient, admin_token: str) -> None:
     assert resp.status_code == 201
 
 
-@pytest.mark.asyncio
 async def test_list_threads(client: AsyncClient, admin_token: str) -> None:
     resp = await client.get(
         "/api/v1/messages/threads",
