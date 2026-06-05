@@ -310,9 +310,9 @@
   "announce_detail": {
     "back": "Retour aux annonces",
     "not_found": "Annonce non trouvée",
-    "views": "{count} vue",
-    "views_plural": "{count} vues",
-    "reading_time": "{min} min de lecture",
+    "views": "{{count}} vue",
+    "views_plural": "{{count}} vues",
+    "reading_time": "{{min}} min de lecture",
     "share": "Partager",
     "reactions": "Réactions"
   },

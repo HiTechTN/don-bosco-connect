@@ -33,8 +33,8 @@ export const AvecImage: Story = {
     title: 'Rentrée scolaire 2026-2027',
     excerpt: 'Informations pratiques pour la rentrée à venir. Les cours débutent le 1er septembre.',
     category: 'academique',
-    coverImageUrl: 'https://picsum.photos/seed/renintree/800/400',
-    publishAt: '2026-06-01T10:00:00Z',
+    cover_image_url: 'https://picsum.photos/seed/renintree/800/400',
+    publish_at: '2026-06-01T10:00:00Z',
     slug: 'rentree-scolaire-2026-2027',
     pinned: false,
     reactions: null,
@@ -48,8 +48,8 @@ export const Epinglee: Story = {
     title: 'Rentrée scolaire 2026-2027',
     excerpt: 'Informations pratiques pour la rentrée à venir.',
     category: 'academique',
-    coverImageUrl: 'https://picsum.photos/seed/epinglee/800/400',
-    publishAt: '2026-06-01T10:00:00Z',
+    cover_image_url: 'https://picsum.photos/seed/epinglee/800/400',
+    publish_at: '2026-06-01T10:00:00Z',
     slug: 'rentree-scolaire-2026-2027',
     pinned: true,
     reactions: { '👍': 24, '🎉': 8 },
@@ -63,8 +63,8 @@ export const SansImage: Story = {
     title: 'Nouveau règlement intérieur',
     excerpt: 'Le règlement intérieur a été mis à jour pour l\'année en cours.',
     category: 'general',
-    coverImageUrl: null,
-    publishAt: '2026-05-15T14:00:00Z',
+    cover_image_url: null,
+    publish_at: '2026-05-15T14:00:00Z',
     slug: 'nouveau-reglement-interieur',
     pinned: false,
     reactions: null,
@@ -78,8 +78,8 @@ export const SansExtrait: Story = {
     title: 'Annonce courte sans description',
     excerpt: null,
     category: 'vie_scolaire',
-    coverImageUrl: null,
-    publishAt: '2026-05-10T09:00:00Z',
+    cover_image_url: null,
+    publish_at: '2026-05-10T09:00:00Z',
     slug: 'annonce-courte',
     pinned: false,
     reactions: null,
@@ -93,8 +93,8 @@ export const AvecReactions: Story = {
     title: 'Journée portes ouvertes',
     excerpt: 'Venez découvrir notre établissement ce samedi de 9h à 16h.',
     category: 'evenement',
-    coverImageUrl: 'https://picsum.photos/seed/portes/800/400',
-    publishAt: '2026-05-20T08:00:00Z',
+    cover_image_url: 'https://picsum.photos/seed/portes/800/400',
+    publish_at: '2026-05-20T08:00:00Z',
     slug: 'journee-portes-ouvertes',
     pinned: false,
     reactions: { '❤️': 12, '👏': 5, '🎉': 3 },
@@ -108,8 +108,8 @@ export const Pedagogique: Story = {
     title: 'Nouveau programme de mathématiques',
     excerpt: 'Découvrez le nouveau programme de maths pour le secondaire.',
     category: 'pedagogique',
-    coverImageUrl: null,
-    publishAt: '2026-04-15T11:00:00Z',
+    cover_image_url: null,
+    publish_at: '2026-04-15T11:00:00Z',
     slug: 'nouveau-programme-maths',
     pinned: false,
     reactions: null,
@@ -125,8 +125,8 @@ export const Grille: Story = {
         title="Rentrée scolaire 2026-2027"
         excerpt="Informations pratiques pour la rentrée à venir."
         category="academique"
-        coverImageUrl="https://picsum.photos/seed/rentree/800/400"
-        publishAt="2026-06-01T10:00:00Z"
+        cover_image_url="https://picsum.photos/seed/rentree/800/400"
+        publish_at="2026-06-01T10:00:00Z"
         slug="rentree"
         pinned
       />
@@ -134,8 +134,8 @@ export const Grille: Story = {
         title="Journée portes ouvertes"
         excerpt="Venez découvrir notre établissement."
         category="evenement"
-        coverImageUrl={null}
-        publishAt="2026-05-20T08:00:00Z"
+        cover_image_url={null}
+        publish_at="2026-05-20T08:00:00Z"
         slug="portes-ouvertes"
         reactions={{ '❤️': 12 }}
       />
@@ -143,8 +143,8 @@ export const Grille: Story = {
         title="Nouveau règlement intérieur"
         excerpt="Le règlement a été mis à jour pour l'année en cours."
         category="general"
-        coverImageUrl="https://picsum.photos/seed/reglement/800/400"
-        publishAt="2026-05-15T14:00:00Z"
+        cover_image_url="https://picsum.photos/seed/reglement/800/400"
+        publish_at="2026-05-15T14:00:00Z"
         slug="reglement"
       />
     </div>

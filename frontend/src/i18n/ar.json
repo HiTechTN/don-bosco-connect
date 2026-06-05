@@ -310,9 +310,9 @@
   "announce_detail": {
     "back": "العودة إلى الإعلانات",
     "not_found": "لم يتم العثور على الإعلان",
-    "views": "{count} مشاهدة",
-    "views_plural": "{count} مشاهدات",
-    "reading_time": "{min} دقيقة قراءة",
+    "views": "{{count}} مشاهدة",
+    "views_plural": "{{count}} مشاهدات",
+    "reading_time": "{{min}} دقيقة قراءة",
     "share": "مشاركة",
     "reactions": "ردود الفعل"
   },

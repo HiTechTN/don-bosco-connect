@@ -7,8 +7,8 @@ interface AnnouncementCardProps {
   title: string;
   excerpt: string | null;
   category: string;
-  coverImageUrl?: string | null;
-  publishAt: string | null;
+  cover_image_url?: string | null;
+  publish_at: string | null;
   slug: string;
   pinned?: boolean;
   reactions?: Record<string, number> | null;
@@ -26,8 +26,8 @@ export function AnnouncementCard({
   title,
   excerpt,
   category,
-  coverImageUrl,
-  publishAt,
+  cover_image_url,
+  publish_at,
   slug,
   pinned,
   reactions,
@@ -46,10 +46,10 @@ export function AnnouncementCard({
       className="group block bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
     >
       {/* Cover Image */}
-      {coverImageUrl ? (
+      {cover_image_url ? (
         <div className="relative h-48 overflow-hidden">
           <img
-            src={coverImageUrl}
+            src={cover_image_url}
             alt={title}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -81,8 +81,8 @@ export function AnnouncementCard({
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${catStyle.bg} ${catStyle.text}`} dir="ltr">
             {category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')}
           </span>
-          {publishAt && (
-            <span className="text-xs text-[#64748B]" dir="ltr">{formatDate(publishAt, i18n.language)}</span>
+          {publish_at && (
+            <span className="text-xs text-[#64748B]" dir="ltr">{formatDate(publish_at, i18n.language)}</span>
           )}
         </div>
 
