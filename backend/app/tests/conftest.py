@@ -15,7 +15,7 @@ from app.models.base import User, UserRole
 TEST_DATABASE_URL = settings.DATABASE_URL
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def engine():
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     async with engine.begin() as conn:
@@ -25,19 +25,20 @@ async def engine():
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
-    except RuntimeError:
-        pass  # Event loop already closed during teardown
-    await engine.dispose()
+        await engine.dispose()
+    except RuntimeError as exc:
+        if "Event loop is closed" not in str(exc):
+            raise  # Only swallow event-loop teardown errors
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
     session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with session_factory() as session:
         yield session
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     async def override_get_db():
         yield db_session
@@ -63,31 +64,31 @@ async def _create_user(db_session: AsyncSession, role: UserRole, email: str) -> 
     return user
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def admin_user(db_session: AsyncSession) -> User:
     return await _create_user(db_session, UserRole.admin, "admin@test.tn")
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def teacher_user(db_session: AsyncSession) -> User:
     return await _create_user(db_session, UserRole.teacher, "teacher@test.tn")
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def student_user(db_session: AsyncSession) -> User:
     return await _create_user(db_session, UserRole.student, "student@test.tn")
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def admin_token(admin_user: User) -> str:
     return create_access_token(user_id=str(admin_user.id), role=admin_user.role)
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def teacher_token(teacher_user: User) -> str:
     return create_access_token(user_id=str(teacher_user.id), role=teacher_user.role)
 
 
-@pytest_asyncio.fixture(loop_scope="function")
+@pytest_asyncio.fixture
 async def student_token(student_user: User) -> str:
     return create_access_token(user_id=str(student_user.id), role=student_user.role)
