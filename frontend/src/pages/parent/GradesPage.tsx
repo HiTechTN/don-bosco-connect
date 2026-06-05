@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
-import { useAuthStore } from '../../store/authStore';
 import { GraduationCap } from 'lucide-react';
 
 export default function ParentGrades() {
-  const [, setSelectedStudent] = useState<string | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
 
   const { data: children } = useQuery({
     queryKey: ['my-children'],

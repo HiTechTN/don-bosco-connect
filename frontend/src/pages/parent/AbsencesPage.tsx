@@ -6,7 +6,7 @@ import api from '../../lib/api';
 import { GraduationCap, Filter } from 'lucide-react';
 
 export default function ParentAbsences() {
-  const [, setSelectedStudent] = useState<string | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
 
   const { data: children } = useQuery({
