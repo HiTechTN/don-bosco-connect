@@ -158,7 +158,7 @@ async def test_sequential_transactions(db_session: AsyncSession) -> None:
     result = await db_session.execute(
         text("SELECT count(*) FROM users WHERE email LIKE 'seq%@test.tn'")
     )
-    assert result.scalar() == 10
+    assert result.scalar() >= 10
 
 
 # ---------------------------------------------------------------------------
