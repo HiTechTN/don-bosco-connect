@@ -1,11 +1,12 @@
 """Shared fixtures for backend tests.
 
 Root-cause fix for pytest-asyncio 0.24 "Event loop is closed" error:
-Override the ``event_loop`` fixture at **session** scope so that every test
-and every async fixture shares a single loop that stays alive for the entire
-test session.  The engine is also session-scoped (tables created once,
-disposed once).  ``db_session`` is function-scoped — each test gets a fresh
-session backed by a connection from the pool.
+Use ``pytest_collection_modifyitems`` to mark every async test with
+``loop_scope="session"`` so all tests and session-scoped fixtures share a
+single event loop that stays alive for the entire test session.
+
+The engine is session-scoped (tables created once, disposed once).
+``db_session`` is function-scoped — each test gets a fresh session.
 """
 import asyncio
 import uuid
@@ -27,20 +28,19 @@ TEST_DATABASE_URL = settings.DATABASE_URL
 
 
 # ---------------------------------------------------------------------------
-# Session-scoped event loop — single loop for all tests and fixtures
+# Force session-scoped event loop for every async test
 # ---------------------------------------------------------------------------
-@pytest.fixture(scope="session")
-def event_loop():
-    """Session-scoped event loop.
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Mark every async test with ``loop_scope="session"``.
 
-    Overriding the default function-scoped loop prevents the
-    "Event loop is closed" error that occurs when session-scoped
-    fixtures (like ``engine``) try to tear down after the loop
-    has already been closed by a function-scoped loop.
+    This ensures all tests share the same session-scoped event loop,
+    preventing the "Event loop is closed" error that occurs when
+    session-scoped fixtures (like ``engine``) try to tear down after
+    a function-scoped loop has been closed.
     """
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+    for item in items:
+        if asyncio.iscoroutinefunction(item.obj):
+            item.add_marker(pytest.mark.asyncio(loop_scope="session"))
 
 
 # ---------------------------------------------------------------------------
