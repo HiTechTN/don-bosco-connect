@@ -13,6 +13,13 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }], ['list']],
   timeout: 30_000,
 
+  expect: {
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.01,
+      animations: 'disabled',
+    },
+  },
+  snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}{ext}',
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',

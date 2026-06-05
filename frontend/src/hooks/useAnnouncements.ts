@@ -75,7 +75,7 @@ export function usePublicAnnouncements(params?: {
   return useQuery({
     queryKey: announcementKeys.publicList(params),
     queryFn: () =>
-      api.get<AnnouncementListResponse>('/public/announcements', { params }).then(r => r.data),
+      api.get<AnnouncementListResponse>('/public/announcements', { params }),
     staleTime: 60_000,
   })
 }
@@ -84,7 +84,7 @@ export function usePublicAnnouncement(slug: string | undefined) {
   return useQuery({
     queryKey: announcementKeys.publicDetail(slug ?? ''),
     queryFn: () =>
-      api.get<PublicAnnouncement>(`/public/announcements/${slug}`).then(r => r.data),
+      api.get<PublicAnnouncement>(`/public/announcements/${slug}`),
     enabled: !!slug,
   })
 }
@@ -101,7 +101,7 @@ export function useAdminAnnouncements(params?: {
   return useQuery({
     queryKey: announcementKeys.adminList(params),
     queryFn: () =>
-      api.get<AnnouncementListResponse>('/announcements', { params }).then(r => r.data),
+      api.get<AnnouncementListResponse>('/announcements', { params }),
   })
 }
 
@@ -109,7 +109,7 @@ export function useAdminAnnouncement(id: string | undefined, enabled = true) {
   return useQuery({
     queryKey: announcementKeys.adminDetail(id ?? ''),
     queryFn: () =>
-      api.get<AdminAnnouncement>(`/announcements/${id}`).then(r => r.data),
+      api.get<AdminAnnouncement>(`/announcements/${id}`),
     enabled: enabled && !!id,
   })
 }
@@ -120,7 +120,7 @@ export function useCreateAnnouncement() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: AnnouncementCreateInput) =>
-      api.post<AdminAnnouncement>('/announcements', data).then(r => r.data),
+      api.post<AdminAnnouncement>('/announcements', data),
     onSuccess: () => qc.invalidateQueries({ queryKey: announcementKeys.all }),
   })
 }
@@ -129,7 +129,7 @@ export function useUpdateAnnouncement() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, ...data }: Partial<AnnouncementCreateInput> & { id: string }) =>
-      api.patch<AdminAnnouncement>(`/announcements/${id}`, data).then(r => r.data),
+      api.patch<AdminAnnouncement>(`/announcements/${id}`, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: announcementKeys.all }),
   })
 }
@@ -138,7 +138,7 @@ export function usePublishAnnouncement() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) =>
-      api.post<AdminAnnouncement>(`/announcements/${id}/publish`).then(r => r.data),
+      api.post<AdminAnnouncement>(`/announcements/${id}/publish`),
     onSuccess: () => qc.invalidateQueries({ queryKey: announcementKeys.all }),
   })
 }
@@ -147,7 +147,7 @@ export function useArchiveAnnouncement() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) =>
-      api.post<AdminAnnouncement>(`/announcements/${id}/archive`).then(r => r.data),
+      api.post<AdminAnnouncement>(`/announcements/${id}/archive`),
     onSuccess: () => qc.invalidateQueries({ queryKey: announcementKeys.all }),
   })
 }

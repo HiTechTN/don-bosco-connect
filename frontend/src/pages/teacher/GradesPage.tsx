@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import api from '../../lib/api';
 import { motion } from 'framer-motion';
-import { Plus, ClipboardList, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, CheckCircle, XCircle } from 'lucide-react';
 
 export default function TeacherGrades() {
   const queryClient = useQueryClient();

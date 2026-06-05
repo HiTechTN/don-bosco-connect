@@ -1,3 +1,4 @@
+/* eslint-disable storybook/no-renderer-packages */
 import type { Meta, StoryObj } from '@storybook/react';
 import { AnnouncementCard } from '@/components/public/AnnouncementCard';
 

@@ -1,3 +1,4 @@
+/* eslint-disable storybook/no-renderer-packages */
 import type { Meta, StoryObj } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';

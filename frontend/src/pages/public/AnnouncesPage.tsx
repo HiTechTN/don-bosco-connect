@@ -1,18 +1,13 @@
 import { useState } from 'react';
 import { Megaphone, Search } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 import { usePublicAnnouncements, type PublicAnnouncement } from '@/hooks/useAnnouncements';
 import { AnnouncementCard } from '@/components/public/AnnouncementCard';
 
-const CATEGORIES = [
-  { value: '', label: 'Toutes' },
-  { value: 'general', label: 'Général' },
-  { value: 'evenement', label: 'Événement' },
-  { value: 'academique', label: 'Académique' },
-  { value: 'pedagogique', label: 'Pédagogique' },
-  { value: 'vie_scolaire', label: 'Vie scolaire' },
-];
-
 export default function AnnouncesPage() {
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
   const [category, setCategory] = useState('');
   const [search, setSearch] = useState('');
 
@@ -24,17 +19,31 @@ export default function AnnouncesPage() {
 
   const announcements: PublicAnnouncement[] = data?.items ?? [];
 
+  const CATEGORIES = [
+    { value: '', labelKey: 'announces.cat_all' },
+    { value: 'general', labelKey: 'announces.cat_general' },
+    { value: 'evenement', labelKey: 'announces.cat_evenement' },
+    { value: 'academique', labelKey: 'announces.cat_academique' },
+    { value: 'pedagogique', labelKey: 'announces.cat_pedagogique' },
+    { value: 'vie_scolaire', labelKey: 'announces.cat_vie_scolaire' },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC]" dir={isRtl ? 'rtl' : 'ltr'}>
+      <Helmet>
+        <title>{t('announces.title') + ' — ' + t('app.name')}</title>
+        <meta name="description" content={t('announces.desc')} />
+      </Helmet>
+
       {/* Header */}
       <div className="bg-gradient-to-br from-[#1B4F72] to-[#0D2B3E] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-4">
             <Megaphone className="w-8 h-8 text-[#F39C12]" />
-            <h1 className="text-3xl md:text-4xl font-bold">Annonces</h1>
+            <h1 className="text-3xl md:text-4xl font-bold">{t('announces.title')}</h1>
           </div>
           <p className="text-white/70 text-lg">
-            Toutes les actualités et informations de l'établissement
+            {t('announces.desc')}
           </p>
         </div>
       </div>
@@ -43,13 +52,13 @@ export default function AnnouncesPage() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748B]" />
+            <Search className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748B] ${isRtl ? 'right-3' : 'left-3'}`} />
             <input
               type="text"
-              placeholder="Rechercher une annonce..."
+              placeholder={t('announces.search_placeholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E2E8F0] bg-white focus:outline-none focus:ring-2 focus:ring-[#1B4F72]/20 focus:border-[#1B4F72] transition"
+              className={`w-full py-3 rounded-xl border border-[#E2E8F0] bg-white focus:outline-none focus:ring-2 focus:ring-[#1B4F72]/20 focus:border-[#1B4F72] transition ${isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'}`}
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -63,7 +72,7 @@ export default function AnnouncesPage() {
                     : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:border-[#1B4F72] hover:text-[#1B4F72]'
                 }`}
               >
-                {cat.label}
+                {t(cat.labelKey)}
               </button>
             ))}
           </div>
@@ -92,8 +101,8 @@ export default function AnnouncesPage() {
         ) : (
           <div className="text-center py-20 text-[#64748B]">
             <Megaphone className="w-16 h-16 mx-auto mb-4 opacity-30" />
-            <p className="text-xl mb-2">Aucune annonce trouvée</p>
-            <p className="text-sm">Essayez de modifier vos filtres de recherche</p>
+            <p className="text-xl mb-2">{t('announces.no_results')}</p>
+            <p className="text-sm">{t('announces.no_results_desc')}</p>
           </div>
         )}
       </div>

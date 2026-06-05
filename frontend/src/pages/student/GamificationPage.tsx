@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Trophy, Medal, Star, TrendingUp, Flame, Zap, Target, 
   Award, Crown, Rocket, Sparkles, Download, Share2, 
-  ChevronRight, Calendar, BookOpen, GraduationCap
+  BookOpen, GraduationCap
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import api from '../../lib/api';

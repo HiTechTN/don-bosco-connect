@@ -1,14 +1,11 @@
+/* eslint-disable react-hooks/purity */
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Eye, Tag, Share2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePublicAnnouncement } from '@/hooks/useAnnouncements';
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  });
-}
+import { formatDate } from '@/lib/utils';
 
 function readingTime(html: string | null): number {
   if (!html) return 1;
@@ -18,6 +15,8 @@ function readingTime(html: string | null): number {
 
 export default function AnnounceDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
 
   const { data: ann, isLoading, error } = usePublicAnnouncement(slug);
 
@@ -57,11 +56,12 @@ export default function AnnounceDetailPage() {
 
   if (error || !ann) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-[#1E293B] mb-4">Annonce non trouvée</h2>
-          <Link to="/annonces" className="text-[#1B4F72] hover:text-[#F39C12] font-semibold">
-            ← Retour aux annonces
+          <h2 className="text-2xl font-bold text-[#1E293B] mb-4">{t('announce_detail.not_found')}</h2>
+          <Link to="/annonces" className="inline-flex items-center gap-2 text-[#1B4F72] hover:text-[#F39C12] font-semibold">
+            <ArrowLeft className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
+            {t('announce_detail.back')}
           </Link>
         </div>
       </div>
@@ -69,7 +69,17 @@ export default function AnnounceDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC]" dir={isRtl ? 'rtl' : 'ltr'}>
+      <Helmet>
+        <title>{ann.title} — {t('app.name')}</title>
+        <meta name="description" content={ann.excerpt || ann.title} />
+        <meta property="og:title" content={ann.title} />
+        <meta property="og:description" content={ann.excerpt || ann.title} />
+        <meta property="og:type" content="article" />
+        {ann.cover_image_url && <meta property="og:image" content={ann.cover_image_url} />}
+        <link rel="canonical" href={window.location.href} />
+      </Helmet>
+
       {/* Hero Cover */}
       {ann.cover_image_url ? (
         <div className="relative h-64 md:h-96 overflow-hidden">
@@ -105,8 +115,8 @@ export default function AnnounceDetailPage() {
           to="/annonces"
           className="inline-flex items-center gap-2 text-[#1B4F72] hover:text-[#F39C12] font-medium mb-6 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Retour aux annonces
+          <ArrowLeft className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
+          {t('announce_detail.back')}
         </Link>
 
         {/* Meta */}
@@ -118,22 +128,22 @@ export default function AnnounceDetailPage() {
           {ann.publish_at && (
             <span className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              {formatDate(ann.publish_at)}
+              {formatDate(ann.publish_at, i18n.language)}
             </span>
           )}
           <span className="flex items-center gap-1">
             <Eye className="w-4 h-4" />
-            {ann.views_count} vue{ann.views_count > 1 ? 's' : ''}
+            {ann.views_count > 1 ? t('announce_detail.views_plural', { count: ann.views_count }) : t('announce_detail.views', { count: ann.views_count })}
           </span>
           <span className="flex items-center gap-1">
-            📖 {readingTime(ann.content_html)} min de lecture
+            📖 {t('announce_detail.reading_time', { min: readingTime(ann.content_html) })}
           </span>
           <button
             onClick={handleShare}
             className="flex items-center gap-1 hover:text-[#1B4F72] transition-colors ml-auto"
           >
             <Share2 className="w-4 h-4" />
-            Partager
+            {t('announce_detail.share')}
           </button>
         </motion.div>
 
@@ -164,7 +174,7 @@ export default function AnnounceDetailPage() {
         {/* Reactions */}
         {ann.reactions && Object.keys(ann.reactions).length > 0 && (
           <div className="mt-8 bg-white rounded-2xl border border-[#E2E8F0] p-6">
-            <h3 className="text-sm font-semibold text-[#64748B] mb-3">Réactions</h3>
+            <h3 className="text-sm font-semibold text-[#64748B] mb-3">{t('announce_detail.reactions')}</h3>
             <div className="flex flex-wrap gap-3">
               {Object.entries(ann.reactions).map(([emoji, count]) => (
                 <span

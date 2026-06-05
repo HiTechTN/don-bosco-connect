@@ -1,6 +1,7 @@
+ 
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, UserCheck, MessageSquare, GraduationCap, TrendingUp, AlertCircle } from 'lucide-react';
+import { ClipboardList, UserCheck, MessageSquare, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
@@ -31,7 +32,7 @@ export default function ParentDashboard() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
           <h2 className="font-semibold mb-3 flex items-center gap-2"><GraduationCap className="h-5 w-5 text-blue-500" /> Mes enfants</h2>
           <div className="flex gap-3">
-            {children.map((c: any) => (
+            {children.map((c: Record<string, unknown>) => (
               <div key={c.id} className="bg-white px-5 py-3 rounded-xl shadow-sm flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
                   {c.first_name[0]}{c.last_name[0]}

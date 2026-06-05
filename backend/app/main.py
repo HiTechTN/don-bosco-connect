@@ -1,7 +1,8 @@
+import time
 from contextlib import asynccontextmanager
 from datetime import timezone
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import Counter, Histogram
@@ -49,6 +50,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ── Middleware: measure public API latency ────────────────────
+@app.middleware("http")
+async def timing_middleware(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    path = request.url.path
+    if path.startswith("/api/v1/public/"):
+        public_api_latency.labels(endpoint=path).observe(time.time() - start)
+    return response
+
 
 app.include_router(v1_router)
 app.include_router(websocket_router)  # WebSocket routes (/ws/v1/...) need no prefix

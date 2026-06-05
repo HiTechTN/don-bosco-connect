@@ -1,3 +1,4 @@
+ 
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import api from '../../lib/api';
@@ -27,7 +28,7 @@ export default function AuditPage() {
   function exportCSV() {
     if (!data?.items?.length) return;
     const headers = ['Date', 'Action', 'Type', 'Ressource ID', 'Utilisateur'];
-    const rows = data.items.map((log: any) => [
+    const rows = data.items.map((log: Record<string, string>) => [
       new Date(log.created_at).toLocaleString('fr-FR'),
       log.action,
       log.resource_type || '',
@@ -86,7 +87,7 @@ export default function AuditPage() {
             {isLoading ? (
               <tr><td colSpan={5} className="px-6 py-4 text-center">Chargement...</td></tr>
             ) : (
-              data?.items?.map((log: any) => (
+              data?.items?.map((log: Record<string, string>) => (
                 <tr key={log.id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm">{new Date(log.created_at).toLocaleString('fr-FR')}</td>
                   <td className="px-6 py-4">

@@ -555,7 +555,7 @@ export default function LandingDemo() {
                 viewport={{ once: true }}
                 className="flex gap-4 mb-6"
               >
-                {['🌐 Web', '📱 iOS', '🤖 Android'].map((c, i) => (
+                {['🌐 Web', '📱 iOS', '🤖 Android'].map((c) => (
                   <motion.div
                     key={c}
                     whileHover={{ scale: 1.05 }}

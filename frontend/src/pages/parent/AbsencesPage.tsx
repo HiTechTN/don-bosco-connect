@@ -1,13 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
-import { useAuthStore } from '../../store/authStore';
 import { GraduationCap, Filter } from 'lucide-react';
 
 export default function ParentAbsences() {
-  const { user } = useAuthStore();
-  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
+  const [, setSelectedStudent] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
 
   const { data: children } = useQuery({
@@ -30,7 +29,7 @@ export default function ParentAbsences() {
 
       {children?.length > 0 && (
         <div className="flex gap-3 mb-6">
-          {children.map((c: any) => (
+          {children.map((c: Record<string, unknown>) => (
             <button key={c.id} onClick={() => setSelectedStudent(c.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${selectedStudent === c.id ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border hover:border-blue-300'}`}>
               <GraduationCap className="h-4 w-4" />
@@ -62,7 +61,7 @@ export default function ParentAbsences() {
 
           <div className="space-y-2">
             {absences?.length === 0 && <div className="text-center py-8 text-gray-400">Aucune absence</div>}
-            {absences?.map((a: any) => (
+            {absences?.map((a: Record<string, unknown>) => (
               <motion.div key={a.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-4 rounded-xl shadow-sm">
                 <div className="flex justify-between items-center">
                   <div>

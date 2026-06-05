@@ -7,6 +7,10 @@ import LandingDemo from './components/LandingDemo';
 import HomePage from './pages/public/HomePage';
 import AnnouncesPage from './pages/public/AnnouncesPage';
 import AnnounceDetailPage from './pages/public/AnnounceDetailPage';
+import MentionsLegalesPage from './pages/public/MentionsLegalesPage';
+import PolitiqueRGPDPage from './pages/public/PolitiqueRGPDPage';
+import ContactPage from './pages/public/ContactPage';
+import PublicLayout from './components/public/PublicLayout';
 
 // Admin
 import DashboardPage from './pages/admin/DashboardPage';
@@ -52,9 +56,14 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/annonces" element={<AnnouncesPage />} />
-          <Route path="/annonces/:slug" element={<AnnounceDetailPage />} />
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/annonces" element={<AnnouncesPage />} />
+            <Route path="/annonces/:slug" element={<AnnounceDetailPage />} />
+            <Route path="/mentions-legales" element={<MentionsLegalesPage />} />
+            <Route path="/politique-rgpd" element={<PolitiqueRGPDPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+          </Route>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/demo" element={<LandingDemo />} />
           <Route path="/admin" element={<Layout />}>

@@ -2,11 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { BookOpen, ClipboardList, UserCheck, TrendingUp, BrainCircuit, Users } from 'lucide-react';
 import api from '../../lib/api';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function TeacherDashboard() {
   const { data } = useQuery({ queryKey: ['teacher-analytics'], queryFn: () => api.get('/analytics/teacher').then(r => r.data) });
-  const { data: recentCourses } = useQuery({ queryKey: ['teacher-recent-courses'], queryFn: () => api.get('/courses', { params: { per_page: 5 } }).then(r => r.data) });
   const { data: gradeDist } = useQuery({ queryKey: ['teacher-grade-dist'], queryFn: () => api.get('/analytics/grades').then(r => r.data) });
 
   const stats = [

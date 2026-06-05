@@ -9,6 +9,7 @@ from app.core.permissions import require_roles
 from app.database import get_db
 from app.models.base import User, UserRole
 from app.services.announcement_service import AnnouncementService
+from app.services.audit_service import log_audit
 
 router = APIRouter(tags=["announcements"])
 
@@ -52,6 +53,11 @@ async def create_announcement(
 ):
     """Create a new announcement (draft by default)."""
     ann = await AnnouncementService.create(db, data, str(current_user.id))
+    await log_audit(
+        db, user_id=current_user.id, action="announcement.create",
+        resource_type="announcement", resource_id=ann.id,
+        metadata={"title": ann.title, "status": ann.status},
+    )
     from app.services.announcement_service import AnnouncementResponse_dict
 
     return AnnouncementResponse_dict(ann)
@@ -83,6 +89,11 @@ async def publish_announcement(
     ann = await AnnouncementService.publish(db, announcement_id)
     if not ann:
         raise HTTPException(status_code=404, detail="Annonce non trouvée")
+    await log_audit(
+        db, user_id=current_user.id, action="announcement.publish",
+        resource_type="announcement", resource_id=ann.id,
+        metadata={"title": ann.title, "visibility": ann.visibility},
+    )
     from app.services.announcement_service import AnnouncementResponse_dict
 
     return AnnouncementResponse_dict(ann)
@@ -98,6 +109,11 @@ async def archive_announcement(
     ann = await AnnouncementService.archive(db, announcement_id)
     if not ann:
         raise HTTPException(status_code=404, detail="Annonce non trouvée")
+    await log_audit(
+        db, user_id=current_user.id, action="announcement.archive",
+        resource_type="announcement", resource_id=ann.id,
+        metadata={"title": ann.title},
+    )
     from app.services.announcement_service import AnnouncementResponse_dict
 
     return AnnouncementResponse_dict(ann)
@@ -113,6 +129,11 @@ async def delete_announcement(
     ok = await AnnouncementService.delete(db, announcement_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Annonce non trouvée")
+    await log_audit(
+        db, user_id=current_user.id, action="announcement.delete",
+        resource_type="announcement",
+        resource_id=UUID(announcement_id) if announcement_id else None,
+    )
 
 
 @router.post("/announcements/{announcement_id}/reactions")

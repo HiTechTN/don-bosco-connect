@@ -59,32 +59,18 @@ const MOCK_SINGLE_ANNOUNCEMENT = MOCK_ANNOUNCEMENTS.items[0];
 
 /** Mock the announcements LIST endpoint only (exact match on path, no slug after) */
 async function mockAnnouncementsListAPI(page: Page, data = MOCK_ANNOUNCEMENTS) {
-  await page.route('**/api/v1/annonces?**', async (route) => {
+  await page.route('**/api/v1/public/announcements**', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(data),
     });
   });
-  // Also catch the list endpoint without query params
-  await page.route('**/api/v1/annonces', async (route) => {
-    const url = new URL(route.request().url());
-    // Only intercept if there's no slug (pure list endpoint)
-    if (url.pathname === '/api/v1/annonces' || url.pathname.endsWith('/annonces')) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(data),
-      });
-    } else {
-      await route.continue();
-    }
-  });
 }
 
 /** Mock a single announcement detail endpoint by slug */
 async function mockAnnouncementDetailAPI(page: Page, slug: string, data = MOCK_SINGLE_ANNOUNCEMENT) {
-  await page.route(`**/api/v1/annonces/${slug}`, async (route) => {
+  await page.route(`**/api/v1/public/announcements/${slug}`, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -213,7 +199,7 @@ test.describe('Page /annonces — Liste et filtres', () => {
   });
 
   test('affiche le message "Aucune annonce trouvée" quand la liste est vide', async ({ page }) => {
-    await page.unroute('**/api/v1/annonces**');
+    await page.unroute('**/api/v1/public/annonces**');
     await mockAnnouncementsListAPI(page, { items: [], total: 0, page: 1, per_page: 50, pages: 0 });
     await page.goto('/annonces');
     await expect(page.locator('text=Aucune annonce trouvée')).toBeVisible();
@@ -327,7 +313,7 @@ test.describe('Flow de navigation : Liste → Détail → Retour', () => {
 
 test.describe('Gestion des erreurs', () => {
   test('page d\'annonce inexistante affiche "Annonce non trouvée"', async ({ page }) => {
-    await page.route('**/api/v1/annonces/does-not-exist', async (route) => {
+    await page.route('**/api/v1/public/annonces/does-not-exist', async (route) => {
       await route.fulfill({ status: 404, contentType: 'application/json', body: '{"detail":"Not found"}' });
     });
 

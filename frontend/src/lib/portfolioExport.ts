@@ -73,7 +73,7 @@ export async function exportPortfolioPDF(data: PortfolioData): Promise<Blob> {
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    data.badges.forEach((badge, idx) => {
+    data.badges.forEach((badge) => {
       if (y > 270) {
         doc.addPage();
         y = 20;

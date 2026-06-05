@@ -1,3 +1,4 @@
+ 
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import api from '../../lib/api';
@@ -6,9 +7,9 @@ import { Card, CardBody } from '../../components/ui/Card';
 import { Modal } from '../../components/ui/Modal';
 
 export default function StudentQuizzes() {
-  const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
-  const [result, setResult] = useState<any>(null);
+  const [selectedQuiz, setSelectedQuiz] = useState<Record<string, unknown> | null>(null);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [result, setResult] = useState<{ score: number; max_score: number } | null>(null);
 
   const { data: quizzes } = useQuery({
     queryKey: ['quizzes'],
@@ -27,7 +28,7 @@ export default function StudentQuizzes() {
         answers: Object.entries(answers).map(([k, v]) => ({ question_id: k, answer: v })),
       });
       setResult(res.data);
-    } catch (e) {
+    } catch {
       alert('Erreur lors de la soumission');
     }
   };
@@ -36,7 +37,7 @@ export default function StudentQuizzes() {
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Quiz</h1>
       <div className="grid gap-4 md:grid-cols-2">
-        {quizzes?.map((q: any) => (
+        {quizzes?.map((q: Record<string, unknown>) => (
           <Card key={q.id} onClick={() => { setSelectedQuiz(q); setResult(null); setAnswers({}); }}>
             <CardBody>
               <h3 className="font-semibold">{q.title}</h3>
@@ -57,10 +58,10 @@ export default function StudentQuizzes() {
           </div>
         ) : (
           <div className="space-y-4">
-            {questions?.options?.map((opt: any, i: number) => (
+            {questions?.options?.map((opt: Record<string, unknown>, i: number) => (
               <div key={i} className="border rounded-lg p-4">
-                <p className="font-medium mb-2">{opt.question_text || `Question ${i + 1}`}</p>
-                {opt.options?.map((o: any, j: number) => (
+                <p className="font-medium mb-2">{String(opt.question_text || `Question ${i + 1}`)}</p>
+                {(opt.options as Array<Record<string, unknown>> | undefined)?.map((o, j) => (
                   <label key={j} className="flex items-center gap-2 py-1 cursor-pointer">
                     <input
                       type="radio"

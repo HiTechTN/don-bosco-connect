@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Megaphone, Pin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { formatDate } from '@/lib/utils';
 
 interface AnnouncementCardProps {
   title: string;
@@ -20,15 +22,6 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
   vie_scolaire: { bg: 'bg-pink-100', text: 'text-pink-700' },
 };
 
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
 export function AnnouncementCard({
   title,
   excerpt,
@@ -39,6 +32,8 @@ export function AnnouncementCard({
   pinned,
   reactions,
 }: AnnouncementCardProps) {
+  const { i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
   const catStyle = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.general;
   const totalReactions = reactions
     ? Object.values(reactions).reduce((a, b) => a + b, 0)
@@ -60,9 +55,10 @@ export function AnnouncementCard({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {pinned && (
-            <div className="absolute top-3 left-3 bg-[#F39C12] text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+            <div className={`absolute top-3 ${isRtl ? 'right-3' : 'left-3'} bg-[#F39C12] text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1`}
+              dir="ltr">
               <Pin className="w-3 h-3" />
-              Épinglée
+              {isRtl ? 'مُثبّتة' : 'Épinglée'}
             </div>
           )}
         </div>
@@ -70,9 +66,10 @@ export function AnnouncementCard({
         <div className="relative h-32 bg-gradient-to-br from-[#1B4F72] to-[#0D2B3E] flex items-center justify-center">
           <Megaphone className="w-10 h-10 text-white/20" />
           {pinned && (
-            <div className="absolute top-3 left-3 bg-[#F39C12] text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+            <div className={`absolute top-3 ${isRtl ? 'right-3' : 'left-3'} bg-[#F39C12] text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1`}
+              dir="ltr">
               <Pin className="w-3 h-3" />
-              Épinglée
+              {isRtl ? 'مُثبّتة' : 'Épinglée'}
             </div>
           )}
         </div>
@@ -81,11 +78,11 @@ export function AnnouncementCard({
       {/* Content */}
       <div className="p-5">
         <div className="flex items-center gap-2 mb-3">
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${catStyle.bg} ${catStyle.text}`}>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${catStyle.bg} ${catStyle.text}`} dir="ltr">
             {category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')}
           </span>
           {publishAt && (
-            <span className="text-xs text-[#64748B]">{formatDate(publishAt)}</span>
+            <span className="text-xs text-[#64748B]" dir="ltr">{formatDate(publishAt, i18n.language)}</span>
           )}
         </div>
 
