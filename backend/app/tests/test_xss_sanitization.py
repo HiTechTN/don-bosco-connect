@@ -3,7 +3,6 @@ import pytest
 
 from app.services.announcement_service import sanitize_html
 
-
 XSS_PAYLOADS = [
     ("<script>alert(1)</script>", "script tag removed"),
     ('<img src=x onerror=alert(1)>', "onerror event removed"),

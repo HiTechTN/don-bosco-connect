@@ -1,6 +1,7 @@
 """Tests for announcement endpoints (ÉTAPE 4.1)."""
 import pytest
 from httpx import AsyncClient
+
 from app.main import app
 
 

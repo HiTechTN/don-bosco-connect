@@ -1,7 +1,7 @@
 """Admin announcement endpoints (RBAC admin only)."""
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
@@ -38,9 +38,12 @@ async def get_announcement(
     ann = await AnnouncementService.get_by_id(db, announcement_id)
     if not ann:
         raise HTTPException(status_code=404, detail="Annonce non trouvée")
-    from app.services.announcement_service import AnnouncementResponse_dict, _get_reactions_aggregate
+    from app.services.announcement_service import (
+        _get_reactions_aggregate,
+        announcement_response_dict,
+    )
 
-    data = AnnouncementResponse_dict(ann)
+    data = announcement_response_dict(ann)
     data["reactions"] = await _get_reactions_aggregate(db, ann.id)
     return data
 
@@ -58,9 +61,9 @@ async def create_announcement(
         resource_type="announcement", resource_id=ann.id,
         metadata={"title": ann.title, "status": ann.status},
     )
-    from app.services.announcement_service import AnnouncementResponse_dict
+    from app.services.announcement_service import announcement_response_dict
 
-    return AnnouncementResponse_dict(ann)
+    return announcement_response_dict(ann)
 
 
 @router.patch("/announcements/{announcement_id}")
@@ -74,9 +77,9 @@ async def update_announcement(
     ann = await AnnouncementService.update(db, announcement_id, data)
     if not ann:
         raise HTTPException(status_code=404, detail="Annonce non trouvée")
-    from app.services.announcement_service import AnnouncementResponse_dict
+    from app.services.announcement_service import announcement_response_dict
 
-    return AnnouncementResponse_dict(ann)
+    return announcement_response_dict(ann)
 
 
 @router.post("/announcements/{announcement_id}/publish")
@@ -94,9 +97,9 @@ async def publish_announcement(
         resource_type="announcement", resource_id=ann.id,
         metadata={"title": ann.title, "visibility": ann.visibility},
     )
-    from app.services.announcement_service import AnnouncementResponse_dict
+    from app.services.announcement_service import announcement_response_dict
 
-    return AnnouncementResponse_dict(ann)
+    return announcement_response_dict(ann)
 
 
 @router.post("/announcements/{announcement_id}/archive")
@@ -114,9 +117,9 @@ async def archive_announcement(
         resource_type="announcement", resource_id=ann.id,
         metadata={"title": ann.title},
     )
-    from app.services.announcement_service import AnnouncementResponse_dict
+    from app.services.announcement_service import announcement_response_dict
 
-    return AnnouncementResponse_dict(ann)
+    return announcement_response_dict(ann)
 
 
 @router.delete("/announcements/{announcement_id}", status_code=204)
@@ -144,16 +147,17 @@ async def add_reaction(
     current_user: User = Depends(get_current_user),
 ):
     """Add a reaction emoji to an announcement."""
-    from app.models.announcement import AnnouncementReaction
     import uuid as _uuid
+
+    from sqlalchemy import select
+
+    from app.models.announcement import AnnouncementReaction
 
     emoji = data.get("emoji", "")
     if not emoji:
         raise HTTPException(status_code=400, detail="Emoji requis")
 
     # Check if reaction already exists
-    from sqlalchemy import select
-
     existing = await db.execute(
         select(AnnouncementReaction).where(
             AnnouncementReaction.announcement_id == announcement_id,
@@ -194,7 +198,8 @@ async def remove_reaction(
     current_user: User = Depends(get_current_user),
 ):
     """Remove a specific reaction from the current user."""
-    from sqlalchemy import delete, select
+    from sqlalchemy import select
+
     from app.models.announcement import AnnouncementReaction
 
     result = await db.execute(

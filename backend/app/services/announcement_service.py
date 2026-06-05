@@ -1,15 +1,13 @@
 """Announcement service with XSS sanitization."""
 import re
-import sys
 import uuid
 from datetime import datetime, timezone
 
 from slugify import slugify
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.announcement import Announcement, AnnouncementReaction
-
 
 # ── XSS Sanitization ─────────────────────────────────────────────
 
@@ -66,7 +64,6 @@ def sanitize_html(html: str) -> str:
     """
     try:
         import bleach
-        from bleach.linkifier import LinkifyFilter
 
         return bleach.clean(
             html,
@@ -81,8 +78,15 @@ def sanitize_html(html: str) -> str:
     # Regex fallback
     cleaned = _TAG_RE.sub(_sanitize_tag, html)
     cleaned = re.sub(r"<!--.*?-->", "", cleaned, flags=re.DOTALL)
-    cleaned = re.sub(r"<(script|iframe|form|object|embed|meta|link|style)[^>]*>.*?</\1>", "", cleaned, flags=re.DOTALL | re.IGNORECASE)
-    cleaned = re.sub(r"<(script|iframe|form|object|embed|meta|link|style)[^>]*/?>", "", cleaned, flags=re.IGNORECASE)
+    bad_tag = r"<(script|iframe|form|object|embed|meta|link|style)"
+    cleaned = re.sub(
+        bad_tag + r"[^>]*>.*?</\1>", "", cleaned,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        bad_tag + r"[^>]*/?>", "", cleaned,
+        flags=re.IGNORECASE,
+    )
     return cleaned.strip()
 
 
@@ -230,7 +234,7 @@ class AnnouncementService:
         items = result.scalars().all()
 
         return {
-            "items": [AnnouncementResponse_dict(a) for a in items],
+            "items": [announcement_response_dict(a) for a in items],
             "total": total,
             "page": page,
             "per_page": per_page,
@@ -330,7 +334,7 @@ class AnnouncementService:
         return True
 
 
-def AnnouncementResponse_dict(ann: Announcement) -> dict:
+def announcement_response_dict(ann: Announcement) -> dict:
     """Convert an Announcement model to a dict for admin responses."""
     return {
         "id": ann.id,
