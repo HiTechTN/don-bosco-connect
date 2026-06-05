@@ -1,9 +1,17 @@
+"""Shared fixtures for backend tests.
+
+Root-cause fix for pytest-asyncio 0.24 "Event loop is closed" error:
+- Session-scoped event loop (asyncio_default_fixture_loop_scope = "session")
+- Session-scoped engine (create tables once, dispose once)
+- Function-scoped db_session using nested transactions for isolation
+"""
 import uuid
 from collections.abc import AsyncGenerator
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import settings
@@ -15,27 +23,37 @@ from app.models.base import User, UserRole
 TEST_DATABASE_URL = settings.DATABASE_URL
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="session")
 async def engine():
+    """Session-scoped async engine — create tables once, dispose once."""
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     async with engine.begin() as conn:
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        try:
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        except ProgrammingError:
+            pass  # pgvector extension not installed (local pg14 without pgvector)
         await conn.run_sync(Base.metadata.create_all)
     yield engine
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-        await engine.dispose()
-    except RuntimeError as exc:
-        if "Event loop is closed" not in str(exc):
-            raise  # Only swallow event-loop teardown errors
+    await engine.dispose()
 
 
 @pytest_asyncio.fixture
 async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
-    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    async with session_factory() as session:
-        yield session
+    """Function-scoped session using nested transactions for test isolation.
+
+    Each test gets its own savepoint that is rolled back after the test,
+    so tests don't interfere with each other and tables stay clean.
+    """
+    connection = await engine.connect()
+    transaction = await connection.begin()
+    session = AsyncSession(bind=connection, expire_on_commit=False)
+
+    yield session
+
+    await session.close()
+    # Roll back the outer transaction to undo all changes from this test
+    await transaction.rollback()
+    await connection.close()
 
 
 @pytest_asyncio.fixture
