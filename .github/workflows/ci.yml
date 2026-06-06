@@ -79,7 +79,7 @@ jobs:
           DB_USER: donbosco_user
           SECRET_KEY: test-secret-key-not-for-production
           ENVIRONMENT: test
-        run: alembic upgrade head && alembic check || echo "Alembic check skipped (no migrations yet)"
+        run: alembic upgrade head && alembic check
       - name: Tests avec couverture
         run: pytest app/tests/ -p no:xdist --cov=app --cov-report=term --cov-report=xml --cov-fail-under=10 -v
         env:
