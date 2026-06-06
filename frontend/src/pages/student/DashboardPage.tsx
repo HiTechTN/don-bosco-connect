@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -28,13 +27,12 @@ export default function StudentDashboard() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const [greeting, setGreeting] = useState('');
 
-  useEffect(() => {
+  const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting(t('student_dashboard.greeting_morning'));
-    else if (hour < 18) setGreeting(t('student_dashboard.greeting_afternoon'));
-    else setGreeting(t('student_dashboard.greeting_evening'));
+    if (hour < 12) return t('student_dashboard.greeting_morning');
+    if (hour < 18) return t('student_dashboard.greeting_afternoon');
+    return t('student_dashboard.greeting_evening');
   }, [t]);
 
   const { data: grades } = useQuery<Grade[]>({ queryKey: ['my-grades'], queryFn: () => api.get(`/students/${user?.id}/grades`).then(r => r.data), enabled: !!user?.id });
