@@ -1,14 +1,14 @@
 """Shared fixtures for backend tests.
 
-The engine is session-scoped (tables created once, disposed once).
-``db_session`` is function-scoped — each test gets a fresh session backed
-by a dedicated connection from the pool.
+Both ``engine`` and ``db_session`` are **function-scoped** so they share
+the same per-test event loop.  A session-scoped autouse fixture handles
+one-time table creation and final truncation.
 
-Note: we intentionally do NOT override the ``event_loop`` fixture.
-In pytest-asyncio >=0.23 with ``asyncio_mode = auto``, overriding it
-deprecation causes ``RuntimeError: Task … got Future … attached to a
-different loop`` because the session-scoped loop conflicts with the
-framework's own loop management.
+We intentionally do NOT override the ``event_loop`` fixture — in
+pytest-asyncio >=0.23 with ``asyncio_mode = auto`` that causes
+``RuntimeError: Task … got Future … attached to a different loop``
+because a session-scoped loop conflicts with the per-test loop the
+framework creates for each test function.
 """
 import uuid
 from collections.abc import AsyncGenerator
@@ -32,58 +32,69 @@ TEST_DATABASE_URL = settings.DATABASE_URL
 
 
 # ---------------------------------------------------------------------------
-# Database fixtures
+# Tables setup & teardown (session-scoped, runs once)
 # ---------------------------------------------------------------------------
-@pytest_asyncio.fixture(scope="session")
-async def engine():
-    """Session-scoped async engine — create tables once, dispose once."""
-    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-    async with engine.begin() as conn:
+TABLES_TO_TRUNCATE = [
+    "announcements",
+    "grades",
+    "absences",
+    "notifications",
+    "quiz_attempts",
+    "quiz_questions",
+    "quizzes",
+    "evaluations",
+    "audit_logs",
+    "refresh_tokens",
+    "users",
+    "subjects",
+    "classes",
+    "academic_years",
+    "school_events",
+    "timetable_slots",
+    "teacher_subject_assignments",
+    "class_enrollments",
+    "student_parent_links",
+    "student_profiles",
+    "student_badges",
+    "xp_transactions",
+    "badges",
+    "ai_messages",
+    "ai_conversations",
+    "course_files",
+    "document_chunks",
+    "courses",
+    "messages",
+    "thread_participants",
+    "message_threads",
+]
+
+
+@pytest_asyncio.fixture(autouse=True, scope="session")
+async def _session_setup_teardown():
+    """Create tables once at session start; truncate at session end."""
+    eng = create_async_engine(TEST_DATABASE_URL, echo=False)
+    async with eng.begin() as conn:
         try:
             await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         except (ProgrammingError, OperationalError):
             pass  # pgvector extension not installed locally
         await conn.run_sync(Base.metadata.create_all)
-    yield engine
-    # Teardown: truncate all test-populated tables to prevent
-    # data accumulation across repeated local runs.
-    tables_to_truncate = [
-        "announcements",
-        "grades",
-        "absences",
-        "notifications",
-        "quiz_attempts",
-        "quiz_questions",
-        "quizzes",
-        "evaluations",
-        "audit_logs",
-        "refresh_tokens",
-        "users",
-        "subjects",
-        "classes",
-        "academic_years",
-        "school_events",
-        "timetable_slots",
-        "teacher_subject_assignments",
-        "class_enrollments",
-        "student_parent_links",
-        "student_profiles",
-        "student_badges",
-        "xp_transactions",
-        "badges",
-        "ai_messages",
-        "ai_conversations",
-        "course_files",
-        "document_chunks",
-        "courses",
-        "messages",
-        "thread_participants",
-        "message_threads",
-    ]
-    async with engine.begin() as conn:
-        for table in tables_to_truncate:
+    yield
+    async with eng.begin() as conn:
+        for table in TABLES_TO_TRUNCATE:
             await conn.execute(text(f"TRUNCATE TABLE {table} CASCADE"))
-    await engine.dispose()
+    await eng.dispose()
+
+
+# ---------------------------------------------------------------------------
+# Database fixtures (function-scoped — same event loop as the test)
+# ---------------------------------------------------------------------------
+@pytest_asyncio.fixture
+async def engine():
+    """Function-scoped engine — runs on the per-test event loop."""
+    eng = create_async_engine(TEST_DATABASE_URL, echo=False)
+    yield eng
+    await eng.dispose()
 
 
 @pytest_asyncio.fixture
