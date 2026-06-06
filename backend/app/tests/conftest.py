@@ -18,7 +18,6 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
-    async_sessionmaker,
     create_async_engine,
 )
 
@@ -105,12 +104,17 @@ async def engine():
 
 @pytest_asyncio.fixture
 async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
-    """Function-scoped session — fresh session per test from the pool."""
-    session_factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with session_factory() as session:
-        yield session
+    """Function-scoped session — each test gets a dedicated connection.
+
+    Using ``engine.connect()`` explicitly acquires a connection from the
+    pool and binds the session to it, preventing concurrent tests from
+    sharing the same underlying asyncpg connection (which causes
+    ``InterfaceError: cannot perform operation: another operation is
+    in progress``).
+    """
+    async with engine.connect() as conn:
+        async with AsyncSession(bind=conn, expire_on_commit=False) as session:
+            yield session
 
 
 # ---------------------------------------------------------------------------
