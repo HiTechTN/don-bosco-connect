@@ -1,7 +1,7 @@
 """revert grades to NUMERIC for exact decimal precision
 
 Revision ID: fe1460476a39
-Revises: 9e79d9136ce7
+Revises: 44c6e4431407
 Create Date: 2026-06-06 23:11:47.615417
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "fe1460476a39"
-down_revision: str | None = "9e79d9136ce7"
+down_revision: str | None = "44c6e4431407"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
