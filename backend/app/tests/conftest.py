@@ -34,39 +34,6 @@ TEST_DATABASE_URL = settings.DATABASE_URL
 # ---------------------------------------------------------------------------
 # Tables setup & teardown (session-scoped, runs once)
 # ---------------------------------------------------------------------------
-TABLES_TO_TRUNCATE = [
-    "announcements",
-    "grades",
-    "absences",
-    "notifications",
-    "quiz_attempts",
-    "quiz_questions",
-    "quizzes",
-    "evaluations",
-    "audit_logs",
-    "refresh_tokens",
-    "users",
-    "subjects",
-    "classes",
-    "academic_years",
-    "school_events",
-    "timetable_slots",
-    "teacher_subject_assignments",
-    "class_enrollments",
-    "student_parent_links",
-    "student_profiles",
-    "student_badges",
-    "xp_transactions",
-    "badges",
-    "ai_messages",
-    "ai_conversations",
-    "course_files",
-    "document_chunks",
-    "courses",
-    "messages",
-    "thread_participants",
-    "message_threads",
-]
 
 
 @pytest_asyncio.fixture(autouse=True, scope="session")
@@ -81,8 +48,8 @@ async def _session_setup_teardown():
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with eng.begin() as conn:
-        for table in TABLES_TO_TRUNCATE:
-            await conn.execute(text(f"TRUNCATE TABLE {table} CASCADE"))
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(text(f"TRUNCATE TABLE {table.name} CASCADE"))
     await eng.dispose()
 
 
