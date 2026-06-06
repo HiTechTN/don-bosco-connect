@@ -81,7 +81,7 @@ jobs:
           ENVIRONMENT: test
         run: alembic upgrade head && alembic check || echo "Alembic check skipped (no migrations yet)"
       - name: Tests avec couverture
-        run: pytest app/tests/ -x -p no:xdist --cov=app --cov-report=term --cov-report=xml --cov-fail-under=10 -v
+        run: pytest app/tests/ -p no:xdist --cov=app --cov-report=term --cov-report=xml --cov-fail-under=10 -v
         env:
           DB_HOST: localhost
           DB_PASSWORD: donbosco_test
