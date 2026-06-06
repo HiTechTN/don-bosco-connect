@@ -92,6 +92,57 @@ jobs:
           REDIS_HOST: localhost
           ENVIRONMENT: test
 
+  # Diagnostic: run tests forked to isolate asyncpg InterfaceError.
+  # Each test runs in its own subprocess with its own event loop + pool.
+  # If this passes but test-backend fails → root cause is the session-scoped
+  # event_loop fixture or connection sharing, not the test code itself.
+  test-backend-forked:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: donbosco_test
+          POSTGRES_USER: donbosco_user
+          POSTGRES_PASSWORD: donbosco_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: pip install "pytest>=8.3,<9" "pytest-asyncio>=0.23,<0.24" pytest-cov pytest-forked httpx anyio
+      - name: Tests (forked — each test in own subprocess)
+        run: pytest app/tests/ -x --forked --cov=app --cov-report=term --cov-report=xml --cov-fail-under=0 -v
+        env:
+          DB_HOST: localhost
+          DB_PASSWORD: donbosco_test
+          DB_NAME: donbosco_test
+          DB_USER: donbosco_user
+          SECRET_KEY: test-secret-key-not-for-production
+          REDIS_PASSWORD: test
+          REDIS_HOST: localhost
+          ENVIRONMENT: test
+
   lint-frontend:
     runs-on: ubuntu-latest
     defaults:
