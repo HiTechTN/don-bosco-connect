@@ -27,7 +27,6 @@ import {
   Container,
   HardDrive,
   ChevronDown,
-  Sparkles,
   Zap,
   Lock,
   Globe,

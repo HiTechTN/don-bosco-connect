@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, UserCheck, BrainCircuit, Gamepad2, TrendingUp, Calendar, BookOpen, Target, Flame, ChevronRight, Sparkles, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
@@ -24,16 +25,17 @@ interface GradeChartEntry {
 }
 
 export default function StudentDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Bonjour');
-    else if (hour < 18) setGreeting('Bon après-midi');
-    else setGreeting('Bonsoir');
-  }, []);
+    if (hour < 12) setGreeting(t('student_dashboard.greeting_morning'));
+    else if (hour < 18) setGreeting(t('student_dashboard.greeting_afternoon'));
+    else setGreeting(t('student_dashboard.greeting_evening'));
+  }, [t]);
 
   const { data: grades } = useQuery<Grade[]>({ queryKey: ['my-grades'], queryFn: () => api.get(`/students/${user?.id}/grades`).then(r => r.data), enabled: !!user?.id });
   const { data: absences } = useQuery<Absence[]>({ queryKey: ['my-absences'], queryFn: () => api.get(`/students/${user?.id}/absences`).then(r => r.data), enabled: !!user?.id });
@@ -70,12 +72,12 @@ export default function StudentDashboard() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">{greeting}, {user?.first_name}! 👋</h1>
-            <p className="opacity-90">Voici un aperçu de ta journée et tes progrès</p>
+            <p className="opacity-90">{t('student_dashboard.subtitle')}</p>
           </div>
           {profile && profile.streak_days > 0 && (
             <div className="flex items-center gap-2 mt-4 md:mt-0 bg-white/20 px-4 py-2 rounded-full">
               <Flame className="w-5 h-5 text-yellow-300" />
-              <span className="font-semibold">{profile.streak_days} jours consécutifs!</span>
+              <span className="font-semibold">{profile.streak_days} {t('student_dashboard.streak')}</span>
             </div>
           )}
         </div>
@@ -84,10 +86,10 @@ export default function StudentDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Mes notes', value: grades?.length ?? 0, sub: grades?.length ? `Moyenne: ${avg}/20` : 'Aucune note', icon: ClipboardList, color: 'bg-blue-100', text: 'text-blue-600', path: '/student/grades' },
-          { label: 'Absences', value: absences?.length ?? 0, sub: `Justifiées: ${justificationRate}%`, icon: UserCheck, color: 'bg-orange-100', text: 'text-orange-600', path: '/student/absences' },
-          { label: 'Quiz', value: 'Jouer', sub: 'Défie-toi!', icon: BrainCircuit, color: 'bg-purple-100', text: 'text-purple-600', path: '/student/quizzes' },
-          { label: 'Gamification', value: `${profile?.xp_total ?? 0} XP`, sub: `Niveau ${profile?.level ?? 1}`, icon: Gamepad2, color: 'bg-green-100', text: 'text-green-600', path: '/student/gamification' },
+          { label: t('student_dashboard.card_grades'), value: grades?.length ?? 0, sub: grades?.length ? `${t('student_dashboard.avg')}: ${avg}/20` : t('student_dashboard.avg_none'), icon: ClipboardList, color: 'bg-blue-100', text: 'text-blue-600', path: '/student/grades' },
+          { label: t('student_dashboard.card_absences'), value: absences?.length ?? 0, sub: `${t('student_dashboard.justified')}: ${justificationRate}%`, icon: UserCheck, color: 'bg-orange-100', text: 'text-orange-600', path: '/student/absences' },
+          { label: t('student_dashboard.card_quizzes'), value: t('student_dashboard.quiz_play'), sub: t('student_dashboard.quiz_challenge'), icon: BrainCircuit, color: 'bg-purple-100', text: 'text-purple-600', path: '/student/quizzes' },
+          { label: t('student_dashboard.card_gamification'), value: `${profile?.xp_total ?? 0} XP`, sub: `${t('student_dashboard.level')} ${profile?.level ?? 1}`, icon: Gamepad2, color: 'bg-green-100', text: 'text-green-600', path: '/student/gamification' },
         ].map((c, idx) => (
           <motion.div key={c.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
             className="bg-white p-5 rounded-xl shadow-sm cursor-pointer hover:shadow-lg transition-all group" onClick={() => navigate(c.path)}>
@@ -106,7 +108,7 @@ export default function StudentDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-indigo-500" /> Progression des notes</h3>
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-indigo-500" /> {t('student_dashboard.grades_progression')}</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={lastGrades}>
@@ -120,7 +122,7 @@ export default function StudentDashboard() {
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><BookOpen className="w-5 h-5 text-purple-500" /> Performance par matière</h3>
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><BookOpen className="w-5 h-5 text-purple-500" /> {t('student_dashboard.subject_performance')}</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={subjectAverages} layout="vertical">
@@ -140,8 +142,8 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold flex items-center gap-2"><Calendar className="w-5 h-5 text-blue-500" /> Aujourd'hui</h3>
-            <button onClick={() => navigate('/student/timetable')} className="text-sm text-indigo-600 hover:underline flex items-center gap-1">Voir tout <ChevronRight className="w-4 h-4" /></button>
+            <h3 className="font-semibold flex items-center gap-2"><Calendar className="w-5 h-5 text-blue-500" /> {t('student_dashboard.today')}</h3>
+            <button onClick={() => navigate('/student/timetable')} className="text-sm text-indigo-600 hover:underline flex items-center gap-1">{t('student_dashboard.see_all')} <ChevronRight className="w-4 h-4" /></button>
           </div>
           {todaySlots.length > 0 ? (
             <div className="space-y-3">
@@ -151,26 +153,26 @@ export default function StudentDashboard() {
                   <div className="text-center min-w-[60px]"><p className="text-lg font-bold text-slate-800">{slot.start_time}</p></div>
                   <div className="flex-1 border-l-2 border-indigo-200 pl-3">
                     <p className="font-semibold text-slate-800">{slot.subject_name}</p>
-                    {slot.room && <p className="text-sm text-slate-500">Salle {slot.room}</p>}
+                    {slot.room && <p className="text-sm text-slate-500">{t('student_dashboard.room')} {slot.room}</p>}
                   </div>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8"><Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" /><p className="text-slate-400">Aucun cours aujourd'hui</p></div>
+            <div className="text-center py-8"><Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" /><p className="text-slate-400">{t('student_dashboard.no_classes_today')}</p></div>
           )}
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><Target className="w-5 h-5 text-green-500" /> Actions rapides</h3>
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><Target className="w-5 h-5 text-green-500" /> {t('student_dashboard.quick_actions')}</h3>
           <div className="space-y-3">
             <button onClick={() => navigate('/student/ai')} className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:shadow-lg transition-all">
-              <BrainCircuit className="w-5 h-5" /><span className="font-medium">Poser une question à l'IA</span>
+              <BrainCircuit className="w-5 h-5" /><span className="font-medium">{t('student_dashboard.ask_ai')}</span>
             </button>
             <button onClick={() => navigate('/student/quizzes')} className="w-full flex items-center gap-3 p-3 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-indigo-500 transition-all">
-              <BrainCircuit className="w-5 h-5" /><span className="font-medium">Faire un quiz</span>
+              <BrainCircuit className="w-5 h-5" /><span className="font-medium">{t('student_dashboard.do_quiz')}</span>
             </button>
             <button onClick={() => navigate('/student/gamification')} className="w-full flex items-center gap-3 p-3 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-green-500 transition-all">
-              <Gamepad2 className="w-5 h-5" /><span className="font-medium">Voir mes achievements</span>
+              <Gamepad2 className="w-5 h-5" /><span className="font-medium">{t('student_dashboard.view_achievements')}</span>
             </button>
           </div>
         </div>
@@ -180,8 +182,8 @@ export default function StudentDashboard() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
           <div>
-            <p className="font-semibold text-amber-800">Attention</p>
-            <p className="text-sm text-amber-700">Tu as {absences?.length} absences au total. Pense à les justifier!</p>
+            <p className="font-semibold text-amber-800">{t('student_dashboard.absences_warning')}</p>
+            <p className="text-sm text-amber-700">{t('student_dashboard.absences_msg', { count: absences?.length })}</p>
           </div>
         </motion.div>
       )}

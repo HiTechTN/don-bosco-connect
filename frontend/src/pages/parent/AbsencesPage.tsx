@@ -4,8 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
 import { GraduationCap, Filter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ParentAbsences() {
+  const { t } = useTranslation();
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
 
@@ -25,7 +27,7 @@ export default function ParentAbsences() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Absences des enfants</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('parent_absences.title')}</h1>
 
       {children?.length > 0 && (
         <div className="flex gap-3 mb-6">
@@ -44,11 +46,11 @@ export default function ParentAbsences() {
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white rounded-xl shadow-sm p-4 text-center">
               <div className="text-3xl font-bold">{total}</div>
-              <div className="text-sm text-gray-500">Total absences</div>
+              <div className="text-sm text-gray-500">{t('parent_absences.total')}</div>
             </div>
             <div className="bg-white rounded-xl shadow-sm p-4 text-center">
               <div className="text-3xl font-bold text-green-600">{justified}</div>
-              <div className="text-sm text-gray-500">Justifiées</div>
+              <div className="text-sm text-gray-500">{t('parent_absences.justified')}</div>
             </div>
           </div>
 
@@ -60,21 +62,19 @@ export default function ParentAbsences() {
           </div>
 
           <div className="space-y-2">
-            {absences?.length === 0 && <div className="text-center py-8 text-gray-400">Aucune absence</div>}
+            {absences?.length === 0 && <div className="text-center py-8 text-gray-400">{t('parent_absences.no_absences')}</div>}
             {absences?.map((a: Record<string, unknown>) => (
               <motion.div key={a.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-4 rounded-xl shadow-sm">
                 <div className="flex justify-between items-center">
                   <div>
                     <span className="font-medium">{a.date}</span>
-                    <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${a.type === 'absence' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'}`}>
-                      {a.type === 'absence' ? 'Absence' : 'Retard'}
-                    </span>
+                    <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${a.type === 'absence' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'}`}>                      {a.type === 'absence' ? t('parent_absences.type_absence') : t('parent_absences.type_retard')}</span>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     a.justification_status === 'justified' ? 'bg-green-50 text-green-600' :
                     a.justification_status === 'pending' ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-600'
                   }`}>
-                    {a.justification_status === 'justified' ? 'Justifiée' : a.justification_status === 'pending' ? 'En attente' : 'Non justifiée'}
+                    {a.justification_status === 'justified' ? t('parent_absences.status_justified') : a.justification_status === 'pending' ? t('parent_absences.status_pending') : t('parent_absences.status_unjustified')}
                   </span>
                 </div>
               </motion.div>

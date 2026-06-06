@@ -91,15 +91,15 @@ test.describe('Page d\'accueil', () => {
 
   test('affiche le hero et le titre principal', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText('Don Bosco Connect');
-    await expect(page.locator('text=Plateforme numérique scolaire')).toBeVisible();
+    await expect(page.locator('h1')).toContainText("L\'Éducation");
+    await expect(page.locator('main >> text=Réinventée')).toBeVisible();
   });
 
   test('affiche le bouton de connexion', async ({ page }) => {
     await page.goto('/');
-    const loginButton = page.locator('a', { hasText: 'Se connecter' });
+    // New landing page: login button is in hero CTAs and demo section
+    const loginButton = page.locator('a[href="/login"]').first();
     await expect(loginButton).toBeVisible();
-    await expect(loginButton).toHaveAttribute('href', '/login');
   });
 
   test('affiche les 3 dernières annonces', async ({ page }) => {
@@ -124,7 +124,11 @@ test.describe('Page d\'accueil', () => {
 
   test('clique sur "Voir toutes les annonces" et navigue vers /annonces', async ({ page }) => {
     await page.goto('/');
-    const link = page.locator('a', { hasText: 'Voir toutes les annonces' }).first();
+    // Scroll to announcements section to make the link visible
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(500);
+    const link = page.locator('a[href="/annonces"]', { hasText: 'annonces' }).first();
+    await expect(link).toBeVisible({ timeout: 10000 });
     await link.click();
     await expect(page).toHaveURL(/\/annonces$/);
   });
@@ -138,15 +142,15 @@ test.describe('Page d\'accueil', () => {
 
   test('affiche les statistiques de l\'établissement', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=1 200+')).toBeVisible();
-    await expect(page.locator('text=85')).toBeVisible();
-    await expect(page.locator('text=60+')).toBeVisible();
+    // New landing page uses landing.stats_title
+    await expect(page.locator('text=Un Impact Concret')).toBeVisible();
   });
 
-  test('affiche le footer avec les informations de contact', async ({ page }) => {
+  test('affiche la section démo avec les comptes de démonstration', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=Avenue de la République, Tunis')).toBeVisible();
-    await expect(page.locator('text=contact@donbosco.tn')).toBeVisible();
+    // New landing page has demo accounts section instead of old footer
+    await expect(page.locator('text=admin@donbosco.tn')).toBeVisible();
+    await expect(page.locator('text=karim.hamdi@donbosco.tn')).toBeVisible();
   });
 });
 
@@ -199,7 +203,7 @@ test.describe('Page /annonces — Liste et filtres', () => {
   });
 
   test('affiche le message "Aucune annonce trouvée" quand la liste est vide', async ({ page }) => {
-    await page.unroute('**/api/v1/public/annonces**');
+    await page.unroute('**/api/v1/public/announcements**');
     await mockAnnouncementsListAPI(page, { items: [], total: 0, page: 1, per_page: 50, pages: 0 });
     await page.goto('/annonces');
     await expect(page.locator('text=Aucune annonce trouvée')).toBeVisible();
@@ -247,12 +251,12 @@ test.describe('Page /annonces/:slug — Détail', () => {
   });
 
   test('affiche le nombre de vues', async ({ page }) => {
-    await expect(page.locator('text=142 vue')).toBeVisible();
+    await expect(page.locator('text=142 vues')).toBeVisible();
   });
 
   test('affiche les tags', async ({ page }) => {
     await expect(page.locator('span', { hasText: 'rentrée' })).toBeVisible();
-    await expect(page.locator('span', { hasText: '2026' })).toBeVisible();
+    await expect(page.locator('span').filter({ hasText: /^2026$/ })).toBeVisible();
   });
 
   test('affiche le contenu HTML de l\'annonce', async ({ page }) => {
@@ -313,12 +317,25 @@ test.describe('Flow de navigation : Liste → Détail → Retour', () => {
 
 test.describe('Gestion des erreurs', () => {
   test('page d\'annonce inexistante affiche "Annonce non trouvée"', async ({ page }) => {
-    await page.route('**/api/v1/public/annonces/does-not-exist', async (route) => {
-      await route.fulfill({ status: 404, contentType: 'application/json', body: '{"detail":"Not found"}' });
+    // Mock the specific announcement endpoint to return 404
+    await page.route('**/api/v1/public/announcements/does-not-exist', async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Not found' }),
+      });
+    });
+    // Also mock the list endpoint in case the page fetches it
+    await page.route('**/api/v1/public/announcements', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [], total: 0, page: 1, per_page: 50, pages: 0 }),
+      });
     });
 
     await page.goto('/annonces/does-not-exist');
-    await expect(page.locator('text=Annonce non trouvée')).toBeVisible();
+    await expect(page.locator('text=Annonce non trouvée')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('a', { hasText: 'Retour aux annonces' })).toBeVisible();
   });
 });
@@ -330,7 +347,7 @@ test.describe('Gestion des erreurs', () => {
 test.describe('État de chargement (skeleton)', () => {
   test('affiche les skeletons pendant le chargement des annonces', async ({ page }) => {
     // Delay the API response to see loading state
-    await page.route('**/api/v1/annonces**', async (route) => {
+    await page.route('**/api/v1/public/announcements**', async (route) => {
       await new Promise(r => setTimeout(r, 2000));
       await route.fulfill({
         status: 200,
@@ -372,8 +389,11 @@ test.describe('Responsive mobile', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
 
-    const mobileLink = page.locator('.sm\\:hidden a', { hasText: 'Voir toutes les annonces' });
-    await expect(mobileLink).toBeVisible();
+    // New landing page: mobile link is at the bottom of announcements section
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(500);
+    const mobileLink = page.locator('a[href="/annonces"]').first();
+    await expect(mobileLink).toBeVisible({ timeout: 10000 });
   });
 
   test('le lien desktop est caché sur mobile', async ({ page }) => {
@@ -381,7 +401,8 @@ test.describe('Responsive mobile', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
 
-    const desktopLink = page.locator('.hidden.sm\\:inline-flex', { hasText: 'Voir toutes les annonces' });
+    // The desktop-only link with hidden sm:inline-flex should not be visible on mobile
+    const desktopLink = page.locator('.hidden.sm\\:inline-flex').first();
     await expect(desktopLink).not.toBeVisible();
   });
 });

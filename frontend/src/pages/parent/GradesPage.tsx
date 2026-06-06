@@ -3,8 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
 import { GraduationCap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ParentGrades() {
+  const { t } = useTranslation();
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
 
   const { data: children } = useQuery({
@@ -27,7 +29,7 @@ export default function ParentGrades() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Notes des enfants</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('parent_grades.title')}</h1>
 
       {children?.length > 0 && (
         <div className="flex gap-3 mb-6">
@@ -56,13 +58,13 @@ export default function ParentGrades() {
           </div>
 
           <div className="space-y-2">
-            {grades?.length === 0 && <div className="text-center py-8 text-gray-400">Aucune note</div>}
+            {grades?.length === 0 && <div className="text-center py-8 text-gray-400">{t('parent_grades.no_grades')}</div>}
             {grades?.map((g: Record<string, unknown>) => (
               <motion.div key={g.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-4 rounded-xl shadow-sm">
                 <div className="flex justify-between items-center">
                   <div>
                     <span className={`font-semibold text-lg ${g.is_absent ? 'text-red-500' : parseFloat(g.score) >= 10 ? 'text-green-600' : 'text-gray-900'}`}>
-                      {g.is_absent ? 'Absent' : `${g.score}/20`}
+                      {g.is_absent ? t('parent_grades.absent') : `${g.score}/20`}
                     </span>
                     {g.comment && <p className="text-sm text-gray-400 mt-0.5">{g.comment}</p>}
                   </div>
@@ -75,7 +77,7 @@ export default function ParentGrades() {
       ) : (
         <div className="bg-white p-8 rounded-xl shadow-sm text-center">
           <GraduationCap className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Sélectionnez un enfant pour voir ses notes</p>
+          <p className="text-gray-500">{t('parent_grades.select_child')}</p>
         </div>
       )}
     </div>

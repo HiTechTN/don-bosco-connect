@@ -11,6 +11,7 @@ import confetti from 'canvas-confetti';
 import api from '../../lib/api';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { useAuthStore } from '../../store/authStore';
+import { useTranslation } from 'react-i18next';
 
 interface Badge {
   id: string;
@@ -58,6 +59,7 @@ const BADGE_ICONS: Record<string, React.ElementType> = {
 };
 
 export default function GamificationPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [showConfetti, setShowConfetti] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -117,7 +119,7 @@ export default function GamificationPage() {
       spread: 70,
       origin: { y: 0.6 },
     });
-    alert('Portfolio numérique exporté avec succès! (Fonctionnalité en cours de développement)');
+    alert(t('student_gamification.portfolio_exported'));
   };
 
   const getBadgeIcon = (badgeName: string) => {
@@ -156,8 +158,8 @@ export default function GamificationPage() {
               >
                 <Crown className="w-24 h-24 mx-auto mb-4 text-yellow-400" />
               </motion.div>
-              <h2 className="text-4xl font-bold mb-2">LEVEL UP!</h2>
-              <p className="text-2xl">Niveau {profile?.level}</p>
+              <h2 className="text-4xl font-bold mb-2">{t('student_gamification.level_up')}</h2>
+              <p className="text-2xl">{t('student_gamification.level_label')} {profile?.level}</p>
             </div>
           </motion.div>
         )}
@@ -175,8 +177,8 @@ export default function GamificationPage() {
         className="welcome-banner relative overflow-hidden"
       >
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold mb-2">Mon Parcours</h1>
-          <p className="opacity-90">Continue comme ça, chaque effort compte!</p>
+          <h1 className="text-3xl font-bold mb-2">{t('student_gamification.my_journey')}</h1>
+          <p className="opacity-90">{t('student_gamification.continue_msg')}</p>
         </div>
         <div className="absolute -right-10 -top-10 opacity-20">
           <Rocket className="w-40 h-40" />
@@ -193,10 +195,10 @@ export default function GamificationPage() {
         >
           <div className="flex items-center justify-between mb-2">
             <Trophy className="w-8 h-8 text-yellow-500" />
-            <span className="text-xs text-slate-400">Total</span>
+            <span className="text-xs text-slate-400">{t('student_gamification.total')}</span>
           </div>
           <p className="text-3xl font-bold text-slate-800">{profile?.xp_total?.toLocaleString() || 0}</p>
-          <p className="text-sm text-slate-500">Points XP</p>
+          <p className="text-sm text-slate-500">{t('student_gamification.xp_total')}</p>
         </motion.div>
 
         <motion.div 
@@ -207,13 +209,13 @@ export default function GamificationPage() {
         >
           <div className="flex items-center justify-between mb-2">
             <Medal className="w-8 h-8 text-indigo-500" />
-            <span className="text-xs text-slate-400">Niveau</span>
+            <span className="text-xs text-slate-400">{t('student_gamification.level_label')}</span>
           </div>
           <p className="text-3xl font-bold text-slate-800">{profile?.level || 1}</p>
           <div className="skill-bar mt-2">
             <div className="skill-bar-fill" style={{ width: `${Math.min(progress, 100)}%` }}></div>
           </div>
-          <p className="text-xs text-slate-400 mt-1">{Math.round(progress)}% vers le prochain niveau</p>
+          <p className="text-xs text-slate-400 mt-1">{Math.round(progress)}% {t('student_gamification.level_progress')}</p>
         </motion.div>
 
         <motion.div 
@@ -228,10 +230,10 @@ export default function GamificationPage() {
             ) : (
               <Flame className="w-8 h-8 text-slate-300" />
             )}
-            <span className="text-xs text-slate-400">Série</span>
+            <span className="text-xs text-slate-400">{t('student_gamification.streak_label')}</span>
           </div>
           <p className="text-3xl font-bold text-slate-800">{profile?.streak_days || 0}</p>
-          <p className="text-sm text-slate-500">Jours consécutifs</p>
+          <p className="text-sm text-slate-500">{t('student_gamification.streak_days')}</p>
         </motion.div>
 
         <motion.div 
@@ -242,10 +244,10 @@ export default function GamificationPage() {
         >
           <div className="flex items-center justify-between mb-2">
             <Target className="w-8 h-8 text-green-500" />
-            <span className="text-xs text-slate-400">Rang</span>
+            <span className="text-xs text-slate-400">{t('student_gamification.rank')}</span>
           </div>
           <p className="text-3xl font-bold text-slate-800">#{myRank >= 0 ? myRank + 1 : '-'}</p>
-          <p className="text-sm text-slate-500">Classement</p>
+          <p className="text-sm text-slate-500">{t('student_gamification.leaderboard')}</p>
         </motion.div>
       </div>
 
@@ -261,11 +263,11 @@ export default function GamificationPage() {
           className="portfolio-export-btn"
         >
           <Download className="w-5 h-5" />
-          Exporter mon Portfolio
+          {t('student_gamification.export_portfolio')}
         </button>
         <button className="btn-secondary flex items-center gap-2">
           <Share2 className="w-4 h-4" />
-          Partager
+          {t('student_gamification.share')}
         </button>
       </motion.div>
 
@@ -275,9 +277,9 @@ export default function GamificationPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <h2 className="font-semibold text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-yellow-500" />
-              Mes Badges
+              {t('student_gamification.my_badges')}
             </h2>
-            <span className="text-sm text-slate-400">{badges?.length || 0} obtenus</span>
+            <span className="text-sm text-slate-400">{t('student_gamification.badges_obtained', { count: badges?.length || 0 })}</span>
           </CardHeader>
           <CardBody>
             {badges && badges.length > 0 ? (
@@ -308,8 +310,8 @@ export default function GamificationPage() {
             ) : (
               <div className="text-center py-8">
                 <Award className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-400">Aucun badge obtenu</p>
-                <p className="text-sm text-slate-400">Complète des quizzes pour en gagner!</p>
+                <p className="text-slate-400">{t('student_gamification.no_badges')}</p>
+                <p className="text-sm text-slate-400">{t('student_gamification.no_badges_hint')}</p>
               </div>
             )}
           </CardBody>
@@ -320,9 +322,9 @@ export default function GamificationPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <h2 className="font-semibold text-lg flex items-center gap-2">
               <Crown className="w-5 h-5 text-yellow-500" />
-              Classement
+              {t('student_gamification.leaderboard')}
             </h2>
-            <span className="text-sm text-slate-400">Top 10</span>
+            <span className="text-sm text-slate-400">{t('student_gamification.top10')}</span>
           </CardHeader>
           <CardBody>
             <div className="space-y-2">
@@ -347,7 +349,7 @@ export default function GamificationPage() {
                       </div>
                       <div>
                         <p className="font-semibold">{entry.first_name} {entry.last_name}</p>
-                        <p className="text-xs opacity-70">Niveau {entry.level}</p>
+                        <p className="text-xs opacity-70">{t('student_gamification.level_label')} {entry.level}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -368,7 +370,7 @@ export default function GamificationPage() {
           <CardHeader>
             <h2 className="font-semibold text-lg flex items-center gap-2">
               <Target className="w-5 h-5 text-indigo-500" />
-              Badges à débloquer
+              {t('student_gamification.badges_to_unlock')}
             </h2>
           </CardHeader>
           <CardBody>
@@ -400,7 +402,7 @@ export default function GamificationPage() {
         <CardHeader>
           <h2 className="font-semibold text-lg flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-green-500" />
-            Historique des gains XP
+            {t('student_gamification.xp_history')}
           </h2>
         </CardHeader>
         <CardBody>
@@ -423,7 +425,7 @@ export default function GamificationPage() {
               </motion.div>
             ))}
             {(!xpHistory || xpHistory.length === 0) && (
-              <p className="text-center text-slate-400 py-4">Aucun historique disponible</p>
+              <p className="text-center text-slate-400 py-4">{t('student_gamification.no_history')}</p>
             )}
           </div>
         </CardBody>

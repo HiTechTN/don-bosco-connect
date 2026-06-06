@@ -5,8 +5,10 @@ import { ClipboardList, UserCheck, MessageSquare, GraduationCap } from 'lucide-r
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function ParentDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
@@ -16,21 +18,21 @@ export default function ParentDashboard() {
   });
 
   const cards = [
-    { label: 'Notes', icon: ClipboardList, color: 'bg-blue-100 text-blue-600', path: '/parent/grades' },
-    { label: 'Absences', icon: UserCheck, color: 'bg-orange-100 text-orange-600', path: '/parent/absences' },
-    { label: 'Messages', icon: MessageSquare, color: 'bg-purple-100 text-purple-600', path: '/parent/messages' },
+    { label: t('parent_dashboard.card_grades'), icon: ClipboardList, color: 'bg-blue-100 text-blue-600', path: '/parent/grades' },
+    { label: t('parent_dashboard.card_absences'), icon: UserCheck, color: 'bg-orange-100 text-orange-600', path: '/parent/absences' },
+    { label: t('parent_dashboard.card_messages'), icon: MessageSquare, color: 'bg-purple-100 text-purple-600', path: '/parent/messages' },
   ];
 
   return (
     <div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold mb-2">Bonjour, {user?.first_name}</h1>
-        <p className="text-gray-500 mb-6">Espace parent - Suivez la scolarité de vos enfants</p>
+        <h1 className="text-2xl font-bold mb-2">{t('parent_dashboard.title', { name: user?.first_name })}</h1>
+        <p className="text-gray-500 mb-6">{t('parent_dashboard.subtitle')}</p>
       </motion.div>
 
       {children?.length > 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
-          <h2 className="font-semibold mb-3 flex items-center gap-2"><GraduationCap className="h-5 w-5 text-blue-500" /> Mes enfants</h2>
+          <h2 className="font-semibold mb-3 flex items-center gap-2"><GraduationCap className="h-5 w-5 text-blue-500" /> {t('parent_dashboard.my_children')}</h2>
           <div className="flex gap-3">
             {children.map((c: Record<string, unknown>) => (
               <div key={c.id} className="bg-white px-5 py-3 rounded-xl shadow-sm flex items-center gap-3">

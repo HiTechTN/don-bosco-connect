@@ -1,5 +1,7 @@
 import AIChat from '../../components/AIChat/AIChat';
+import { useTranslation } from 'react-i18next';
 
 export default function TeacherAI() {
-  return <AIChat title="Assistant IA Enseignant" placeholder="Pose une question sur les cours..." />;
+  const { t } = useTranslation();
+  return <AIChat title={t('teacher_ai.title')} placeholder={t('teacher_ai.placeholder')} />;
 }

@@ -2,9 +2,9 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../lib/api';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
-const dayLabels: Record<string, string> = { monday: 'Lundi', tuesday: 'Mardi', wednesday: 'Mercredi', thursday: 'Jeudi', friday: 'Vendredi' };
 const periods = [
   { label: '08:00 - 09:00', start: '08:00' }, { label: '09:00 - 10:00', start: '09:00' },
   { label: '10:00 - 11:00', start: '10:00' }, { label: '11:00 - 12:00', start: '11:00' },
@@ -13,7 +13,9 @@ const periods = [
 ];
 
 export default function StudentTimetable() {
+  const { t } = useTranslation();
   const { data: slots } = useQuery({ queryKey: ['my-timetable'], queryFn: () => api.get('/timetable/my').then(r => r.data) });
+  const dayLabels: Record<string, string> = { monday: t('student_timetable.day_monday'), tuesday: t('student_timetable.day_tuesday'), wednesday: t('student_timetable.day_wednesday'), thursday: t('student_timetable.day_thursday'), friday: t('student_timetable.day_friday') };
 
   function getSlot(day: string, startTime: string) {
     return slots?.find((s: any) => s.day === day && s.start_time === startTime);
@@ -21,12 +23,12 @@ export default function StudentTimetable() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Mon emploi du temps</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('student_timetable.title')}</h1>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-xl shadow-sm overflow-x-auto">
         <table className="w-full min-w-[700px]">
           <thead>
             <tr className="bg-gray-50">
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Horaire</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">{t('student_timetable.time_slot')}</th>
               {days.map((d) => <th key={d} className="px-4 py-3 text-left text-sm font-medium text-gray-500">{dayLabels[d]}</th>)}
             </tr>
           </thead>
