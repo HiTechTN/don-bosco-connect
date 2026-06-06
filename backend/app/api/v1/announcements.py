@@ -23,7 +23,7 @@ async def list_announcements(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     """List all announcements (draft+published+archived). Admin only."""
     return await AnnouncementService.list_admin(db, page, per_page, status, category, q)
@@ -33,7 +33,7 @@ async def list_announcements(
 async def get_announcement(
     announcement_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     """Get announcement details. Admin only."""
     ann = await AnnouncementService.get_by_id(db, announcement_id)
@@ -56,7 +56,7 @@ async def get_announcement(
 async def create_announcement(
     data: dict,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     """Create a new announcement (draft by default)."""
     ann = await AnnouncementService.create(db, data, str(current_user.id))
@@ -78,7 +78,7 @@ async def update_announcement(
     announcement_id: str,
     data: dict,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     """Update an announcement."""
     ann = await AnnouncementService.update(db, announcement_id, data)
@@ -96,7 +96,7 @@ async def update_announcement(
 async def publish_announcement(
     announcement_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     """Publish an announcement (status → published)."""
     ann = await AnnouncementService.publish(db, announcement_id)
@@ -122,7 +122,7 @@ async def publish_announcement(
 async def archive_announcement(
     announcement_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     """Archive an announcement."""
     ann = await AnnouncementService.archive(db, announcement_id)
@@ -148,7 +148,7 @@ async def archive_announcement(
 async def delete_announcement(
     announcement_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ) -> None:
     """Delete an announcement (hard delete)."""
     ok = await AnnouncementService.delete(db, announcement_id)

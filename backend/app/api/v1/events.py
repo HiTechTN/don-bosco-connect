@@ -46,7 +46,7 @@ async def list_events(
 async def create_event(
     data: EventCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     event = SchoolEvent(
         id=uuid4(),
@@ -70,7 +70,7 @@ async def update_event(
     event_id: str,
     data: EventUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ):
     result = await db.execute(select(SchoolEvent).where(SchoolEvent.id == event_id))
     event = result.scalar_one_or_none()
@@ -93,7 +93,7 @@ async def update_event(
 async def delete_event(
     event_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.admin])),
+    current_user: User = Depends(require_roles(UserRole.admin)),
 ) -> None:
     result = await db.execute(select(SchoolEvent).where(SchoolEvent.id == event_id))
     event = result.scalar_one_or_none()
