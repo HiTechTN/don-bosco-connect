@@ -1,0 +1,105 @@
+"""
+Error codes for API responses.
+
+The frontend maps these codes to translated strings via i18n.
+This keeps the API language-agnostic and avoids server-side i18n dependencies.
+"""
+
+
+# ── Authentication & Authorization ──────────────────────────────────────
+AUTH_TOKEN_MISSING = "AUTH_TOKEN_MISSING"
+AUTH_TOKEN_INVALID = "AUTH_TOKEN_INVALID"
+AUTH_TOKEN_EXPIRED = "AUTH_TOKEN_EXPIRED"
+AUTH_USER_INACTIVE = "AUTH_USER_INACTIVE"
+AUTH_MFA_REQUIRED = "AUTH_MFA_REQUIRED"
+AUTH_MFA_ALREADY_ENABLED = "AUTH_MFA_ALREADY_ENABLED"
+AUTH_MFA_INVALID_CODE = "AUTH_MFA_INVALID_CODE"
+AUTH_REFRESH_MISSING = "AUTH_REFRESH_MISSING"
+AUTH_REFRESH_INVALID = "AUTH_REFRESH_INVALID"
+AUTH_PASSWORD_OLD_INCORRECT = "AUTH_PASSWORD_OLD_INCORRECT"
+AUTH_CREDENTIALS_INVALID = "AUTH_CREDENTIALS_INVALID"
+
+# ── Generic ──────────────────────────────────────────────────────────────
+NOT_FOUND = "NOT_FOUND"
+INVALID_ID = "INVALID_ID"
+FORBIDDEN = "FORBIDDEN"
+CONFLICT = "CONFLICT"
+
+# ── Users ────────────────────────────────────────────────────────────────
+USER_NOT_FOUND = "USER_NOT_FOUND"
+USER_INVALID_ID = "USER_INVALID_ID"
+USER_EMAIL_EXISTS = "USER_EMAIL_EXISTS"
+USER_CANNOT_CHANGE_OWN_ROLE = "USER_CANNOT_CHANGE_OWN_ROLE"
+USER_CANNOT_DEACTIVATE_SELF = "USER_CANNOT_DEACTIVATE_SELF"
+USER_DEACTIVATED = "USER_DEACTIVATED"
+
+# ── Classes & Enrollments ────────────────────────────────────────────────
+CLASS_NOT_FOUND = "CLASS_NOT_FOUND"
+CLASS_INVALID_ID = "CLASS_INVALID_ID"
+CLASS_FULL = "CLASS_FULL"
+ENROLLMENT_NOT_FOUND = "ENROLLMENT_NOT_FOUND"
+ENROLLMENT_INVALID_ID = "ENROLLMENT_INVALID_ID"
+YEAR_NOT_FOUND = "YEAR_NOT_FOUND"
+YEAR_EXISTS = "YEAR_EXISTS"
+TEACHER_NOT_FOUND = "TEACHER_NOT_FOUND"
+STUDENT_NOT_FOUND = "STUDENT_NOT_FOUND"
+
+# ── Announcements ────────────────────────────────────────────────────────
+ANNOUNCEMENT_NOT_FOUND = "ANNOUNCEMENT_NOT_FOUND"
+ANNOUNCEMENT_EMOJI_REQUIRED = "ANNOUNCEMENT_EMOJI_REQUIRED"
+REACTION_ALREADY_ADDED = "REACTION_ALREADY_ADDED"
+REACTION_NOT_FOUND = "REACTION_NOT_FOUND"
+
+# ── Courses ──────────────────────────────────────────────────────────────
+COURSE_NOT_FOUND = "COURSE_NOT_FOUND"
+COURSE_INVALID_ID = "COURSE_INVALID_ID"
+COURSE_NOT_PUBLISHED = "COURSE_NOT_PUBLISHED"
+COURSE_FILE_NOT_FOUND = "COURSE_FILE_NOT_FOUND"
+
+# ── Evaluations & Grades ────────────────────────────────────────────────
+EVALUATION_NOT_FOUND = "EVALUATION_NOT_FOUND"
+EVALUATION_INVALID_ID = "EVALUATION_INVALID_ID"
+GRADES_NOT_PUBLISHED = "GRADES_NOT_PUBLISHED"
+GRADES_NOT_AVAILABLE = "GRADES_NOT_AVAILABLE"
+
+# ── Absences ─────────────────────────────────────────────────────────────
+ABSENCE_NOT_FOUND = "ABSENCE_NOT_FOUND"
+ABSENCE_INVALID_ID = "ABSENCE_INVALID_ID"
+
+# ── Subjects ─────────────────────────────────────────────────────────────
+SUBJECT_NOT_FOUND = "SUBJECT_NOT_FOUND"
+SUBJECT_INVALID_ID = "SUBJECT_INVALID_ID"
+SUBJECT_CODE_EXISTS = "SUBJECT_CODE_EXISTS"
+
+# ── Timetable ────────────────────────────────────────────────────────────
+TIMETABLE_SLOT_NOT_FOUND = "TIMETABLE_SLOT_NOT_FOUND"
+TIMETABLE_SLOT_INVALID_ID = "TIMETABLE_SLOT_INVALID_ID"
+TIMETABLE_SLOT_EXISTS = "TIMETABLE_SLOT_EXISTS"
+
+# ── Messages ─────────────────────────────────────────────────────────────
+MESSAGE_THREAD_INVALID_ID = "MESSAGE_THREAD_INVALID_ID"
+MESSAGE_THREAD_FORBIDDEN = "MESSAGE_THREAD_FORBIDDEN"
+
+# ── Gamification ─────────────────────────────────────────────────────────
+GAMIFICATION_STUDENTS_ONLY = "GAMIFICATION_STUDENTS_ONLY"
+GAMIFICATION_ADMIN_TEACHER_ONLY = "GAMIFICATION_ADMIN_TEACHER_ONLY"
+
+# ── AI ───────────────────────────────────────────────────────────────────
+AI_CONVERSATION_NOT_FOUND = "AI_CONVERSATION_NOT_FOUND"
+AI_MESSAGE_NOT_FOUND = "AI_MESSAGE_NOT_FOUND"
+AI_COURSE_NOT_FOUND = "AI_COURSE_NOT_FOUND"
+AI_QUIZ_NOT_FOUND = "AI_QUIZ_NOT_FOUND"
+AI_PARSE_ERROR = "AI_PARSE_ERROR"
+
+# ── Reports ──────────────────────────────────────────────────────────────
+REPORT_STUDENT_INVALID = "REPORT_STUDENT_INVALID"
+REPORT_ACCESS_DENIED = "REPORT_ACCESS_DENIED"
+
+# ── Analytics ────────────────────────────────────────────────────────────
+ANALYTICS_TEACHERS_ONLY = "ANALYTICS_TEACHERS_ONLY"
+
+# ── Events ───────────────────────────────────────────────────────────────
+EVENT_NOT_FOUND = "EVENT_NOT_FOUND"
+
+# ── Notifications ────────────────────────────────────────────────────────
+NOTIFICATION_NOT_FOUND = "NOTIFICATION_NOT_FOUND"

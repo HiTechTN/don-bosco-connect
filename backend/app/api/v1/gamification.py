@@ -28,7 +28,7 @@ async def get_my_profile(
     db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role != "student":
-        raise HTTPException(status_code=403, detail="Réservé aux élèves")
+        raise HTTPException(status_code=403, detail={"error": {"code": "GAMIFICATION_STUDENTS_ONLY", "message": "Réservé aux élèves"}})
     return await get_or_create_profile(db, str(current_user.id))
 
 
@@ -64,7 +64,7 @@ async def my_badges(
     db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role != "student":
-        raise HTTPException(status_code=403, detail="Réservé aux élèves")
+        raise HTTPException(status_code=403, detail={"error": {"code": "GAMIFICATION_STUDENTS_ONLY", "message": "Réservé aux élèves"}})
     result = await db.execute(
         select(StudentBadge).where(StudentBadge.student_id == current_user.id)
     )
@@ -107,7 +107,7 @@ async def xp_history(
     db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role != "student":
-        raise HTTPException(status_code=403, detail="Réservé aux élèves")
+        raise HTTPException(status_code=403, detail={"error": {"code": "GAMIFICATION_STUDENTS_ONLY", "message": "Réservé aux élèves"}})
     result = await db.execute(
         select(XPTransaction)
         .where(XPTransaction.student_id == current_user.id)
@@ -125,6 +125,6 @@ async def dropout_risk(
     """List students at risk of dropping out. Accessible by admin and teachers."""
     if current_user.role not in ("admin", "teacher"):
         raise HTTPException(
-            status_code=403, detail="Accès réservé aux administrateurs et enseignants"
+            status_code=403, detail={"error": {"code": "GAMIFICATION_ADMIN_TEACHER_ONLY", "message": "Accès réservé aux administrateurs et enseignants"}}
         )
     return await get_at_risk_students(db, class_id)

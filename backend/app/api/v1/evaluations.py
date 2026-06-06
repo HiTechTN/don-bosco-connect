@@ -59,13 +59,13 @@ async def get_evaluation(
     try:
         eval_uuid = uuid.UUID(evaluation_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID évaluation invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "EVALUATION_INVALID_ID", "message": "ID évaluation invalide"}})
     result = await db.execute(select(Evaluation).where(Evaluation.id == eval_uuid))
     eval_ = result.scalar_one_or_none()
     if not eval_:
         raise NotFoundException("Évaluation non trouvée")
     if current_user.role == UserRole.student and not eval_.is_published:
-        raise HTTPException(status_code=403, detail="Notes non publiées")
+        raise HTTPException(status_code=403, detail={"error": {"code": "GRADES_NOT_PUBLISHED", "message": "Notes non publiées"}})
     return EvaluationResponse.model_validate(eval_)
 
 
@@ -79,7 +79,7 @@ async def update_evaluation(
     try:
         eval_uuid = uuid.UUID(evaluation_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID évaluation invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "EVALUATION_INVALID_ID", "message": "ID évaluation invalide"}})
     result = await db.execute(select(Evaluation).where(Evaluation.id == eval_uuid))
     eval_ = result.scalar_one_or_none()
     if not eval_:
@@ -99,7 +99,7 @@ async def delete_evaluation(
     try:
         eval_uuid = uuid.UUID(evaluation_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID évaluation invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "EVALUATION_INVALID_ID", "message": "ID évaluation invalide"}})
     result = await db.execute(select(Evaluation).where(Evaluation.id == eval_uuid))
     eval_ = result.scalar_one_or_none()
     if not eval_:
@@ -118,14 +118,14 @@ async def get_grades(
     try:
         eval_uuid = uuid.UUID(evaluation_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID évaluation invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "EVALUATION_INVALID_ID", "message": "ID évaluation invalide"}})
     result = await db.execute(select(Evaluation).where(Evaluation.id == eval_uuid))
     eval_ = result.scalar_one_or_none()
     if not eval_:
         raise NotFoundException("Évaluation non trouvée")
     if current_user.role == UserRole.student:
         if not eval_.is_published:
-            raise HTTPException(status_code=403, detail="Notes non disponibles")
+            raise HTTPException(status_code=403, detail={"error": {"code": "GRADES_NOT_AVAILABLE", "message": "Notes non disponibles"}})
         result = await db.execute(
             select(Grade).where(
                 Grade.evaluation_id == eval_uuid, Grade.student_id == current_user.id
@@ -147,7 +147,7 @@ async def add_grades(
     try:
         eval_uuid = uuid.UUID(evaluation_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID évaluation invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "EVALUATION_INVALID_ID", "message": "ID évaluation invalide"}})
     result = await db.execute(select(Evaluation).where(Evaluation.id == eval_uuid))
     if not result.scalar_one_or_none():
         raise NotFoundException("Évaluation non trouvée")

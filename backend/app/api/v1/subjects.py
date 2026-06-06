@@ -71,7 +71,7 @@ async def get_subject(
     try:
         subject_uuid = uuid.UUID(subject_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID matière invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}})
     result = await db.execute(select(Subject).where(Subject.id == subject_uuid))
     subject = result.scalar_one_or_none()
     if not subject:
@@ -89,7 +89,7 @@ async def update_subject(
     try:
         subject_uuid = uuid.UUID(subject_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID matière invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}})
     result = await db.execute(select(Subject).where(Subject.id == subject_uuid))
     subject = result.scalar_one_or_none()
     if not subject:
@@ -120,7 +120,7 @@ async def delete_subject(
     try:
         subject_uuid = uuid.UUID(subject_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID matière invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}})
     result = await db.execute(select(Subject).where(Subject.id == subject_uuid))
     subject = result.scalar_one_or_none()
     if not subject:

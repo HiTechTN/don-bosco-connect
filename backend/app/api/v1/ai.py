@@ -84,7 +84,7 @@ async def get_messages(
 ):
     conv = await db.get(AIConversation, conversation_id)
     if not conv or conv.student_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Conversation non trouvée")
+        raise HTTPException(status_code=404, detail={"error": {"code": "AI_CONVERSATION_NOT_FOUND", "message": "Conversation non trouvée"}})
     result = await db.execute(
         select(AIMessage)
         .where(AIMessage.conversation_id == conversation_id)
@@ -102,7 +102,7 @@ async def send_message(
 ):
     conv = await db.get(AIConversation, conversation_id)
     if not conv or conv.student_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Conversation non trouvée")
+        raise HTTPException(status_code=404, detail={"error": {"code": "AI_CONVERSATION_NOT_FOUND", "message": "Conversation non trouvée"}})
 
     # Store user message
     user_msg = AIMessage(
@@ -164,7 +164,7 @@ async def message_feedback(
 ):
     msg = await db.get(AIMessage, message_id)
     if not msg or str(msg.conversation_id) != conversation_id:
-        raise HTTPException(status_code=404, detail="Message non trouvé")
+        raise HTTPException(status_code=404, detail={"error": {"code": "AI_MESSAGE_NOT_FOUND", "message": "Message non trouvé"}})
     msg.feedback = feedback
     await db.commit()
     return {"message": "Feedback enregistré"}
@@ -214,7 +214,7 @@ async def generate_quiz(
 ):
     course = await db.get(Course, body.course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Cours non trouvé")
+        raise HTTPException(status_code=404, detail={"error": {"code": "AI_COURSE_NOT_FOUND", "message": "Cours non trouvé"}})
 
     chunks = await db.execute(
         select(DocumentChunk).where(DocumentChunk.course_id == body.course_id).limit(5)
@@ -254,7 +254,7 @@ async def generate_quiz(
         if match:
             quiz_data = json.loads(match.group(1))
         else:
-            raise HTTPException(status_code=500, detail="Impossible de parser la réponse du modèle")
+            raise HTTPException(status_code=500, detail={"error": {"code": "AI_PARSE_ERROR", "message": "Impossible de parser la réponse du modèle"}})
 
     quiz = Quiz(
         id=uuid4(),
@@ -319,7 +319,7 @@ async def get_quiz(
 ):
     quiz = await db.get(Quiz, quiz_id)
     if not quiz:
-        raise HTTPException(status_code=404, detail="Quiz non trouvé")
+        raise HTTPException(status_code=404, detail={"error": {"code": "AI_QUIZ_NOT_FOUND", "message": "Quiz non trouvé"}})
     return quiz
 
 
@@ -332,7 +332,7 @@ async def submit_quiz(
 ):
     quiz = await db.get(Quiz, quiz_id)
     if not quiz:
-        raise HTTPException(status_code=404, detail="Quiz non trouvé")
+        raise HTTPException(status_code=404, detail={"error": {"code": "AI_QUIZ_NOT_FOUND", "message": "Quiz non trouvé"}})
 
     questions = (
         (

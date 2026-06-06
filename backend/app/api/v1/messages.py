@@ -70,7 +70,7 @@ async def get_messages(
     try:
         tid = uuid.UUID(thread_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID fil invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "MESSAGE_THREAD_INVALID_ID", "message": "ID fil invalide"}})
 
     part = await db.execute(
         select(ThreadParticipant).where(
@@ -106,7 +106,7 @@ async def post_message(
     try:
         tid = uuid.UUID(thread_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID fil invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "MESSAGE_THREAD_INVALID_ID", "message": "ID fil invalide"}})
 
     part = await db.execute(
         select(ThreadParticipant).where(

@@ -137,7 +137,7 @@ async def get_class(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID classe invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
@@ -155,7 +155,7 @@ async def update_class(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID classe invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
@@ -188,7 +188,7 @@ async def delete_class(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID classe invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
@@ -210,7 +210,7 @@ async def list_class_students(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID classe invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
     result = await db.execute(
         select(ClassEnrollment, User)
         .join(User, ClassEnrollment.student_id == User.id)
@@ -241,7 +241,7 @@ async def enroll_student(
         student_uuid = uuid.UUID(enrollment_data.student_id)
         academic_year_uuid = uuid.UUID(enrollment_data.academic_year_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}})
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
@@ -300,7 +300,7 @@ async def unenroll_student(
         student_uuid = uuid.UUID(student_id)
         academic_year_uuid = uuid.UUID(academic_year_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}})
     result = await db.execute(
         select(ClassEnrollment).where(
             and_(
@@ -330,7 +330,7 @@ async def delete_enrollment(
     try:
         enr_uuid = uuid.UUID(enrollment_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID inscription invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "ENROLLMENT_INVALID_ID", "message": "ID inscription invalide"}})
     result = await db.execute(select(ClassEnrollment).where(ClassEnrollment.id == enr_uuid))
     enrollment = result.scalar_one_or_none()
     if not enrollment:

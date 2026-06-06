@@ -28,7 +28,7 @@ async def get_my_timetable(
     db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role not in (UserRole.student, UserRole.teacher):
-        raise HTTPException(status_code=403, detail="Réservé aux élèves et enseignants")
+        raise HTTPException(status_code=403, detail={"error": {"code": "FORBIDDEN", "message": "Réservé aux élèves et enseignants"}})
 
     if current_user.role == UserRole.student:
         result = await db.execute(
@@ -169,7 +169,7 @@ async def update_timetable_slot(
     try:
         slot_uuid = uuid.UUID(slot_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID créneau invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "TIMETABLE_SLOT_INVALID_ID", "message": "ID créneau invalide"}})
     result = await db.execute(select(TimetableSlot).where(TimetableSlot.id == slot_uuid))
     slot = result.scalar_one_or_none()
     if not slot:
@@ -200,7 +200,7 @@ async def delete_timetable_slot(
     try:
         slot_uuid = uuid.UUID(slot_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID créneau invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "TIMETABLE_SLOT_INVALID_ID", "message": "ID créneau invalide"}})
     result = await db.execute(select(TimetableSlot).where(TimetableSlot.id == slot_uuid))
     slot = result.scalar_one_or_none()
     if not slot:

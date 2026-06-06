@@ -53,7 +53,7 @@ async def get_absence(
     try:
         abs_uuid = uuid.UUID(absence_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID absence invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "ABSENCE_INVALID_ID", "message": "ID absence invalide"}})
     result = await db.execute(select(Absence).where(Absence.id == abs_uuid))
     absence = result.scalar_one_or_none()
     if not absence:
@@ -71,7 +71,7 @@ async def justify_absence(
     try:
         abs_uuid = uuid.UUID(absence_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="ID absence invalide")
+        raise HTTPException(status_code=400, detail={"error": {"code": "ABSENCE_INVALID_ID", "message": "ID absence invalide"}})
     result = await db.execute(select(Absence).where(Absence.id == abs_uuid))
     absence = result.scalar_one_or_none()
     if not absence:
