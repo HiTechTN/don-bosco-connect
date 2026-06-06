@@ -1,17 +1,18 @@
 """Shared fixtures for backend tests.
 
-Root-cause fix for pytest-asyncio "Event loop is closed" error:
-Override the ``event_loop`` fixture at **session** scope so that every test
-and every async fixture shares a single loop that stays alive for the entire
-test session.  The engine is also session-scoped (tables created once,
-disposed once).  ``db_session`` is function-scoped — each test gets a fresh
-session backed by a connection from the pool.
+The engine is session-scoped (tables created once, disposed once).
+``db_session`` is function-scoped — each test gets a fresh session backed
+by a dedicated connection from the pool.
+
+Note: we intentionally do NOT override the ``event_loop`` fixture.
+In pytest-asyncio >=0.23 with ``asyncio_mode = auto``, overriding it
+deprecation causes ``RuntimeError: Task … got Future … attached to a
+different loop`` because the session-scoped loop conflicts with the
+framework's own loop management.
 """
-import asyncio
 import uuid
 from collections.abc import AsyncGenerator
 
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
@@ -28,23 +29,6 @@ from app.main import app
 from app.models.base import User, UserRole
 
 TEST_DATABASE_URL = settings.DATABASE_URL
-
-
-# ---------------------------------------------------------------------------
-# Session-scoped event loop — single loop for all tests and fixtures
-# ---------------------------------------------------------------------------
-@pytest.fixture(scope="session")
-def event_loop():
-    """Session-scoped event loop.
-
-    Overriding the default function-scoped loop prevents the
-    "Event loop is closed" error that occurs when session-scoped
-    fixtures (like ``engine``) try to tear down after the loop
-    has already been closed by a function-scoped loop.
-    """
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 # ---------------------------------------------------------------------------
