@@ -6,9 +6,9 @@ from sqlalchemy import (
     Column,
     Date,
     DateTime,
-    Float,
     ForeignKey,
     Integer,
+    Numeric,
     String,
     Text,
     Time,
@@ -69,7 +69,7 @@ class Subject(Base):
     name_ar = Column(String(100))
     code = Column(String(20), unique=True, nullable=False)
     color = Column(String(7), default="#3B82F6")
-    coefficient = Column(Float, default=1.0)
+    coefficient = Column(Numeric(3, 1), default=1.0)
     description = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

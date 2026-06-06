@@ -6,9 +6,9 @@ from sqlalchemy import (
     Column,
     Date,
     DateTime,
-    Float,
     ForeignKey,
     Integer,
+    Numeric,
     String,
     Text,
     Time,
@@ -32,8 +32,8 @@ class Evaluation(Base):
     class_id = Column(UUID(as_uuid=True), ForeignKey("classes.id"))
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"))
-    max_score = Column(Float, default=20.0)
-    coefficient = Column(Float, default=1.0)
+    max_score = Column(Numeric(5, 2), default=20.0)
+    coefficient = Column(Numeric(3, 1), default=1.0)
     date = Column(Date, nullable=False)
     is_published = Column(Boolean, default=False)
     is_ai_generated = Column(Boolean, default=False)
@@ -46,7 +46,7 @@ class Grade(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     evaluation_id = Column(UUID(as_uuid=True), ForeignKey("evaluations.id", ondelete="CASCADE"))
     student_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    score = Column(Float)
+    score = Column(Numeric(5, 2))
     comment = Column(Text)
     is_absent = Column(Boolean, default=False)
     graded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
@@ -87,8 +87,8 @@ class QuizAttempt(Base):
     quiz_id = Column(UUID(as_uuid=True), ForeignKey("quizzes.id", ondelete="CASCADE"))
     student_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
     answers = Column(JSON, default=[])
-    score = Column(Float)
-    max_score = Column(Float)
+    score = Column(Numeric(5, 2))
+    max_score = Column(Numeric(5, 2))
     duration_seconds = Column(Integer)
     completed_at = Column(DateTime(timezone=True))
     adaptive_level_before = Column(
