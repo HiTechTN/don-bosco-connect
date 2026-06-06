@@ -5,6 +5,16 @@ from sqlalchemy import and_, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import (
+    CLASS_FULL,
+    CLASS_NOT_FOUND,
+    ENROLLMENT_EXISTS,
+    ENROLLMENT_NOT_FOUND,
+    STUDENT_NOT_FOUND,
+    TEACHER_NOT_FOUND,
+    YEAR_EXISTS,
+    YEAR_NOT_FOUND,
+)
 from app.core.exceptions import ConflictException, NotFoundException
 from app.core.permissions import require_roles
 from app.database import get_db
@@ -31,7 +41,9 @@ async def create_academic_year(
     result = await db.execute(select(AcademicYear).where(AcademicYear.name == year_data.name))
     existing_year = result.scalar_one_or_none()
     if existing_year:
-        raise ConflictException("Une année scolaire avec ce nom existe déjà")
+        raise ConflictException(
+            "Une année scolaire avec ce nom existe déjà", error_code=YEAR_EXISTS
+        )
     if year_data.is_current:
         await db.execute(
             update(AcademicYear).where(AcademicYear.is_current).values(is_current=False)
@@ -72,12 +84,12 @@ async def create_class(
     )
     academic_year = result.scalar_one_or_none()
     if not academic_year:
-        raise NotFoundException("Année scolaire non trouvée")
+        raise NotFoundException("Année scolaire", error_code=YEAR_NOT_FOUND)
     if class_data.main_teacher_id:
         result = await db.execute(select(User).where(User.id == class_data.main_teacher_id))
         main_teacher = result.scalar_one_or_none()
         if not main_teacher or main_teacher.role != UserRole.teacher:
-            raise NotFoundException("Professeur principal non trouvé ou invalide")
+            raise NotFoundException("Professeur principal", error_code=TEACHER_NOT_FOUND)
     new_class = Class(
         id=uuid.uuid4(),
         academic_year_id=class_data.academic_year_id,
@@ -137,11 +149,14 @@ async def get_class(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}},
+        )
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
-        raise NotFoundException("Classe non trouvée")
+        raise NotFoundException("Classe", error_code=CLASS_NOT_FOUND)
     return ClassResponse.model_validate(class_)
 
 
@@ -155,11 +170,14 @@ async def update_class(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}},
+        )
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
-        raise NotFoundException("Classe non trouvée")
+        raise NotFoundException("Classe", error_code=CLASS_NOT_FOUND)
     if class_data.name is not None:
         class_.name = class_data.name
     if class_data.level is not None:
@@ -172,7 +190,7 @@ async def update_class(
         result = await db.execute(select(User).where(User.id == class_data.main_teacher_id))
         teacher = result.scalar_one_or_none()
         if not teacher or teacher.role != UserRole.teacher:
-            raise NotFoundException("Professeur non trouvé ou invalide")
+            raise NotFoundException("Professeur", error_code=TEACHER_NOT_FOUND)
         class_.main_teacher_id = class_data.main_teacher_id
     await db.commit()
     await db.refresh(class_)
@@ -188,11 +206,14 @@ async def delete_class(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}},
+        )
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
-        raise NotFoundException("Classe non trouvée")
+        raise NotFoundException("Classe", error_code=CLASS_NOT_FOUND)
     await db.execute(delete(ClassEnrollment).where(ClassEnrollment.class_id == class_uuid))
     await db.delete(class_)
     await db.commit()
@@ -210,7 +231,10 @@ async def list_class_students(
     try:
         class_uuid = uuid.UUID(class_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "CLASS_INVALID_ID", "message": "ID classe invalide"}},
+        )
     result = await db.execute(
         select(ClassEnrollment, User)
         .join(User, ClassEnrollment.student_id == User.id)
@@ -241,18 +265,20 @@ async def enroll_student(
         student_uuid = uuid.UUID(enrollment_data.student_id)
         academic_year_uuid = uuid.UUID(enrollment_data.academic_year_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}})
+        raise HTTPException(
+            status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}}
+        )
     result = await db.execute(select(Class).where(Class.id == class_uuid))
     class_ = result.scalar_one_or_none()
     if not class_:
-        raise NotFoundException("Classe non trouvée")
+        raise NotFoundException("Classe", error_code=CLASS_NOT_FOUND)
     result = await db.execute(select(User).where(User.id == student_uuid))
     student = result.scalar_one_or_none()
     if not student or student.role != UserRole.student:
-        raise NotFoundException("Étudiant non trouvé")
+        raise NotFoundException("Étudiant", error_code=STUDENT_NOT_FOUND)
     result = await db.execute(select(AcademicYear).where(AcademicYear.id == academic_year_uuid))
     if not result.scalar_one_or_none():
-        raise NotFoundException("Année scolaire non trouvée")
+        raise NotFoundException("Année scolaire", error_code=YEAR_NOT_FOUND)
     result = await db.execute(
         select(ClassEnrollment).where(
             and_(
@@ -263,7 +289,7 @@ async def enroll_student(
         )
     )
     if result.scalar_one_or_none():
-        raise ConflictException("L'étudiant est déjà inscrit")
+        raise ConflictException("L'étudiant est déjà inscrit", error_code=ENROLLMENT_EXISTS)
     result = await db.execute(
         select(func.count(ClassEnrollment.id)).where(
             and_(
@@ -274,7 +300,7 @@ async def enroll_student(
         )
     )
     if result.scalar() >= class_.max_students:
-        raise ConflictException("La classe est déjà complète")
+        raise ConflictException("La classe est déjà complète", error_code=CLASS_FULL)
     enrollment = ClassEnrollment(
         id=uuid.uuid4(),
         student_id=student_uuid,
@@ -300,7 +326,9 @@ async def unenroll_student(
         student_uuid = uuid.UUID(student_id)
         academic_year_uuid = uuid.UUID(academic_year_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}})
+        raise HTTPException(
+            status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}}
+        )
     result = await db.execute(
         select(ClassEnrollment).where(
             and_(
@@ -312,7 +340,7 @@ async def unenroll_student(
     )
     enrollment = result.scalar_one_or_none()
     if not enrollment:
-        raise NotFoundException("Inscription non trouvée")
+        raise NotFoundException("Inscription", error_code=ENROLLMENT_NOT_FOUND)
     await db.delete(enrollment)
     await db.commit()
     return {"message": "Étudiant désinscrit"}
@@ -330,10 +358,15 @@ async def delete_enrollment(
     try:
         enr_uuid = uuid.UUID(enrollment_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "ENROLLMENT_INVALID_ID", "message": "ID inscription invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": {"code": "ENROLLMENT_INVALID_ID", "message": "ID inscription invalide"}
+            },
+        )
     result = await db.execute(select(ClassEnrollment).where(ClassEnrollment.id == enr_uuid))
     enrollment = result.scalar_one_or_none()
     if not enrollment:
-        raise NotFoundException("Inscription non trouvée")
+        raise NotFoundException("Inscription", error_code=ENROLLMENT_NOT_FOUND)
     await db.delete(enrollment)
     await db.commit()

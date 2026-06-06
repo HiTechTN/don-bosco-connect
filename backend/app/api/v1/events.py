@@ -75,7 +75,10 @@ async def update_event(
     result = await db.execute(select(SchoolEvent).where(SchoolEvent.id == event_id))
     event = result.scalar_one_or_none()
     if not event:
-        raise HTTPException(status_code=404, detail={"error": {"code": "EVENT_NOT_FOUND", "message": "Event not found"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "EVENT_NOT_FOUND", "message": "Event not found"}},
+        )
 
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
@@ -95,7 +98,10 @@ async def delete_event(
     result = await db.execute(select(SchoolEvent).where(SchoolEvent.id == event_id))
     event = result.scalar_one_or_none()
     if not event:
-        raise HTTPException(status_code=404, detail={"error": {"code": "EVENT_NOT_FOUND", "message": "Event not found"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "EVENT_NOT_FOUND", "message": "Event not found"}},
+        )
 
     await db.execute(delete(SchoolEvent).where(SchoolEvent.id == event_id))
     await db.flush()

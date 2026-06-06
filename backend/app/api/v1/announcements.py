@@ -1,4 +1,5 @@
 """Admin announcement endpoints (RBAC admin only)."""
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -37,7 +38,10 @@ async def get_announcement(
     """Get announcement details. Admin only."""
     ann = await AnnouncementService.get_by_id(db, announcement_id)
     if not ann:
-        raise HTTPException(status_code=404, detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}},
+        )
     from app.services.announcement_service import (
         _get_reactions_aggregate,
         announcement_response_dict,
@@ -57,8 +61,11 @@ async def create_announcement(
     """Create a new announcement (draft by default)."""
     ann = await AnnouncementService.create(db, data, str(current_user.id))
     await log_audit(
-        db, user_id=current_user.id, action="announcement.create",
-        resource_type="announcement", resource_id=ann.id,
+        db,
+        user_id=current_user.id,
+        action="announcement.create",
+        resource_type="announcement",
+        resource_id=ann.id,
         metadata={"title": ann.title, "status": ann.status},
     )
     from app.services.announcement_service import announcement_response_dict
@@ -76,7 +83,10 @@ async def update_announcement(
     """Update an announcement."""
     ann = await AnnouncementService.update(db, announcement_id, data)
     if not ann:
-        raise HTTPException(status_code=404, detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}},
+        )
     from app.services.announcement_service import announcement_response_dict
 
     return announcement_response_dict(ann)
@@ -91,10 +101,16 @@ async def publish_announcement(
     """Publish an announcement (status → published)."""
     ann = await AnnouncementService.publish(db, announcement_id)
     if not ann:
-        raise HTTPException(status_code=404, detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}},
+        )
     await log_audit(
-        db, user_id=current_user.id, action="announcement.publish",
-        resource_type="announcement", resource_id=ann.id,
+        db,
+        user_id=current_user.id,
+        action="announcement.publish",
+        resource_type="announcement",
+        resource_id=ann.id,
         metadata={"title": ann.title, "visibility": ann.visibility},
     )
     from app.services.announcement_service import announcement_response_dict
@@ -111,10 +127,16 @@ async def archive_announcement(
     """Archive an announcement."""
     ann = await AnnouncementService.archive(db, announcement_id)
     if not ann:
-        raise HTTPException(status_code=404, detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}},
+        )
     await log_audit(
-        db, user_id=current_user.id, action="announcement.archive",
-        resource_type="announcement", resource_id=ann.id,
+        db,
+        user_id=current_user.id,
+        action="announcement.archive",
+        resource_type="announcement",
+        resource_id=ann.id,
         metadata={"title": ann.title},
     )
     from app.services.announcement_service import announcement_response_dict
@@ -131,9 +153,14 @@ async def delete_announcement(
     """Delete an announcement (hard delete)."""
     ok = await AnnouncementService.delete(db, announcement_id)
     if not ok:
-        raise HTTPException(status_code=404, detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}},
+        )
     await log_audit(
-        db, user_id=current_user.id, action="announcement.delete",
+        db,
+        user_id=current_user.id,
+        action="announcement.delete",
         resource_type="announcement",
         resource_id=UUID(announcement_id) if announcement_id else None,
     )
@@ -155,7 +182,10 @@ async def add_reaction(
 
     emoji = data.get("emoji", "")
     if not emoji:
-        raise HTTPException(status_code=400, detail={"error": {"code": "ANNOUNCEMENT_EMOJI_REQUIRED", "message": "Emoji requis"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "ANNOUNCEMENT_EMOJI_REQUIRED", "message": "Emoji requis"}},
+        )
 
     # Check if reaction already exists
     existing = await db.execute(
@@ -166,7 +196,12 @@ async def add_reaction(
         )
     )
     if existing.scalar_one_or_none():
-        raise HTTPException(status_code=409, detail={"error": {"code": "REACTION_ALREADY_ADDED", "message": "Réaction déjà ajoutée"}})
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": {"code": "REACTION_ALREADY_ADDED", "message": "Réaction déjà ajoutée"}
+            },
+        )
 
     reaction = AnnouncementReaction(
         id=_uuid.uuid4(),
@@ -211,7 +246,10 @@ async def remove_reaction(
     )
     reaction = result.scalar_one_or_none()
     if not reaction:
-        raise HTTPException(status_code=404, detail={"error": {"code": "REACTION_NOT_FOUND", "message": "Réaction non trouvée"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "REACTION_NOT_FOUND", "message": "Réaction non trouvée"}},
+        )
 
     await db.delete(reaction)
     await db.commit()

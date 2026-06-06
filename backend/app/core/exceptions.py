@@ -1,9 +1,9 @@
 from fastapi import HTTPException, status
 
 from app.core.error_codes import (
-    NOT_FOUND,
-    FORBIDDEN,
     CONFLICT,
+    FORBIDDEN,
+    NOT_FOUND,
 )
 
 
@@ -31,7 +31,9 @@ class NotFoundException(AppException):
 
 
 class UnauthorizedException(AppException):
-    def __init__(self, message: str = "Not authenticated", error_code: str = "unauthorized") -> None:
+    def __init__(
+        self, message: str = "Not authenticated", error_code: str = "unauthorized"
+    ) -> None:
         super().__init__(
             code=error_code,
             message=message,
@@ -40,7 +42,9 @@ class UnauthorizedException(AppException):
 
 
 class ForbiddenException(AppException):
-    def __init__(self, message: str = "Insufficient permissions", error_code: str = FORBIDDEN) -> None:
+    def __init__(
+        self, message: str = "Insufficient permissions", error_code: str = FORBIDDEN
+    ) -> None:
         super().__init__(
             code=error_code,
             message=message,
@@ -49,7 +53,9 @@ class ForbiddenException(AppException):
 
 
 class ConflictException(AppException):
-    def __init__(self, message: str = "Resource already exists", error_code: str = CONFLICT) -> None:
+    def __init__(
+        self, message: str = "Resource already exists", error_code: str = CONFLICT
+    ) -> None:
         super().__init__(
             code=error_code,
             message=message,

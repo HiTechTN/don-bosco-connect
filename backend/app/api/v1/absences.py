@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import ABSENCE_NOT_FOUND
 from app.core.exceptions import NotFoundException
 from app.core.permissions import require_roles
 from app.database import get_db
@@ -53,11 +54,14 @@ async def get_absence(
     try:
         abs_uuid = uuid.UUID(absence_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "ABSENCE_INVALID_ID", "message": "ID absence invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "ABSENCE_INVALID_ID", "message": "ID absence invalide"}},
+        )
     result = await db.execute(select(Absence).where(Absence.id == abs_uuid))
     absence = result.scalar_one_or_none()
     if not absence:
-        raise NotFoundException("Absence non trouvée")
+        raise NotFoundException("Absence", error_code=ABSENCE_NOT_FOUND)
     return AbsenceResponse.model_validate(absence)
 
 
@@ -71,11 +75,14 @@ async def justify_absence(
     try:
         abs_uuid = uuid.UUID(absence_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "ABSENCE_INVALID_ID", "message": "ID absence invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "ABSENCE_INVALID_ID", "message": "ID absence invalide"}},
+        )
     result = await db.execute(select(Absence).where(Absence.id == abs_uuid))
     absence = result.scalar_one_or_none()
     if not absence:
-        raise NotFoundException("Absence non trouvée")
+        raise NotFoundException("Absence", error_code=ABSENCE_NOT_FOUND)
     for k, v in body.model_dump(exclude_unset=True).items():
         setattr(absence, k, v)
     await db.commit()

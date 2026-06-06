@@ -62,7 +62,12 @@ async def teacher_dashboard(
     db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role not in ("admin", "teacher"):
-        raise HTTPException(status_code=403, detail={"error": {"code": "ANALYTICS_TEACHERS_ONLY", "message": "Réservé aux enseignants"}})
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": {"code": "ANALYTICS_TEACHERS_ONLY", "message": "Réservé aux enseignants"}
+            },
+        )
 
     teacher_id = current_user.id
 

@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import SUBJECT_CODE_EXISTS, SUBJECT_NOT_FOUND
 from app.core.exceptions import ConflictException, NotFoundException
 from app.core.permissions import require_roles
 from app.database import get_db
@@ -46,7 +47,9 @@ async def create_subject(
 ):
     result = await db.execute(select(Subject).where(Subject.code == subject_data.code))
     if result.scalar_one_or_none():
-        raise ConflictException("Une matière avec ce code existe déjà")
+        raise ConflictException(
+            "Une matière avec ce code existe déjà", error_code=SUBJECT_CODE_EXISTS
+        )
     subject = Subject(
         id=uuid.uuid4(),
         name=subject_data.name,
@@ -71,11 +74,14 @@ async def get_subject(
     try:
         subject_uuid = uuid.UUID(subject_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}},
+        )
     result = await db.execute(select(Subject).where(Subject.id == subject_uuid))
     subject = result.scalar_one_or_none()
     if not subject:
-        raise NotFoundException("Matière non trouvée")
+        raise NotFoundException("Matière", error_code=SUBJECT_NOT_FOUND)
     return SubjectResponse.model_validate(subject)
 
 
@@ -89,11 +95,14 @@ async def update_subject(
     try:
         subject_uuid = uuid.UUID(subject_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}},
+        )
     result = await db.execute(select(Subject).where(Subject.id == subject_uuid))
     subject = result.scalar_one_or_none()
     if not subject:
-        raise NotFoundException("Matière non trouvée")
+        raise NotFoundException("Matière", error_code=SUBJECT_NOT_FOUND)
     if subject_data.name is not None:
         subject.name = subject_data.name
     if subject_data.name_ar is not None:
@@ -120,11 +129,14 @@ async def delete_subject(
     try:
         subject_uuid = uuid.UUID(subject_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "SUBJECT_INVALID_ID", "message": "ID matière invalide"}},
+        )
     result = await db.execute(select(Subject).where(Subject.id == subject_uuid))
     subject = result.scalar_one_or_none()
     if not subject:
-        raise NotFoundException("Matière non trouvée")
+        raise NotFoundException("Matière", error_code=SUBJECT_NOT_FOUND)
     await db.delete(subject)
     await db.commit()
     return {"message": "Matière supprimée"}

@@ -1,4 +1,5 @@
 """Public announcement endpoints (no auth required)."""
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,5 +33,8 @@ async def get_public_announcement(
     """Increments views_count. Returns content_html sanitized (never content_json)."""
     result = await AnnouncementService.get_public_by_slug(db, slug)
     if not result:
-        raise HTTPException(status_code=404, detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}})
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "ANNOUNCEMENT_NOT_FOUND", "message": "Annonce non trouvée"}},
+        )
     return result

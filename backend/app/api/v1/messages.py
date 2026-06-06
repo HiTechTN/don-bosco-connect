@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import MESSAGE_THREAD_FORBIDDEN
 from app.core.exceptions import ForbiddenException
 from app.core.security import decrypt_message
 from app.database import get_db
@@ -70,7 +71,10 @@ async def get_messages(
     try:
         tid = uuid.UUID(thread_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "MESSAGE_THREAD_INVALID_ID", "message": "ID fil invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "MESSAGE_THREAD_INVALID_ID", "message": "ID fil invalide"}},
+        )
 
     part = await db.execute(
         select(ThreadParticipant).where(
@@ -78,7 +82,7 @@ async def get_messages(
         )
     )
     if not part.scalar_one_or_none():
-        raise ForbiddenException("Accès interdit à ce fil")
+        raise ForbiddenException("Accès interdit à ce fil", error_code=MESSAGE_THREAD_FORBIDDEN)
 
     result = await db.execute(
         select(Message).where(Message.thread_id == tid).order_by(Message.created_at)
@@ -106,7 +110,10 @@ async def post_message(
     try:
         tid = uuid.UUID(thread_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "MESSAGE_THREAD_INVALID_ID", "message": "ID fil invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "MESSAGE_THREAD_INVALID_ID", "message": "ID fil invalide"}},
+        )
 
     part = await db.execute(
         select(ThreadParticipant).where(
@@ -114,7 +121,7 @@ async def post_message(
         )
     )
     if not part.scalar_one_or_none():
-        raise ForbiddenException("Accès interdit à ce fil")
+        raise ForbiddenException("Accès interdit à ce fil", error_code=MESSAGE_THREAD_FORBIDDEN)
 
     msg = await send_message(db, thread_id, str(current_user.id), body.content)
     return {

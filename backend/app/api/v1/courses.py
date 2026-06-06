@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import COURSE_FILE_NOT_FOUND, COURSE_NOT_FOUND
 from app.core.exceptions import NotFoundException
 from app.core.permissions import require_roles
 from app.database import get_db
@@ -57,13 +58,19 @@ async def get_course(
     try:
         course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}},
+        )
     result = await db.execute(select(Course).where(Course.id == course_uuid))
     course = result.scalar_one_or_none()
     if not course:
-        raise NotFoundException("Cours non trouvé")
+        raise NotFoundException("Cours", error_code=COURSE_NOT_FOUND)
     if current_user.role == UserRole.student and not course.is_published:
-        raise HTTPException(status_code=403, detail={"error": {"code": "COURSE_NOT_PUBLISHED", "message": "Cours non publié"}})
+        raise HTTPException(
+            status_code=403,
+            detail={"error": {"code": "COURSE_NOT_PUBLISHED", "message": "Cours non publié"}},
+        )
     return CourseResponse.model_validate(course)
 
 
@@ -77,11 +84,14 @@ async def update_course(
     try:
         course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}},
+        )
     result = await db.execute(select(Course).where(Course.id == course_uuid))
     course = result.scalar_one_or_none()
     if not course:
-        raise NotFoundException("Cours non trouvé")
+        raise NotFoundException("Cours", error_code=COURSE_NOT_FOUND)
     for k, v in body.model_dump(exclude_unset=True).items():
         setattr(course, k, v)
     await db.commit()
@@ -97,11 +107,14 @@ async def delete_course(
     try:
         course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}},
+        )
     result = await db.execute(select(Course).where(Course.id == course_uuid))
     course = result.scalar_one_or_none()
     if not course:
-        raise NotFoundException("Cours non trouvé")
+        raise NotFoundException("Cours", error_code=COURSE_NOT_FOUND)
     await db.delete(course)
     await db.commit()
     return {"message": "Cours supprimé"}
@@ -116,11 +129,14 @@ async def publish_course(
     try:
         course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}},
+        )
     result = await db.execute(select(Course).where(Course.id == course_uuid))
     course = result.scalar_one_or_none()
     if not course:
-        raise NotFoundException("Cours non trouvé")
+        raise NotFoundException("Cours", error_code=COURSE_NOT_FOUND)
     course.is_published = True
     from datetime import datetime
 
@@ -139,10 +155,13 @@ async def upload_file(
     try:
         course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}},
+        )
     result = await db.execute(select(Course).where(Course.id == course_uuid))
     if not result.scalar_one_or_none():
-        raise NotFoundException("Cours non trouvé")
+        raise NotFoundException("Cours", error_code=COURSE_NOT_FOUND)
     cf = await upload_course_file(db, course_id, file, str(current_user.id))
     return CourseFileResponse.model_validate(cf)
 
@@ -156,7 +175,10 @@ async def list_files(
     try:
         course_uuid = uuid.UUID(course_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "COURSE_INVALID_ID", "message": "ID cours invalide"}},
+        )
     result = await db.execute(select(CourseFile).where(CourseFile.course_id == course_uuid))
     files = result.scalars().all()
     return [CourseFileResponse.model_validate(f) for f in files]
@@ -173,13 +195,15 @@ async def delete_file(
         course_uuid = uuid.UUID(course_id)
         file_uuid = uuid.UUID(file_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}})
+        raise HTTPException(
+            status_code=400, detail={"error": {"code": "INVALID_ID", "message": "ID invalide"}}
+        )
     result = await db.execute(
         select(CourseFile).where(CourseFile.id == file_uuid, CourseFile.course_id == course_uuid)
     )
     cf = result.scalar_one_or_none()
     if not cf:
-        raise NotFoundException("Fichier non trouvé")
+        raise NotFoundException("Fichier", error_code=COURSE_FILE_NOT_FOUND)
     from app.minio_client import get_minio
 
     minio_client = get_minio()

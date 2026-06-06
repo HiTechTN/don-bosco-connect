@@ -4,6 +4,7 @@ from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import NOTIFICATION_NOT_FOUND
 from app.core.exceptions import NotFoundException
 from app.database import get_db
 from app.models.base import Notification, User
@@ -70,7 +71,7 @@ async def mark_read(
     )
     notification = result.scalar_one_or_none()
     if not notification:
-        raise NotFoundException("Notification non trouvée")
+        raise NotFoundException("Notification", error_code=NOTIFICATION_NOT_FOUND)
     notification.is_read = True
     await db.commit()
     return {"message": "Notification marquée comme lue"}
@@ -106,7 +107,7 @@ async def delete_notification(
     )
     notification = result.scalar_one_or_none()
     if not notification:
-        raise NotFoundException("Notification non trouvée")
+        raise NotFoundException("Notification", error_code=NOTIFICATION_NOT_FOUND)
     await db.delete(notification)
     await db.commit()
     return {"message": "Notification supprimée"}

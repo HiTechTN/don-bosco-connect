@@ -6,6 +6,13 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import (
+    CLASS_NOT_FOUND,
+    SUBJECT_NOT_FOUND,
+    TEACHER_NOT_FOUND,
+    TIMETABLE_SLOT_EXISTS,
+    TIMETABLE_SLOT_NOT_FOUND,
+)
 from app.core.exceptions import ConflictException, NotFoundException
 from app.core.permissions import require_roles
 from app.database import get_db
@@ -28,7 +35,10 @@ async def get_my_timetable(
     db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role not in (UserRole.student, UserRole.teacher):
-        raise HTTPException(status_code=403, detail={"error": {"code": "FORBIDDEN", "message": "Réservé aux élèves et enseignants"}})
+        raise HTTPException(
+            status_code=403,
+            detail={"error": {"code": "FORBIDDEN", "message": "Réservé aux élèves et enseignants"}},
+        )
 
     if current_user.role == UserRole.student:
         result = await db.execute(
@@ -116,16 +126,16 @@ async def create_timetable_slot(
 ):
     result = await db.execute(select(Class).where(Class.id == slot_data.class_id))
     if not result.scalar_one_or_none():
-        raise NotFoundException("Classe non trouvée")
+        raise NotFoundException("Classe", error_code=CLASS_NOT_FOUND)
     if slot_data.subject_id:
         result = await db.execute(select(Subject).where(Subject.id == slot_data.subject_id))
         if not result.scalar_one_or_none():
-            raise NotFoundException("Matière non trouvée")
+            raise NotFoundException("Matière", error_code=SUBJECT_NOT_FOUND)
     if slot_data.teacher_id:
         result = await db.execute(select(User).where(User.id == slot_data.teacher_id))
         teacher = result.scalar_one_or_none()
         if not teacher or teacher.role != UserRole.teacher:
-            raise NotFoundException("Professeur non trouvé ou invalide")
+            raise NotFoundException("Professeur", error_code=TEACHER_NOT_FOUND)
     result = await db.execute(
         select(TimetableSlot).where(
             and_(
@@ -141,7 +151,10 @@ async def create_timetable_slot(
         )
     )
     if result.scalar_one_or_none():
-        raise ConflictException("Un créneau existe déjà pour cette classe à cette heure")
+        raise ConflictException(
+            "Un créneau existe déjà pour cette classe à cette heure",
+            error_code=TIMETABLE_SLOT_EXISTS,
+        )
     slot = TimetableSlot(
         id=uuid.uuid4(),
         class_id=slot_data.class_id,
@@ -169,11 +182,16 @@ async def update_timetable_slot(
     try:
         slot_uuid = uuid.UUID(slot_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "TIMETABLE_SLOT_INVALID_ID", "message": "ID créneau invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": {"code": "TIMETABLE_SLOT_INVALID_ID", "message": "ID créneau invalide"}
+            },
+        )
     result = await db.execute(select(TimetableSlot).where(TimetableSlot.id == slot_uuid))
     slot = result.scalar_one_or_none()
     if not slot:
-        raise NotFoundException("Créneau non trouvé")
+        raise NotFoundException("Créneau", error_code=TIMETABLE_SLOT_NOT_FOUND)
     if slot_data.subject_id is not None:
         slot.subject_id = slot_data.subject_id
     if slot_data.teacher_id is not None:
@@ -200,11 +218,16 @@ async def delete_timetable_slot(
     try:
         slot_uuid = uuid.UUID(slot_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "TIMETABLE_SLOT_INVALID_ID", "message": "ID créneau invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": {"code": "TIMETABLE_SLOT_INVALID_ID", "message": "ID créneau invalide"}
+            },
+        )
     result = await db.execute(select(TimetableSlot).where(TimetableSlot.id == slot_uuid))
     slot = result.scalar_one_or_none()
     if not slot:
-        raise NotFoundException("Créneau non trouvé")
+        raise NotFoundException("Créneau", error_code=TIMETABLE_SLOT_NOT_FOUND)
     await db.delete(slot)
     await db.commit()
     return {"message": "Créneau supprimé"}

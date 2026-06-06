@@ -63,7 +63,12 @@ async def login(body: LoginRequest, response: Response, db: AsyncSession = Depen
     if user.mfa_enabled:
         raise HTTPException(
             status_code=403,
-            detail={"error": {"code": "AUTH_MFA_REQUIRED", "message": "MFA requis. Utilisez /auth/mfa/verify avec le token temporaire."}},
+            detail={
+                "error": {
+                    "code": "AUTH_MFA_REQUIRED",
+                    "message": "MFA requis. Utilisez /auth/mfa/verify avec le token temporaire.",
+                }
+            },
         )
     access, refresh = await generate_tokens(db, user)
     _set_auth_cookies(response, access, refresh)
@@ -80,7 +85,7 @@ async def login(body: LoginRequest, response: Response, db: AsyncSession = Depen
             "last_name": user.last_name,
             "preferred_language": getattr(user, "preferred_language", "fr"),
             "mfa_enabled": user.mfa_enabled,
-        }
+        },
     }
 
 
@@ -96,10 +101,21 @@ async def refresh(
     if not token and body:
         token = body.refresh_token
     if not token:
-        raise HTTPException(status_code=401, detail={"error": {"code": "AUTH_REFRESH_MISSING", "message": "Refresh token manquant"}})
+        raise HTTPException(
+            status_code=401,
+            detail={"error": {"code": "AUTH_REFRESH_MISSING", "message": "Refresh token manquant"}},
+        )
     tokens = await refresh_access_token(db, token)
     if not tokens:
-        raise HTTPException(status_code=401, detail={"error": {"code": "AUTH_REFRESH_INVALID", "message": "Refresh token invalide ou expiré"}})
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": {
+                    "code": "AUTH_REFRESH_INVALID",
+                    "message": "Refresh token invalide ou expiré",
+                }
+            },
+        )
     _set_auth_cookies(response, tokens[0], tokens[1])
     return {"access_token": tokens[0], "refresh_token": tokens[1], "token_type": "bearer"}
 
@@ -133,16 +149,25 @@ async def get_me(
     elif access_token:
         token = access_token
     if not token:
-        raise HTTPException(status_code=401, detail={"error": {"code": "AUTH_TOKEN_MISSING", "message": "Non authentifié"}})
+        raise HTTPException(
+            status_code=401,
+            detail={"error": {"code": "AUTH_TOKEN_MISSING", "message": "Non authentifié"}},
+        )
     payload = decode_token(token)
     if payload is None or payload.get("type") != "access":
-        raise HTTPException(status_code=401, detail={"error": {"code": "AUTH_TOKEN_INVALID", "message": "Token invalide"}})
+        raise HTTPException(
+            status_code=401,
+            detail={"error": {"code": "AUTH_TOKEN_INVALID", "message": "Token invalide"}},
+        )
     from sqlalchemy import select
 
     result = await db.execute(select(User).where(User.id == payload["sub"]))
     user = result.scalar_one_or_none()
     if not user or user.status != "active":
-        raise HTTPException(status_code=401, detail={"error": {"code": "AUTH_USER_INACTIVE", "message": "Utilisateur inactif"}})
+        raise HTTPException(
+            status_code=401,
+            detail={"error": {"code": "AUTH_USER_INACTIVE", "message": "Utilisateur inactif"}},
+        )
     return {
         "id": str(user.id),
         "email": user.email,
@@ -159,7 +184,10 @@ async def mfa_setup(
     current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     if current_user.mfa_enabled:
-        raise HTTPException(status_code=400, detail={"error": {"code": "AUTH_MFA_ALREADY_ENABLED", "message": "MFA déjà activé"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "AUTH_MFA_ALREADY_ENABLED", "message": "MFA déjà activé"}},
+        )
     data = await setup_mfa(db, current_user)
     return data
 
@@ -171,7 +199,10 @@ async def mfa_verify(
     db: AsyncSession = Depends(get_db),
 ):
     if not await verify_mfa(db, current_user, body.code):
-        raise HTTPException(status_code=400, detail={"error": {"code": "AUTH_MFA_INVALID_CODE", "message": "Code invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "AUTH_MFA_INVALID_CODE", "message": "Code invalide"}},
+        )
     return {"message": "MFA activé"}
 
 
@@ -182,7 +213,15 @@ async def change_password(
     db: AsyncSession = Depends(get_db),
 ):
     if not verify_password(body.old_password, current_user.password_hash):
-        raise HTTPException(status_code=400, detail={"error": {"code": "AUTH_PASSWORD_OLD_INCORRECT", "message": "Ancien mot de passe incorrect"}})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": {
+                    "code": "AUTH_PASSWORD_OLD_INCORRECT",
+                    "message": "Ancien mot de passe incorrect",
+                }
+            },
+        )
     current_user.password_hash = hash_password(body.new_password)
     await db.commit()
     return {"message": "Mot de passe changé"}

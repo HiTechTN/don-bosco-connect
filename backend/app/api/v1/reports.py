@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import STUDENT_NOT_FOUND
 from app.core.exceptions import NotFoundException
 from app.database import get_db
 from app.models.base import (
@@ -32,11 +33,17 @@ async def get_student_grades(
     try:
         student_uuid = uuid.UUID(student_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "REPORT_STUDENT_INVALID", "message": "ID étudiant invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "REPORT_STUDENT_INVALID", "message": "ID étudiant invalide"}},
+        )
 
     # Permission checks
     if current_user.role == UserRole.student and current_user.id != student_uuid:
-        raise HTTPException(status_code=403, detail={"error": {"code": "REPORT_ACCESS_DENIED", "message": "Accès refusé"}})
+        raise HTTPException(
+            status_code=403,
+            detail={"error": {"code": "REPORT_ACCESS_DENIED", "message": "Accès refusé"}},
+        )
     if current_user.role == UserRole.parent:
         from app.models.base import StudentParentLink
 
@@ -47,7 +54,10 @@ async def get_student_grades(
             )
         )
         if not result.scalar_one_or_none():
-            raise HTTPException(status_code=403, detail={"error": {"code": "REPORT_ACCESS_DENIED", "message": "Accès refusé"}})
+            raise HTTPException(
+                status_code=403,
+                detail={"error": {"code": "REPORT_ACCESS_DENIED", "message": "Accès refusé"}},
+            )
 
     query = select(Grade).join(Evaluation).where(Grade.student_id == student_uuid)
     if subject_id:
@@ -84,7 +94,10 @@ async def get_student_absences(
     try:
         student_uuid = uuid.UUID(student_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "REPORT_STUDENT_INVALID", "message": "ID étudiant invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "REPORT_STUDENT_INVALID", "message": "ID étudiant invalide"}},
+        )
 
     query = select(Absence).where(Absence.student_id == student_uuid)
     if from_date:
@@ -119,12 +132,15 @@ async def get_student_report(
     try:
         student_uuid = uuid.UUID(student_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "REPORT_STUDENT_INVALID", "message": "ID étudiant invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "REPORT_STUDENT_INVALID", "message": "ID étudiant invalide"}},
+        )
 
     result = await db.execute(select(User).where(User.id == student_uuid))
     student = result.scalar_one_or_none()
     if not student:
-        raise NotFoundException("Étudiant non trouvé")
+        raise NotFoundException("Étudiant", error_code=STUDENT_NOT_FOUND)
 
     # Get enrolled classes
     result = await db.execute(

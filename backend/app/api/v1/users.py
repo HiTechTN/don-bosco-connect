@@ -5,6 +5,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.error_codes import USER_EMAIL_EXISTS, USER_NOT_FOUND
 from app.core.exceptions import ConflictException, NotFoundException
 from app.core.permissions import require_roles
 from app.database import get_db
@@ -60,7 +61,9 @@ async def create_user(
     result = await db.execute(select(User).where(User.email == user_data.email))
     existing_user = result.scalar_one_or_none()
     if existing_user:
-        raise ConflictException("Un utilisateur avec cet email existe déjà")
+        raise ConflictException(
+            "Un utilisateur avec cet email existe déjà", error_code=USER_EMAIL_EXISTS
+        )
     from app.core.security import hash_password
 
     hashed_password = hash_password(user_data.password)
@@ -90,7 +93,10 @@ async def get_my_children(
     db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     if current_user.role != UserRole.parent:
-        raise HTTPException(status_code=403, detail={"error": {"code": "FORBIDDEN", "message": "Réservé aux parents"}})
+        raise HTTPException(
+            status_code=403,
+            detail={"error": {"code": "FORBIDDEN", "message": "Réservé aux parents"}},
+        )
     result = await db.execute(
         select(User)
         .join(StudentParentLink, User.id == StudentParentLink.student_id)
@@ -131,11 +137,14 @@ async def get_user(
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "USER_INVALID_ID", "message": "ID utilisateur invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "USER_INVALID_ID", "message": "ID utilisateur invalide"}},
+        )
     result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalar_one_or_none()
     if not user:
-        raise NotFoundException("Utilisateur non trouvé")
+        raise NotFoundException("Utilisateur", error_code=USER_NOT_FOUND)
     return UserResponse.model_validate(user)
 
 
@@ -149,20 +158,33 @@ async def update_user(
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "USER_INVALID_ID", "message": "ID utilisateur invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "USER_INVALID_ID", "message": "ID utilisateur invalide"}},
+        )
     result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalar_one_or_none()
     if not user:
-        raise NotFoundException("Utilisateur non trouvé")
+        raise NotFoundException("Utilisateur", error_code=USER_NOT_FOUND)
     if user_data.role is not None and user.id == current_user.id:
-        raise HTTPException(status_code=400, detail={"error": {"code": "USER_CANNOT_CHANGE_OWN_ROLE", "message": "Vous ne pouvez pas modifier votre propre rôle"}})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": {
+                    "code": "USER_CANNOT_CHANGE_OWN_ROLE",
+                    "message": "Vous ne pouvez pas modifier votre propre rôle",
+                }
+            },
+        )
     if user_data.email is not None:
         result = await db.execute(
             select(User).where(and_(User.email == user_data.email, User.id != user_uuid))
         )
         existing_user = result.scalar_one_or_none()
         if existing_user:
-            raise ConflictException("Cet email est déjà utilisé par un autre utilisateur")
+            raise ConflictException(
+                "Cet email est déjà utilisé par un autre utilisateur", error_code=USER_EMAIL_EXISTS
+            )
         user.email = user_data.email
     if user_data.role is not None:
         user.role = user_data.role
@@ -190,14 +212,23 @@ async def delete_user(
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail={"error": {"code": "USER_INVALID_ID", "message": "ID utilisateur invalide"}})
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"code": "USER_INVALID_ID", "message": "ID utilisateur invalide"}},
+        )
     result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalar_one_or_none()
     if not user:
-        raise NotFoundException("Utilisateur non trouvé")
+        raise NotFoundException("Utilisateur", error_code=USER_NOT_FOUND)
     if user.id == current_user.id:
         raise HTTPException(
-            status_code=400, detail={"error": {"code": "USER_CANNOT_DEACTIVATE_SELF", "message": "Vous ne pouvez pas désactiver votre propre compte"}}
+            status_code=400,
+            detail={
+                "error": {
+                    "code": "USER_CANNOT_DEACTIVATE_SELF",
+                    "message": "Vous ne pouvez pas désactiver votre propre compte",
+                }
+            },
         )
     user.status = UserStatus.inactive
     await db.commit()
