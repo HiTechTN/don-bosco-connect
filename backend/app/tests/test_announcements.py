@@ -78,8 +78,7 @@ class TestAdminAnnouncements:
         assert resp.status_code in (401, 403)
 
     async def test_reactions_endpoint_public(self, client: AsyncClient) -> None:
-        nil_uuid = "00000000-0000-0000-0000-000000000000"
-        resp = await client.get(f"/api/v1/announcements/{nil_uuid}/reactions")
+        resp = await client.get("/api/v1/public/announcements/nonexistent/reactions")
         assert resp.status_code in (200, 404)
 
 

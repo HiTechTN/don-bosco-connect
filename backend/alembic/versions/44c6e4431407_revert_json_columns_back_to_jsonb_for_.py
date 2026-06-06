@@ -1,7 +1,7 @@
 """revert JSON columns back to JSONB for future-proofing
 
 Revision ID: 44c6e4431407
-Revises: 42a0cbf69db6
+Revises: ea22d27c40c6
 Create Date: 2026-06-06 22:56:16.190231
 
 """
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import postgresql
 from alembic import op
 
 revision: str = "44c6e4431407"
-down_revision: str | None = "42a0cbf69db6"
+down_revision: str | None = "ea22d27c40c6"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

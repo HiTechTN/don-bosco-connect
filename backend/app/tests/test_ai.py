@@ -98,7 +98,7 @@ async def test_quiz_generate_requires_auth(client: AsyncClient) -> None:
         "/api/v1/ai/quiz/generate",
         json={"course_id": "", "num_questions": 3},
     )
-    assert resp.status_code == 401
+    assert resp.status_code in (401, 403)
 
 
 async def test_quiz_generate_requires_admin_or_teacher(

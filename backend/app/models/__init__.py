@@ -9,6 +9,7 @@ from app.models.academic import (
     TimetableSlot,
 )
 from app.models.ai import AIConversation, AIMessage
+from app.models.announcement import Announcement, AnnouncementReaction
 from app.models.course import Course, CourseFile, DocumentChunk
 from app.models.enums import (
     AbsenceType,
@@ -77,4 +78,6 @@ __all__ = [
     "Badge",
     "StudentBadge",
     "XPTransaction",
+    "Announcement",
+    "AnnouncementReaction",
 ]
