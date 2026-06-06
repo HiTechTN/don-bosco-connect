@@ -713,5 +713,14 @@
     "write_placeholder": "اكتب رسالة...",
     "send": "إرسال",
     "select_conversation": "اختر محادثة"
+  },
+  "ai_chat": {
+    "title": "المساعد الذكي",
+    "placeholder": "سؤالك...",
+    "conv_title": "محادثة ذكاء اصطناعي",
+    "error_api": "خطأ في واجهة البرمجة",
+    "error_communication": "خطأ في الاتصال بالمساعد",
+    "empty_state": "اطرح سؤالاً عن دروسك!",
+    "send": "إرسال"
   }
 }

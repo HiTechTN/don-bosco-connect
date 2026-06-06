@@ -3,13 +3,17 @@ import { useMutation } from '@tanstack/react-query';
 import api from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Card, CardBody } from '../ui/Card';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   role: string;
   content: string;
 }
 
-export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta question...' }: { title?: string; placeholder?: string }) {
+export default function AIChat({ title, placeholder }: { title?: string; placeholder?: string }) {
+  const { t } = useTranslation();
+  const chatTitle = title || t('ai_chat.title');
+  const chatPlaceholder = placeholder || t('ai_chat.placeholder');
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [convId, setConvId] = useState<string | null>(null);
@@ -17,7 +21,7 @@ export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta quest
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const createConv = useMutation({
-    mutationFn: () => api.post('/ai/conversations', {}, { params: { title: 'Chat IA' } }),
+    mutationFn: () => api.post('/ai/conversations', {}, { params: { title: t('ai_chat.conv_title') } }),
     onSuccess: (res) => setConvId(res.data.id),
   });
 
@@ -43,11 +47,11 @@ export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta quest
         body: JSON.stringify({ message: userMsg, context_type: 'general' }),
       });
 
-      if (!res.ok) throw new Error('Erreur API');
+      if (!res.ok) throw new Error(t('ai_chat.error_api'));
       const data = await res.json();
       setMessages((prev) => [...prev, { role: 'assistant', content: data.response }]);
     } catch {
-      setMessages((prev) => [...prev, { role: 'assistant', content: "Erreur de communication avec l'assistant" }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: t('ai_chat.error_communication') }]);
     } finally {
       setStreaming(false);
     }
@@ -57,11 +61,11 @@ export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta quest
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">{title}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">{chatTitle}</h1>
       <Card className="flex-1 flex flex-col">
         <CardBody className="flex-1 overflow-y-auto space-y-3">
           {messages.length === 0 && (
-            <p className="text-gray-400 text-center py-12">Pose une question sur tes cours !</p>
+            <p className="text-gray-400 text-center py-12">{t('ai_chat.empty_state')}</p>
           )}
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -83,13 +87,13 @@ export default function AIChat({ title = 'Assistant IA', placeholder = 'Ta quest
         <div className="px-6 py-4 border-t flex gap-2">
           <input
             className="flex-1 border rounded-lg px-3 py-2 text-sm"
-            placeholder={placeholder}
+            placeholder={chatPlaceholder}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMsg()}
             disabled={streaming}
           />
-          <Button onClick={sendMsg} disabled={streaming}>{streaming ? '...' : 'Envoyer'}</Button>
+          <Button onClick={sendMsg} disabled={streaming}>{streaming ? '...' : t('ai_chat.send')}</Button>
         </div>
       </Card>
     </div>

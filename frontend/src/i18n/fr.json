@@ -713,5 +713,14 @@
     "write_placeholder": "Écrire un message...",
     "send": "Envoyer",
     "select_conversation": "Sélectionne une conversation"
+  },
+  "ai_chat": {
+    "title": "Assistant IA",
+    "placeholder": "Ta question...",
+    "conv_title": "Chat IA",
+    "error_api": "Erreur API",
+    "error_communication": "Erreur de communication avec l'assistant",
+    "empty_state": "Pose une question sur tes cours !",
+    "send": "Envoyer"
   }
 }
