@@ -154,3 +154,11 @@ async def test_quiz_generate_course_not_found(client: AsyncClient, admin_token: 
     )
     # May be 404 (course not found) or 500 (Ollama not available)
     assert resp.status_code in (404, 500)
+
+
+async def test_chat_stream_requires_auth(client: AsyncClient) -> None:
+    resp = await client.post(
+        "/api/v1/ai/chat/stream",
+        json={"message": "Hello"},
+    )
+    assert resp.status_code == 401
