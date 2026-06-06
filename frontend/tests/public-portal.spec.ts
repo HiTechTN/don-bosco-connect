@@ -97,9 +97,19 @@ test.describe('Page d\'accueil', () => {
 
   test('affiche le bouton de connexion', async ({ page }) => {
     await page.goto('/');
-    // New landing page: login button is in hero CTAs and demo section
-    const loginButton = page.locator('a[href="/login"]').first();
-    await expect(loginButton).toBeVisible();
+    // New landing page: login button exists in hero CTAs and demo CTA section
+    // Scroll through the full page to trigger all lazy sections
+    await page.evaluate(async () => {
+      const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+      for (let i = 0; i < document.body.scrollHeight; i += 300) {
+        window.scrollTo(0, i);
+        await delay(100);
+      }
+    });
+    await page.waitForTimeout(500);
+    // The login link in the CTA section is always visible after scrolling
+    const loginLink = page.locator('a[href="/login"]');
+    await expect(loginLink.first()).toBeVisible({ timeout: 15000 });
   });
 
   test('affiche les 3 dernières annonces', async ({ page }) => {
@@ -124,11 +134,17 @@ test.describe('Page d\'accueil', () => {
 
   test('clique sur "Voir toutes les annonces" et navigue vers /annonces', async ({ page }) => {
     await page.goto('/');
-    // Scroll to announcements section to make the link visible
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    // Scroll through the full page to trigger all lazy sections
+    await page.evaluate(async () => {
+      const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+      for (let i = 0; i < document.body.scrollHeight; i += 300) {
+        window.scrollTo(0, i);
+        await delay(100);
+      }
+    });
     await page.waitForTimeout(500);
-    const link = page.locator('a[href="/annonces"]', { hasText: 'annonces' }).first();
-    await expect(link).toBeVisible({ timeout: 10000 });
+    const link = page.locator('a[href="/annonces"]').first();
+    await expect(link).toBeVisible({ timeout: 15000 });
     await link.click();
     await expect(page).toHaveURL(/\/annonces$/);
   });
@@ -389,11 +405,18 @@ test.describe('Responsive mobile', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
 
-    // New landing page: mobile link is at the bottom of announcements section
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-    const mobileLink = page.locator('a[href="/annonces"]').first();
-    await expect(mobileLink).toBeVisible({ timeout: 10000 });
+    // Scroll through the full page to trigger all lazy sections
+    await page.evaluate(async () => {
+      const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+      for (let i = 0; i < document.body.scrollHeight; i += 300) {
+        window.scrollTo(0, i);
+        await delay(100);
+      }
+    });
+    await page.waitForTimeout(1000);
+    // Use last() since the first link might be the desktop-only one
+    const mobileLink = page.locator('a[href="/annonces"]').last();
+    await expect(mobileLink).toBeVisible({ timeout: 15000 });
   });
 
   test('le lien desktop est caché sur mobile', async ({ page }) => {

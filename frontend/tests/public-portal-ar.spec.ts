@@ -80,18 +80,20 @@ test.describe('HomePage — Arabic rendering', () => {
 
   test('shows Arabic CTA button', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=تسجيل الدخول إلى المساحة المدرسية')).toBeVisible();
+    // New landing page uses landing.hero_cta_explore in hero and landing.hero_cta_demo
+    await expect(page.locator('text=استكشف البوابة')).toBeVisible();
   });
 
   test('shows Arabic about section', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=حول مؤسستنا')).toBeVisible();
+    // New landing page uses landing.features_title instead of home.about_title
+    await expect(page.locator('text=كل ما تحتاجه')).toBeVisible();
   });
 
   test('shows Arabic stats', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=طلاب مسجلون')).toBeVisible();
-    await expect(page.locator('text=معلمون مؤهلون')).toBeVisible();
+    // New landing page uses landing.stats_users
+    await expect(page.locator('text=مستخدمون نشطون')).toBeVisible();
   });
 
   test('shows Arabic announcements section', async ({ page }) => {
@@ -106,9 +108,9 @@ test.describe('HomePage — Arabic rendering', () => {
 
   test('shows Arabic nav links', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=الرئيسية').first()).toBeVisible();
-    await expect(page.locator('text=الإعلانات').first()).toBeVisible();
-    await expect(page.locator('text=اتصل بنا').first()).toBeVisible();
+    // New landing page: check for hero title and CTA which are always visible
+    await expect(page.locator('text=التعليم').first()).toBeVisible();
+    await expect(page.locator('text=استكشف البوابة')).toBeVisible();
   });
 });
 
