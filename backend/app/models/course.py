@@ -3,7 +3,6 @@ import uuid
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     ARRAY,
-    JSON,
     BigInteger,
     Boolean,
     Column,
@@ -14,7 +13,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -71,5 +70,5 @@ class DocumentChunk(Base):
     content = Column(Text, nullable=False)
     token_count = Column(Integer)
     embedding = Column(Vector(768))
-    metadata_ = Column("metadata", JSON, default={})
+    metadata_ = Column("metadata", JSONB, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())

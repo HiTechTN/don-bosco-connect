@@ -1,7 +1,6 @@
 import uuid
 
 from sqlalchemy import (
-    JSON,
     BigInteger,
     Boolean,
     Column,
@@ -12,7 +11,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import INET, UUID
+from sqlalchemy.dialects.postgresql import INET, JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -64,5 +63,5 @@ class AuditLog(Base):
     resource_id = Column(UUID(as_uuid=True))
     ip_address = Column(INET)
     user_agent = Column(Text)
-    metadata_ = Column("metadata", JSON, default={})
+    metadata_ = Column("metadata", JSONB, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())

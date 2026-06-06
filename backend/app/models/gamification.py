@@ -1,8 +1,8 @@
 import uuid
 
-from sqlalchemy import JSON, Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -21,7 +21,7 @@ class StudentProfile(Base):
         SAEnum("remediation", "normal", "advanced", name="difficulty_level"), default="normal"
     )
     adaptive_score = Column(Float, default=0.5)
-    avatar_config = Column(JSON, default={})
+    avatar_config = Column(JSONB, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     student = relationship("User", back_populates="student_profile")

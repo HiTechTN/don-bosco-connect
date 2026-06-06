@@ -1,8 +1,8 @@
 import uuid
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -60,7 +60,7 @@ class Notification(Base):
     )
     title = Column(String(255), nullable=False)
     body = Column(Text)
-    data = Column(JSON, default={})
+    data = Column(JSONB, default={})
     is_read = Column(Boolean, default=False)
     read_at = Column(DateTime(timezone=True))
     push_sent = Column(Boolean, default=False)
