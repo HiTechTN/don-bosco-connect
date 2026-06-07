@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-build dev-logs dev-stop dev-restart dev-status up build build-no-cache down restart restart-api logs logs-api status health health-check-all migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup validate clean clean-all reset release release-apk push pull
+.PHONY: help install dev dev-build dev-logs dev-stop dev-restart dev-status up build build-no-cache down restart restart-api logs logs-api status health health-check-all migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup backup-dev validate clean clean-all reset release release-apk push pull
 
 # Default target
 .DEFAULT_GOAL := help
@@ -185,6 +185,27 @@ redis-cli: ## Open redis-cli in the Redis container
 
 backup: ## Backup the database
 	./scripts/backup.sh
+
+backup-dev: ## Backup dev database and Redis to timestamped directory
+	@TS=$$(date +%Y%m%d_%H%M%S) && \
+		BACKUP_DIR="backups/$$TS" && \
+		mkdir -p "$$BACKUP_DIR" && \
+		echo "\033[1;36m═══ Dev Backup ($$TS) ═══\033[0m" && \
+		echo "" && \
+		echo "  📦 Backing up PostgreSQL..." && \
+		$(DEV_COMPOSE) exec -T db pg_dump -U donbosco_user -d donbosco -F c > "$$BACKUP_DIR/postgres.dump" && \
+		echo "  ✅ PostgreSQL saved to $$BACKUP_DIR/postgres.dump" || \
+		(echo "  ❌ PostgreSQL backup failed" && exit 1) && \
+		echo "" && \
+		echo "  📦 Backing up Redis..." && \
+		$(DEV_COMPOSE) exec -T redis redis-cli -a "$${REDIS_PASSWORD}" LASTSAVE > "$$BACKUP_DIR/redis_before.txt" && \
+		$(DEV_COMPOSE) exec -T redis redis-cli -a "$${REDIS_PASSWORD}" BGSAVE >/dev/null 2>&1 && \
+		sleep 2 && \
+		$(DEV_COMPOSE) exec -T redis redis-cli -a "$${REDIS_PASSWORD}" LASTSAVE > "$$BACKUP_DIR/redis_lastsave.txt" && \
+		echo "  ✅ Redis saved to $$BACKUP_DIR/redis_lastsave.txt" || \
+		(echo "  ❌ Redis backup failed" && exit 1) && \
+		echo "" && \
+		echo "\033[1;32m✅ Dev backup complete: $$BACKUP_DIR/\033[0m"
 
 validate: ## Validate the project configuration
 	./scripts/validate.sh
