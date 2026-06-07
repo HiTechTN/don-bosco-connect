@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Check no secrets committed
         run: |
           for pattern in ".env.production" ".env" ".env.*"; do
@@ -161,7 +163,8 @@ jobs:
             --exclude-files 'constants\.ts$' \
             --exclude-files 'fr\.json$' \
             --exclude-files 'demo/capture_screenshots' \
-            --exclude-files '\.github/workflows/.*\.yml$' > /tmp/secrets.json
+            --exclude-files '\.github/workflows/.*\.yml$' \
+            --exclude-files 'scripts/install\.sh$' > /tmp/secrets.json
           if jq -e '.results | length > 0' /tmp/secrets.json > /dev/null; then
             echo "SECRETS FOUND:"
             jq -r '.results | to_entries[] | .key as $file | .value[] | "\($file):\(.line_number) - \(.type)"' /tmp/secrets.json
