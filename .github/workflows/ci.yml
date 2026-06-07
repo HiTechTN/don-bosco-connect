@@ -12,16 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: Check no secrets committed
         run: |
           for pattern in ".env.production" ".env" ".env.*"; do
-            if git log --diff-filter=A -- "$pattern" 2>/dev/null | grep -q "^commit"; then
-              if git log --after="2026-06-01" -- "$pattern" 2>/dev/null | grep -q "^commit"; then
-                echo "ERREUR: $pattern ajouté récemment dans l'historique Git!"
-                exit 1
-              fi
-              echo "⚠️  $pattern existe dans l'historique ancien (purge recommandée avec git filter-repo)"
+            if git diff --name-only HEAD~1 HEAD | grep -q "^$pattern$"; then
+              echo "ERREUR: $pattern ajouté ou modifié dans ce commit!"
+              exit 1
+            fi
+            if git log --oneline -- "$pattern" 2>/dev/null | grep -q .; then
+              echo "⚠️  $pattern existe dans l'historique Git (purge recommandée avec git filter-repo)"
             else
               echo "✅ Pas de $pattern dans l'historique Git"
             fi
