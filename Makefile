@@ -149,13 +149,13 @@ psql: ## Open psql shell in the database
 # ─── Testing ────────────────────────────────────────────────────────────────────
 
 test: ## Run backend tests
-	$(COMPOSE) exec api pytest app/tests/ -p no:xdist -v
+	$(COMPOSE) exec api python -m pytest app/tests/ -p no:xdist -v
 
 test-cov: ## Run backend tests with coverage
-	$(COMPOSE) exec api pytest app/tests/ -p no:xdist --cov=app --cov-report=term -v
+	$(COMPOSE) exec api python -m pytest app/tests/ -p no:xdist --cov=app --cov-report=term -v
 
 test-fast: ## Run backend tests (quiet mode)
-	$(COMPOSE) exec api pytest app/tests/ -p no:xdist -q
+	$(COMPOSE) exec api python -m pytest app/tests/ -p no:xdist -q
 
 test-e2e: ## Run Playwright E2E tests (starts Vite dev server)
 	@echo "" && \
@@ -179,7 +179,7 @@ test-integration: ## Run all integration tests (backend + frontend typecheck + E
 	echo "" && \
 	echo "\033[1;36m[1/3] Backend Tests\033[0m" && \
 	echo "─────────────────────────────────" && \
-	($(COMPOSE) exec api pytest app/tests/ -p no:xdist -v) || FAILED=1; \
+	($(COMPOSE) exec api python -m pytest app/tests/ -p no:xdist -v) || FAILED=1; \
 	echo "" && \
 	echo "\033[1;36m[2/3] Frontend Typecheck\033[0m" && \
 	echo "─────────────────────────────────" && \
