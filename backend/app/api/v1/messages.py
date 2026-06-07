@@ -1,8 +1,11 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 from app.api.deps import get_current_user
 from app.core.error_codes import MESSAGE_THREAD_FORBIDDEN
@@ -50,6 +53,7 @@ async def list_threads(
             try:
                 last_msg_content = decrypt_message(last_msg.content, last_msg.content_iv)
             except Exception:
+                logger.warning("Failed to decrypt message %s", last_msg.id if last_msg else "unknown")
                 last_msg_content = "***"
         resp.append(
             {

@@ -1,3 +1,5 @@
+import os
+
 from pydantic_settings import BaseSettings
 
 
@@ -43,6 +45,7 @@ class Settings(BaseSettings):
     LOGIN_LOCKOUT_MINUTES: int = 15
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost,https://donbosco.local"
     ENCRYPTION_KEY: str = ""
+    USE_MOCK_DATA: bool = os.getenv("USE_MOCK_DATA", "false").lower() == "true"
 
     MAX_UPLOAD_SIZE_MB: int = 200
     ALLOWED_MIME_TYPES: str = (

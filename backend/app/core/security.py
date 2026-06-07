@@ -5,7 +5,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from jose import jwt
+from authlib.jose import jwt
 from passlib.context import CryptContext
 
 from app.config import settings
@@ -29,7 +29,8 @@ def create_access_token(user_id: str, role: str) -> str:
         "iat": datetime.now(timezone.utc),
         "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     }
-    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    header = {"alg": settings.ALGORITHM}
+    return jwt.encode(header, payload, settings.SECRET_KEY).decode("utf-8")
 
 
 def create_refresh_token(user_id: str) -> tuple[str, str]:
@@ -40,7 +41,9 @@ def create_refresh_token(user_id: str) -> tuple[str, str]:
 
 def decode_token(token: str) -> dict | None:
     try:
-        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        claims = jwt.decode(token, settings.SECRET_KEY)
+        claims.validate()
+        return dict(claims)
     except Exception:
         return None
 
