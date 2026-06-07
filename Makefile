@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-build dev-logs dev-stop dev-status up build build-no-cache down restart restart-api logs logs-api status health migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup validate clean clean-all reset release release-apk push pull
+.PHONY: help install dev dev-build dev-logs dev-stop dev-restart dev-status up build build-no-cache down restart restart-api logs logs-api status health migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup validate clean clean-all reset release release-apk push pull
 
 # Default target
 .DEFAULT_GOAL := help
@@ -53,6 +53,10 @@ dev-logs: ## Tail development logs
 
 dev-stop: ## Stop development services
 	$(DEV_COMPOSE) down
+
+dev-restart: ## Restart all dev services (api, worker, beat)
+	$(DEV_COMPOSE) restart api worker beat
+	@echo "✅ Dev services restarted (api, worker, beat)"
 
 dev-status: ## Show dev container status and check all health endpoints
 	@echo ""
