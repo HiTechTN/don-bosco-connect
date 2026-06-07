@@ -28,7 +28,7 @@ echo "🛑 Arrêt des services..."
 docker compose down --volumes --remove-orphans 2>/dev/null || true
 
 echo "🧹 Nettoyage des volumes Docker..."
-docker volume prune -f 2>/dev/null || true
+docker volume rm don-bosco-connect_postgres_data don-bosco-connect_redis_data 2>/dev/null || true
 
 echo "🧹 Réinitialisation des certificats SSL..."
 rm -f nginx/ssl/donbosco.crt nginx/ssl/donbosco.key

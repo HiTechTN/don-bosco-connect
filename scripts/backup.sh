@@ -13,8 +13,14 @@ RETENTION_DAYS=30
 
 mkdir -p "$BACKUP_DIR"
 
-PGPASSWORD="$DB_PASSWORD" pg_dump -h db -U "$DB_USER" -d "$DB_NAME" \
+PGPASSFILE=$(mktemp)
+echo "db:5432:${DB_NAME}:${DB_USER}:${DB_PASSWORD}" > "$PGPASSFILE"
+chmod 600 "$PGPASSFILE"
+
+PGPASSFILE="$PGPASSFILE" pg_dump -h db -U "$DB_USER" -d "$DB_NAME" \
     -F c -f "$BACKUP_DIR/${DB_NAME}_${DATE}.dump"
+
+rm -f "$PGPASSFILE"
 
 echo "Backup created: ${BACKUP_DIR}/${DB_NAME}_${DATE}.dump"
 
