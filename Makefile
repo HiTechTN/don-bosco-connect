@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-build dev-logs dev-stop dev-restart dev-status up build build-no-cache down restart restart-api logs logs-api status health health-check-all migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast test-e2e test-integration test-all lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup backup-dev validate clean clean-all reset release release-apk push pull
+.PHONY: help install dev dev-build dev-logs dev-stop dev-restart dev-status up build build-no-cache down restart restart-api logs logs-api status health health-check-all migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast test-quick test-e2e test-integration test-all lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup backup-dev validate clean clean-all reset release release-apk push pull
 
 # Default target
 .DEFAULT_GOAL := help
@@ -156,6 +156,22 @@ test-cov: ## Run backend tests with coverage
 
 test-fast: ## Run backend tests (quiet mode)
 	$(COMPOSE) exec api python -m pytest app/tests/ -p no:xdist -q
+
+test-quick: ## Quick tests (backend + typecheck, skips E2E)
+	@FAILED=0; \
+	echo "" && \
+	echo "\033[1;36m═══ Quick Test Suite ═══\033[0m" && \
+	echo "" && \
+	echo "\033[1;36m[1/2] Backend Tests\033[0m" && \
+	echo "─────────────────────────────────" && \
+	($(COMPOSE) exec api python -m pytest app/tests/ -p no:xdist -v) || FAILED=1; \
+	echo "" && \
+	echo "\033[1;36m[2/2] Frontend Typecheck\033[0m" && \
+	echo "─────────────────────────────────" && \
+	(cd frontend && npx tsc --noEmit) || FAILED=1; \
+	echo ""; \
+	if [ $$FAILED -ne 0 ]; then echo "\033[1;31m❌ Quick tests FAILED\033[0m"; exit 1; fi; \
+	echo "\033[1;32m✅ All quick tests passed\033[0m"
 
 test-e2e: ## Run Playwright E2E tests (starts Vite dev server)
 	@echo "" && \
