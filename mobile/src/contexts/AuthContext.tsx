@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User } from '../types';
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   isLoading: boolean;
-  login: (userData: any) => Promise<void>;
+  login: (userData: User) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -16,20 +17,25 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         const userStr = await AsyncStorage.getItem('user');
-        if (userStr) setUser(JSON.parse(userStr));
-      } catch {}
-      setIsLoading(false);
+        if (userStr && mounted.current) setUser(JSON.parse(userStr));
+      } catch (e) {
+        console.error('Auth restore error:', e);
+      }
+      if (mounted.current) setIsLoading(false);
     })();
+    return () => { mounted.current = false; };
   }, []);
 
-  const login = useCallback(async (userData: any) => {
+  const login = useCallback(async (userData: User) => {
     await AsyncStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
   }, []);

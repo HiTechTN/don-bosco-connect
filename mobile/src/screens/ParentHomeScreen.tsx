@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList, ChildRecord } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import Card from '../components/Card';
 
-interface Props { navigation: any }
-
-const MOCK_CHILDREN = [
+const MOCK_CHILDREN: ChildRecord[] = [
   { id: 'student-uuid-001', first_name: 'Adam', last_name: 'Slim', email: 'adam.slim@donbosco.tn' },
 ];
 
-export default function ParentDashboardScreen({ navigation }: Props) {
+export default function ParentDashboardScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
-  const [children] = useState(MOCK_CHILDREN);
+  const [children] = useState<ChildRecord[]>(MOCK_CHILDREN);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -59,9 +61,9 @@ export default function ParentDashboardScreen({ navigation }: Props) {
 
         <Card title="Actions">
           <View style={styles.quickActions}>
-            {[
-              { title: 'Messages', icon: '💬', screen: 'Messages' },
-            ].map((item) => (
+            {([
+              { title: 'Messages', icon: '💬', screen: 'Messages' as const },
+            ] as const).map((item) => (
               <TouchableOpacity key={item.screen} style={styles.actionBtn} onPress={() => navigation.navigate(item.screen)}>
                 <Text style={styles.actionIcon}>{item.icon}</Text>
                 <Text style={styles.actionLabel}>{item.title}</Text>

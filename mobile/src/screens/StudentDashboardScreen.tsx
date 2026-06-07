@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/StatCard';
 import Card from '../components/Card';
 
-interface Props { navigation: any }
-
 const MOCK_STATS = { grades: 8, absences: 3, xp: 2450 };
 
-export default function StudentDashboardScreen({ navigation }: Props) {
+export default function StudentDashboardScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const [stats] = useState(MOCK_STATS);
 
@@ -39,15 +41,15 @@ export default function StudentDashboardScreen({ navigation }: Props) {
 
         <Card title="Navigation">
           <View style={styles.grid}>
-            {[
-              { title: 'Mes Notes', icon: '📝', screen: 'Grades', color: '#4F46E5' },
-              { title: 'Absences', icon: '🚫', screen: 'Absences', color: '#EF4444' },
-              { title: 'Emploi du temps', icon: '📅', screen: 'StudentTimetable', color: '#8B5CF6' },
-              { title: 'Quiz', icon: '🧠', screen: 'StudentQuizzes', color: '#EC4899' },
-              { title: 'Gamification', icon: '🏆', screen: 'StudentGamification', color: '#D97706' },
-              { title: 'IA Chat', icon: '🤖', screen: 'AIChat', color: '#14B8A6' },
-              { title: 'Messages', icon: '💬', screen: 'Messages', color: '#059669' },
-            ].map((item) => (
+            {([
+              { title: 'Mes Notes', icon: '📝', screen: 'Grades' as const, color: '#4F46E5' },
+              { title: 'Absences', icon: '🚫', screen: 'Absences' as const, color: '#EF4444' },
+              { title: 'Emploi du temps', icon: '📅', screen: 'StudentTimetable' as const, color: '#8B5CF6' },
+              { title: 'Quiz', icon: '🧠', screen: 'StudentQuizzes' as const, color: '#EC4899' },
+              { title: 'Gamification', icon: '🏆', screen: 'StudentGamification' as const, color: '#D97706' },
+              { title: 'IA Chat', icon: '🤖', screen: 'AIChat' as const, color: '#14B8A6' },
+              { title: 'Messages', icon: '💬', screen: 'Messages' as const, color: '#059669' },
+            ] as const).map((item) => (
               <TouchableOpacity key={item.screen} style={styles.gridItem} onPress={() => navigation.navigate(item.screen)}>
                 <Text style={styles.gridIcon}>{item.icon}</Text>
                 <Text style={styles.gridLabel}>{item.title}</Text>

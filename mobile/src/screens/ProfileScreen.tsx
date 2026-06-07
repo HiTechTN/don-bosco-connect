@@ -38,14 +38,14 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={[styles.avatarContainer, { backgroundColor: ROLE_COLORS[user?.role] || '#6B7280' }]}>
+        <View style={[styles.avatarContainer, { backgroundColor: (user?.role && ROLE_COLORS[user.role]) || '#6B7280' }]}>
           <Text style={styles.avatarText}>{initials}</Text>
         </View>
         <Text style={styles.fullName}>{user?.first_name} {user?.last_name}</Text>
         <Text style={styles.email}>{user?.email || 'utilisateur@donbosco.tn'}</Text>
-        <View style={[styles.roleBadge, { backgroundColor: (ROLE_COLORS[user?.role] || '#6B7280') + '20' }]}>
-          <Text style={[styles.roleText, { color: ROLE_COLORS[user?.role] || '#6B7280' }]}>
-            {ROLE_LABELS[user?.role] || user?.role}
+        <View style={[styles.roleBadge, { backgroundColor: ((user?.role && ROLE_COLORS[user.role]) || '#6B7280') + '20' }]}>
+          <Text style={[styles.roleText, { color: (user?.role && ROLE_COLORS[user.role]) || '#6B7280' }]}>
+            {user?.role && ROLE_LABELS[user.role] ? ROLE_LABELS[user.role] : user?.role}
           </Text>
         </View>
 
@@ -57,7 +57,7 @@ export default function ProfileScreen() {
           <View style={styles.divider} />
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Rôle</Text>
-            <Text style={styles.infoValue}>{ROLE_LABELS[user?.role] || user?.role}</Text>
+            <Text style={styles.infoValue}>{user?.role && ROLE_LABELS[user.role] ? ROLE_LABELS[user.role] : user?.role}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>

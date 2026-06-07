@@ -1,21 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { getUser } from '../lib/auth';
 import { mockApi } from '../services/api';
+import { Absence } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function AbsencesScreen() {
-  const [absences, setAbsences] = useState<any[]>([]);
+  const [absences, setAbsences] = useState<Absence[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         const u = await getUser();
-        const data = await mockApi.getAbsences(u.id);
-        setAbsences(data);
-      } catch { } finally { setLoading(false); }
+        if (!mounted.current) return;
+        const data = await mockApi.getAbsences(u.id) as Absence[];
+        if (mounted.current) setAbsences(data);
+      } catch (e) { console.error('Failed to load absences:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   if (loading) return <LoadingScreen />;

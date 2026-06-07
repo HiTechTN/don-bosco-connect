@@ -1,27 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { mockApi } from '../services/api';
+import { RootStackParamList, Grade } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
-interface Props { route: any }
+type ParentGradesRouteProp = RouteProp<RootStackParamList, 'ParentGrades'>;
 
-export default function ParentGradesScreen({ route }: Props) {
+export default function ParentGradesScreen() {
+  const route = useRoute<ParentGradesRouteProp>();
   const { child } = route.params;
-  const [grades, setGrades] = useState<any[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
-        const res = await api.get(`/students/${child.id}/grades`);
-        setGrades(res.data || []);
-      } catch { } finally { setLoading(false); }
+        const data = await mockApi.getGrades(child.id);
+        if (mounted.current) setGrades(data);
+      } catch (e) { console.error('Failed to load grades:', e); } finally { if (mounted.current) setLoading(false); }
     })();
-  }, []);
+    return () => { mounted.current = false; };
+  }, [child.id]);
 
   if (loading) return <LoadingScreen />;
 
-  const avg = grades.length ? (grades.reduce((s: number, g: any) => s + (g.score || 0), 0) / grades.length).toFixed(2) : 'N/A';
+  const avg = grades.length ? (grades.reduce((s, g) => s + (g.score || 0), 0) / grades.length).toFixed(2) : 'N/A';
 
   return (
     <View style={styles.container}>

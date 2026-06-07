@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/StatCard';
 import Card from '../components/Card';
 
-interface Props { navigation: any }
-
 const MOCK_STATS = { courses: 3, evaluations: 5, students: 28 };
 
-export default function TeacherDashboardScreen({ navigation }: Props) {
+export default function TeacherDashboardScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const [stats] = useState(MOCK_STATS);
 
@@ -38,13 +40,13 @@ export default function TeacherDashboardScreen({ navigation }: Props) {
 
         <Card title="Actions rapides">
           <View style={styles.quickActions}>
-            {[
-              { title: 'Cours', icon: '📖', screen: 'TeacherCourses', color: '#4F46E5' },
-              { title: 'Notes', icon: '📝', screen: 'TeacherGrades', color: '#059669' },
-              { title: 'Absences', icon: '🚫', screen: 'TeacherAbsences', color: '#DC2626' },
-              { title: 'Messages', icon: '💬', screen: 'Messages', color: '#8B5CF6' },
-              { title: 'IA Chat', icon: '🤖', screen: 'AIChat', color: '#14B8A6' },
-            ].map((item) => (
+            {([
+              { title: 'Cours', icon: '📖', screen: 'TeacherCourses' as const, color: '#4F46E5' },
+              { title: 'Notes', icon: '📝', screen: 'TeacherGrades' as const, color: '#059669' },
+              { title: 'Absences', icon: '🚫', screen: 'TeacherAbsences' as const, color: '#DC2626' },
+              { title: 'Messages', icon: '💬', screen: 'Messages' as const, color: '#8B5CF6' },
+              { title: 'IA Chat', icon: '🤖', screen: 'AIChat' as const, color: '#14B8A6' },
+            ] as const).map((item) => (
               <TouchableOpacity key={item.screen} style={styles.actionBtn} onPress={() => navigation.navigate(item.screen)}>
                 <Text style={styles.actionIcon}>{item.icon}</Text>
                 <Text style={styles.actionLabel}>{item.title}</Text>

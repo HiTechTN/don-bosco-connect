@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface Props { navigation: any }
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 const DEMO_ACCOUNTS = [
   { role: 'Admin', email: 'admin@donbosco.tn', password: 'admin123!', color: '#4F46E5' },
   { role: 'Enseignant', email: 'karim.hamdi@donbosco.tn', password: 'teacher123!', color: '#059669' },
   { role: 'Élève', email: 'adam.slim@donbosco.tn', password: 'student123!', color: '#D97706' },
   { role: 'Parent', email: 'ahmed.slim@parent.tn', password: 'parent123!', color: '#DC2626' },
-];
+] as const;
 
 const mockLogin = async (email: string, password: string) => {
-  const users: Record<string, { id: string; name: string; role: string }> = {
+  const users: Record<string, { id: string; name: string; role: 'admin' | 'teacher' | 'student' | 'parent' }> = {
     'admin@donbosco.tn': { id: 'admin-uuid-0001', name: 'Admin Principal', role: 'admin' },
     'karim.hamdi@donbosco.tn': { id: 'teacher-uuid-001', name: 'Karim Hamdi', role: 'teacher' },
     'adam.slim@donbosco.tn': { id: 'student-uuid-001', name: 'Adam Slim', role: 'student' },
@@ -27,7 +29,9 @@ const mockLogin = async (email: string, password: string) => {
   throw new Error('Email ou mot de passe incorrect');
 };
 
-export default function LoginScreen({ navigation }: Props) {
+export default function LoginScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Login'>>();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,20 +45,20 @@ export default function LoginScreen({ navigation }: Props) {
       await AsyncStorage.setItem('access_token', `mock_${userData.id}`);
       await AsyncStorage.setItem('refresh_token', `mock_refresh_${userData.id}`);
       await AsyncStorage.setItem('user', JSON.stringify(userData));
-      
-      const screenMap: Record<string, string> = {
+      await login(userData);
+      const screenMap: Record<string, keyof RootStackParamList> = {
         admin: 'AdminHome',
         teacher: 'TeacherHome',
         parent: 'ParentHome',
         student: 'StudentHome',
       };
-      navigation.replace(screenMap[userData.role] || 'StudentHome');
-    } catch (err: any) {
-      setError(err.message || 'Email ou mot de passe incorrect');
+      navigation.replace((screenMap[userData.role] || 'StudentHome') as any);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Email ou mot de passe incorrect');
     } finally { setLoading(false); }
   };
 
-  const fillDemo = (a: typeof DEMO_ACCOUNTS[0]) => { setEmail(a.email); setPassword(a.password); };
+  const fillDemo = (a: { role: string; email: string; password: string; color: string }) => { setEmail(a.email); setPassword(a.password); };
 
   return (
     <SafeAreaView style={styles.safe}>

@@ -1,29 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, FlatList, TextInput, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { mockApi } from '../services/api';
+import { Message, UserRecord } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Button from '../components/Button';
 
-interface Props { route?: any }
-
-export default function MessagesScreen({ route }: Props) {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+export default function MessagesScreen() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         const [mData, uData] = await Promise.all([
           mockApi.getMessages(),
           mockApi.getUsers(),
         ]);
-        setMessages(mData);
-        setUsers(uData);
-      } catch { } finally { setLoading(false); }
+        if (mounted.current) {
+          setMessages(mData);
+          setUsers(uData);
+        }
+      } catch (e) { console.error('Failed to load messages:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   const send = async () => {

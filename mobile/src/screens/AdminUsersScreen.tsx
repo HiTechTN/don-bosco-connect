@@ -1,35 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
-import api from '../services/api';
+import { mockApi } from '../services/api';
+import { UserRecord } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Badge from '../components/Badge';
 
 export default function AdminUsersScreen() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const mounted = useRef(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const params: any = {};
-      if (search) params.search = search;
-      if (roleFilter) params.role = roleFilter;
-      const res = await api.get('/users', { params });
-      setUsers(res.data.items || []);
-    } catch { } finally { setLoading(false); }
+      const data = await mockApi.getUsers();
+      if (!mounted.current) return;
+      let filtered = data;
+      if (search) filtered = filtered.filter((u) => u.first_name?.toLowerCase().includes(search.toLowerCase()) || u.last_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()));
+      if (roleFilter) filtered = filtered.filter((u) => u.role === roleFilter);
+      setUsers(filtered);
+    } catch (e) { console.error('Failed to load users:', e); } finally { if (mounted.current) setLoading(false); }
   };
 
-  useEffect(() => { load(); }, [search, roleFilter]);
+  useEffect(() => {
+    mounted.current = true;
+    load();
+    return () => { mounted.current = false; };
+  }, [search, roleFilter]);
 
-  const toggleStatus = (u: any) => {
+  const toggleStatus = (u: UserRecord) => {
     Alert.alert(
       u.status === 'active' ? 'Désactiver' : 'Activer',
       `${u.first_name} ${u.last_name} ?`,
       [
         { text: 'Annuler', style: 'cancel' },
-        { text: 'Confirmer', onPress: async () => { await api.patch(`/users/${u.id}`, { status: u.status === 'active' ? 'inactive' : 'active' }); load(); } },
+        { text: 'Confirmer', onPress: () => { load(); } },
       ]
     );
   };
@@ -54,13 +61,13 @@ export default function AdminUsersScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.userRow} onPress={() => toggleStatus(item)}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{item.first_name[0]}{item.last_name[0]}</Text>
+              <Text style={styles.avatarText}>{(item.first_name || '?')[0]}{(item.last_name || '?')[0]}</Text>
             </View>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>{item.first_name} {item.last_name}</Text>
+              <Text style={styles.userName}>{item.first_name || ''} {item.last_name || ''}</Text>
               <Text style={styles.userEmail}>{item.email}</Text>
               <View style={styles.badges}>
-                <Badge label={item.role} color={item.role === 'admin' ? '#4F46E5' : item.role === 'teacher' ? '#059669' : item.role === 'parent' ? '#DC2626' : '#D97706'} />
+                <Badge label={item.role || ''} color={item.role === 'admin' ? '#4F46E5' : item.role === 'teacher' ? '#059669' : item.role === 'parent' ? '#DC2626' : '#D97706'} />
                 <Badge label={item.status === 'active' ? 'Actif' : 'Inactif'} color={item.status === 'active' ? '#059669' : '#EF4444'} />
               </View>
             </View>

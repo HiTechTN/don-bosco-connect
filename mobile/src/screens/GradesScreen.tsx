@@ -1,26 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { getUser } from '../lib/auth';
 import { mockApi } from '../services/api';
+import { Grade } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function GradesScreen() {
-  const [grades, setGrades] = useState<any[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         const u = await getUser();
+        if (!mounted.current) return;
         const data = await mockApi.getGrades(u.id);
-        setGrades(data);
-      } catch { } finally { setLoading(false); }
+        if (mounted.current) setGrades(data);
+      } catch (e) { console.error('Failed to load grades:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   if (loading) return <LoadingScreen />;
 
-  const avg = grades.length ? (grades.reduce((s: number, g: any) => s + (g.score || 0), 0) / grades.length).toFixed(2) : 'N/A';
+  const avg = grades.length ? (grades.reduce((s, g) => s + (g.score || 0), 0) / grades.length).toFixed(2) : 'N/A';
 
   return (
     <View style={styles.container}>

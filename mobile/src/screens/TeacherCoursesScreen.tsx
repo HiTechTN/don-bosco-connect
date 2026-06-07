@@ -1,25 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, TextInput } from 'react-native';
-import api from '../services/api';
+import api, { mockApi } from '../services/api';
+import { CourseRecord } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 export default function TeacherCoursesScreen() {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<CourseRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', chapter_number: '' });
+  const mounted = useRef(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/courses');
-      setCourses(res.data.items || res.data || []);
-    } catch { } finally { setLoading(false); }
+      const data = await mockApi.getCourses();
+      if (mounted.current) setCourses(data);
+    } catch (e) { console.error('Failed to load courses:', e); } finally { if (mounted.current) setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    load();
+    return () => { mounted.current = false; };
+  }, []);
 
   const createCourse = async () => {
     if (!form.title) return;
@@ -28,7 +34,7 @@ export default function TeacherCoursesScreen() {
       setForm({ title: '', description: '', chapter_number: '' });
       setShowForm(false);
       load();
-    } catch { Alert.alert('Erreur', 'Impossible de créer le cours'); }
+    } catch (e) { console.error('Create course error:', e); Alert.alert('Erreur', 'Impossible de créer le cours'); }
   };
 
   if (loading) return <LoadingScreen />;

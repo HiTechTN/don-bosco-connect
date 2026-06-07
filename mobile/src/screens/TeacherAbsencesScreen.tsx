@@ -1,29 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
-import api from '../services/api';
+import api, { mockApi } from '../services/api';
+import { Absence } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 export default function TeacherAbsencesScreen() {
-  const [absences, setAbsences] = useState<any[]>([]);
+  const [absences, setAbsences] = useState<Absence[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/absences');
-      setAbsences(res.data.items || res.data || []);
-    } catch { } finally { setLoading(false); }
+        const data = await mockApi.getAbsencesForTeacher() as Absence[];
+      if (mounted.current) setAbsences(data);
+    } catch (e) { console.error('Failed to load absences:', e); } finally { if (mounted.current) setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    load();
+    return () => { mounted.current = false; };
+  }, []);
 
   const justify = async (id: string) => {
     try {
       await api.patch(`/absences/${id}`, { justification_status: 'justified' });
       load();
-    } catch { Alert.alert('Erreur'); }
+    } catch (e) { console.error('Justify error:', e); Alert.alert('Erreur'); }
   };
 
   if (loading) return <LoadingScreen />;

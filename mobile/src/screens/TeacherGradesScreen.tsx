@@ -1,34 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, TextInput } from 'react-native';
-import api from '../services/api';
+import api, { mockApi } from '../services/api';
+import { EvaluationRecord, GradeRecord } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 export default function TeacherGradesScreen() {
-  const [evaluations, setEvaluations] = useState<any[]>([]);
+  const [evaluations, setEvaluations] = useState<EvaluationRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEval, setSelectedEval] = useState<any>(null);
-  const [grades, setGrades] = useState<any[]>([]);
+  const [selectedEval, setSelectedEval] = useState<EvaluationRecord | null>(null);
+  const [grades, setGrades] = useState<GradeRecord[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', type: 'devoir', max_score: '20' });
+  const mounted = useRef(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/evaluations');
-      setEvaluations(res.data || []);
-    } catch { } finally { setLoading(false); }
+      const data = await mockApi.getEvaluations();
+      if (mounted.current) setEvaluations(data);
+    } catch (e) { console.error('Failed to load evaluations:', e); } finally { if (mounted.current) setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    load();
+    return () => { mounted.current = false; };
+  }, []);
 
-  const loadGrades = async (ev: any) => {
+  const loadGrades = async (ev: EvaluationRecord) => {
     setSelectedEval(ev);
     try {
-      const res = await api.get(`/evaluations/${ev.id}/grades`);
-      setGrades(res.data || []);
-    } catch { setGrades([]); }
+      const data = await mockApi.getGradesForEvaluation(ev.id);
+      setGrades(data);
+    } catch (e) { console.error('Failed to load grades:', e); setGrades([]); }
   };
 
   const createEval = async () => {
@@ -38,7 +44,7 @@ export default function TeacherGradesScreen() {
       setForm({ title: '', type: 'devoir', max_score: '20' });
       setShowForm(false);
       load();
-    } catch { Alert.alert('Erreur'); }
+    } catch (e) { console.error('Create evaluation error:', e); Alert.alert('Erreur'); }
   };
 
   if (loading) return <LoadingScreen />;

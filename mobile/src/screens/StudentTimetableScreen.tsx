@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { mockApi } from '../services/api';
+import { TimetableSlot } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function StudentTimetableScreen() {
-  const [slots, setSlots] = useState<any[]>([]);
+  const [slots, setSlots] = useState<TimetableSlot[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         const data = await mockApi.getTimetable();
-        setSlots(data);
-      } catch { } finally { setLoading(false); }
+        if (mounted.current) setSlots(data);
+      } catch (e) { console.error('Failed to load timetable:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];

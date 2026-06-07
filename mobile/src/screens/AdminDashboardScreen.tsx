@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/StatCard';
 
-interface Props { navigation: any }
-
 const MOCK_STATS = { users: 9, classes: 3, subjects: 8, events: 5 };
 
-export default function AdminDashboardScreen({ navigation }: Props) {
+export default function AdminDashboardScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const [stats] = useState(MOCK_STATS);
 
@@ -38,14 +40,14 @@ export default function AdminDashboardScreen({ navigation }: Props) {
 
         <Text style={styles.sectionTitle}>Gestion</Text>
         <View style={styles.grid}>
-          {[
-            { title: 'Utilisateurs', icon: '👥', color: '#4F46E5', screen: 'AdminUsers' },
-            { title: 'Classes', icon: '🏫', color: '#059669', screen: 'AdminClasses' },
-            { title: 'Matières', icon: '📚', color: '#D97706', screen: 'AdminSubjects' },
-            { title: 'Emploi du temps', icon: '📅', color: '#8B5CF6', screen: 'AdminTimetable' },
-            { title: 'Événements', icon: '🎉', color: '#EC4899', screen: 'AdminEvents' },
-            { title: 'Audit', icon: '📋', color: '#14B8A6', screen: 'AdminAudit' },
-          ].map((item) => (
+          {([
+            { title: 'Utilisateurs', icon: '👥', color: '#4F46E5', screen: 'AdminUsers' as const },
+            { title: 'Classes', icon: '🏫', color: '#059669', screen: 'AdminClasses' as const },
+            { title: 'Matières', icon: '📚', color: '#D97706', screen: 'AdminSubjects' as const },
+            { title: 'Emploi du temps', icon: '📅', color: '#8B5CF6', screen: 'AdminTimetable' as const },
+            { title: 'Événements', icon: '🎉', color: '#EC4899', screen: 'AdminEvents' as const },
+            { title: 'Audit', icon: '📋', color: '#14B8A6', screen: 'AdminAudit' as const },
+          ] as const).map((item) => (
             <TouchableOpacity key={item.screen} style={styles.gridItem} onPress={() => navigation.navigate(item.screen)}>
               <Text style={styles.gridIcon}>{item.icon}</Text>
               <Text style={styles.gridLabel}>{item.title}</Text>

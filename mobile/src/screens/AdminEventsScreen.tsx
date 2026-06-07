@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
+import { mockApi } from '../services/api';
+import { EventRecord } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Badge from '../components/Badge';
 
 export default function AdminEventsScreen() {
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<EventRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
-        const res = await api.get('/events');
-        setEvents(res.data || []);
-      } catch { } finally { setLoading(false); }
+        const data = await mockApi.getEvents();
+        if (mounted.current) setEvents(data);
+      } catch (e) { console.error('Failed to load events:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   if (loading) return <LoadingScreen />;
@@ -31,11 +35,11 @@ export default function AdminEventsScreen() {
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.title}>{item.title}</Text>
-              <Badge label={item.event_type} color={typeColors[item.event_type] || '#6B7280'} />
+              <Badge label={item.event_type || item.type} color={typeColors[item.event_type || 'academic'] || '#6B7280'} />
             </View>
             <Text style={styles.desc}>{item.description}</Text>
             <Text style={styles.date}>
-              {new Date(item.start_datetime).toLocaleDateString('fr-FR')}
+              {item.start_datetime ? new Date(item.start_datetime).toLocaleDateString('fr-FR') : item.date}
               {item.all_day ? ' (Toute la journée)' : ''}
             </Text>
           </View>

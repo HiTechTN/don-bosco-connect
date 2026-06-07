@@ -3,9 +3,9 @@ import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { RootStackParamList } from './src/types';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import LoginScreen from './src/screens/LoginScreen';
 import StudentDashboardScreen from './src/screens/StudentDashboardScreen';
 import TeacherDashboardScreen from './src/screens/TeacherDashboardScreen';
@@ -31,10 +31,10 @@ import MessagesScreen from './src/screens/MessagesScreen';
 import AIChatScreen from './src/screens/AIChatScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
-  const { user, isLoading, login } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -44,10 +44,6 @@ function AppNavigator() {
       </View>
     );
   }
-
-  const handleLogin = (userData: any) => {
-    login(userData);
-  };
 
   const sharedScreens = user && user.role !== 'parent' ? (
     <>
@@ -59,12 +55,7 @@ function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!user ? (
-        <Stack.Screen name="Login">
-          {() => <LoginScreen navigation={{ replace: async () => {
-            const userStr = await AsyncStorage.getItem('user');
-            if (userStr) handleLogin(JSON.parse(userStr));
-          } } as any} />}
-        </Stack.Screen>
+        <Stack.Screen name="Login" component={LoginScreen} />
       ) : (
         <>
           {user.role === 'admin' && (
@@ -119,7 +110,9 @@ export default function App() {
   return (
     <AuthProvider>
       <NavigationContainer>
-        <AppNavigator />
+        <ErrorBoundary>
+          <AppNavigator />
+        </ErrorBoundary>
       </NavigationContainer>
     </AuthProvider>
   );

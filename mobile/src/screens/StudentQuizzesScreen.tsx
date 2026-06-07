@@ -1,32 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { mockApi } from '../services/api';
+import { Quiz, Question } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function StudentQuizzesScreen() {
-  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeQuiz, setActiveQuiz] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         const data = await mockApi.getQuizzes();
-        setQuizzes(data);
-      } catch { } finally { setLoading(false); }
+        if (mounted.current) setQuizzes(data);
+      } catch (e) { console.error('Failed to load quizzes:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
-  const startQuiz = async (q: any) => {
+  const startQuiz = async (q: Quiz) => {
     setActiveQuiz(q);
     try {
       const data = await mockApi.getQuizQuestions(q.id);
       setQuestions(data);
-    } catch { }
+    } catch (e) { console.error('Failed to load questions:', e); }
   };
 
   const answer = (idx: number) => {

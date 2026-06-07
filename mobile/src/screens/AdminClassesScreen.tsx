@@ -1,22 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import api from '../services/api';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { mockApi } from '../services/api';
+import { ClassRecord } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Badge from '../components/Badge';
 
 export default function AdminClassesScreen() {
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<ClassRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/classes');
-      setClasses(res.data || []);
-    } catch { } finally { setLoading(false); }
+      const data = await mockApi.getClasses();
+      if (mounted.current) setClasses(data);
+    } catch (e) { console.error('Failed to load classes:', e); } finally { if (mounted.current) setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    load();
+    return () => { mounted.current = false; };
+  }, []);
 
   if (loading) return <LoadingScreen />;
 

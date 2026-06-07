@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
+import { mockApi } from '../services/api';
+import { SubjectRecord } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function AdminSubjectsScreen() {
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<SubjectRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
-        const res = await api.get('/subjects');
-        setSubjects(res.data || []);
-      } catch { } finally { setLoading(false); }
+        const data = await mockApi.getSubjects();
+        if (mounted.current) setSubjects(data);
+      } catch (e) { console.error('Failed to load subjects:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   if (loading) return <LoadingScreen />;

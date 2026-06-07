@@ -1,32 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { getUser } from '../lib/auth';
 import { mockApi } from '../services/api';
+import { Badge, LeaderboardEntry, XpHistoryEntry } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function StudentGamificationScreen() {
-  const [profile, setProfile] = useState<any>(null);
-  const [badges, setBadges] = useState<any[]>([]);
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [xpHistory, setXpHistory] = useState<any[]>([]);
+  const [profile, setProfile] = useState<{ level: number; xp_total: number; streak_days: number } | null>(null);
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [xpHistory, setXpHistory] = useState<XpHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
         const u = await getUser();
+        if (!mounted.current) return;
         const [pData, bData, lData, xData] = await Promise.all([
           mockApi.getGamificationProfile(u.id),
           mockApi.getGamificationBadges(u.id),
           mockApi.getGamificationLeaderboard(u.id),
           mockApi.getGamificationXpHistory(u.id),
         ]);
-        setProfile(pData);
-        setBadges(bData);
-        setLeaderboard(lData);
-        setXpHistory(xData);
-      } catch { } finally { setLoading(false); }
+        if (mounted.current) {
+          setProfile(pData);
+          setBadges(bData);
+          setLeaderboard(lData);
+          setXpHistory(xData);
+        }
+      } catch (e) { console.error('Failed to load gamification data:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   if (loading) return <LoadingScreen />;

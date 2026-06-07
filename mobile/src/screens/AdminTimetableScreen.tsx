@@ -1,22 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
+import { mockApi } from '../services/api';
+import { TimetableSlot } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
-import Badge from '../components/Badge';
 
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
 
 export default function AdminTimetableScreen() {
-  const [slots, setSlots] = useState<any[]>([]);
+  const [slots, setSlots] = useState<TimetableSlot[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
-        const res = await api.get('/timetable');
-        setSlots(res.data || []);
-      } catch { } finally { setLoading(false); }
+        const data = await mockApi.getTimetable();
+        if (mounted.current) setSlots(data);
+      } catch (e) { console.error('Failed to load timetable:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   if (loading) return <LoadingScreen />;

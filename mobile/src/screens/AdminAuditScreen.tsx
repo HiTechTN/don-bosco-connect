@@ -1,23 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, TextInput } from 'react-native';
-import api from '../services/api';
+import { mockApi } from '../services/api';
+import { AuditLog } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 import Badge from '../components/Badge';
 
 export default function AdminAuditScreen() {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
-        const params: any = {};
-        if (filter) params.resource_type = filter;
-        const res = await api.get('/audit/logs', { params });
-        setLogs(res.data.items || res.data || []);
-      } catch { } finally { setLoading(false); }
+        const data = await mockApi.getAuditLogs();
+        if (!mounted.current) return;
+        if (filter) {
+          setLogs(data.filter((l) => l.resource_type?.toLowerCase().includes(filter.toLowerCase())));
+        } else {
+          setLogs(data);
+        }
+      } catch (e) { console.error('Failed to load audit logs:', e); } finally { if (mounted.current) setLoading(false); }
     })();
+    return () => { mounted.current = false; };
   }, [filter]);
 
   if (loading) return <LoadingScreen />;

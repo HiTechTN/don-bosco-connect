@@ -3,6 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = 'http://localhost:8000/api/v1';
 
+export type { User, Grade, Absence, TimetableSlot, Quiz, Question, Badge, LeaderboardEntry, XpHistoryEntry, Message } from '../types';
+
 const api = axios.create({ baseURL: BASE_URL, timeout: 10000 });
 
 api.interceptors.request.use(
@@ -181,9 +183,81 @@ export const mockApi = {
 
   async getUsers() {
     return [
-      { id: 'teacher-uuid-001', first_name: 'Karim', last_name: 'Hamdi', role: 'teacher' },
-      { id: 'admin-uuid-0001', first_name: 'Admin', last_name: 'Principal', role: 'admin' },
-      { id: 'parent-uuid-001', first_name: 'Ahmed', last_name: 'Slim', role: 'parent' },
+      { id: 'admin-uuid-0001', email: 'admin@donbosco.tn', role: 'admin', first_name: 'Admin', last_name: 'Principal', class_id: null, status: 'active' },
+      { id: 'teacher-uuid-001', email: 'karim.hamdi@donbosco.tn', role: 'teacher', first_name: 'Karim', last_name: 'Hamdi', class_id: 'class-1', status: 'active' },
+      { id: 'teacher-uuid-002', email: 'slah.mansour@donbosco.tn', role: 'teacher', first_name: 'Slah', last_name: 'Mansour', class_id: 'class-2', status: 'active' },
+      { id: 'student-uuid-001', email: 'adam.slim@donbosco.tn', role: 'student', first_name: 'Adam', last_name: 'Slim', class_id: 'class-1', status: 'active' },
+      { id: 'parent-uuid-001', email: 'ahmed.slim@parent.tn', role: 'parent', first_name: 'Ahmed', last_name: 'Slim', class_id: null, status: 'active' },
+      { id: 'student-uuid-002', email: 'mariem.beldi@donbosco.tn', role: 'student', first_name: 'Mariem', last_name: 'Beldi', class_id: 'class-1', status: 'active' },
+      { id: 'student-uuid-003', email: 'youssef.mansour@donbosco.tn', role: 'student', first_name: 'Youssef', last_name: 'Mansour', class_id: 'class-2', status: 'active' },
+      { id: 'parent-uuid-002', email: 'fatma.slim@parent.tn', role: 'parent', first_name: 'Fatma', last_name: 'Beldi', class_id: null, status: 'active' },
+      { id: 'teacher-uuid-003', email: 'nadia.trabelsi@donbosco.tn', role: 'teacher', first_name: 'Nadia', last_name: 'Trabelsi', class_id: 'class-3', status: 'active' },
+    ];
+  },
+  async getClasses() {
+    return [
+      { id: 'class-1', name: '6ème A', level: 6, section: 'A', main_teacher_name: 'Karim Hamdi', enrollment_count: 28, max_students: 30 },
+      { id: 'class-2', name: '6ème B', level: 6, section: 'B', main_teacher_name: 'Slah Mansour', enrollment_count: 25, max_students: 30 },
+      { id: 'class-3', name: '7ème A', level: 7, section: 'A', main_teacher_name: 'Nadia Trabelsi', enrollment_count: 30, max_students: 30 },
+    ];
+  },
+  async getSubjects() {
+    return [
+      { id: 'subj-1', name: 'Mathématiques', coefficient: 4, code: 'MATH', color: '#4F46E5' },
+      { id: 'subj-2', name: 'Physique', coefficient: 3, code: 'PHY', color: '#059669' },
+      { id: 'subj-3', name: 'Français', coefficient: 3, code: 'FR', color: '#D97706' },
+      { id: 'subj-4', name: 'Anglais', coefficient: 2, code: 'ANG', color: '#EC4899' },
+      { id: 'subj-5', name: 'Histoire-Géo', coefficient: 2, code: 'HG', color: '#8B5CF6' },
+      { id: 'subj-6', name: 'Sciences', coefficient: 2, code: 'SCI', color: '#14B8A6' },
+      { id: 'subj-7', name: 'Sport', coefficient: 1, code: 'SPO', color: '#DC2626' },
+    ];
+  },
+  async getEvents() {
+    return [
+      { id: 'evt-1', title: 'Conseil de classe 6ème A', date: '2025-06-15', description: 'Conseil de classe du premier semestre', type: 'meeting', event_type: 'meeting', start_datetime: '2025-06-15T14:00:00', all_day: false },
+      { id: 'evt-2', title: 'Sortie pédagogique Musée', date: '2025-06-20', description: 'Visite du musée des sciences', type: 'outing', event_type: 'activity', start_datetime: '2025-06-20T08:00:00', all_day: true },
+      { id: 'evt-3', title: 'Remise des bulletins', date: '2025-06-30', description: 'Remise des bulletins du second semestre', type: 'event', event_type: 'academic', start_datetime: '2025-06-30T09:00:00', all_day: false },
+    ];
+  },
+  async getAuditLogs() {
+    return [
+      { id: 'log-1', action: 'Connexion', user_email: 'admin@donbosco.tn', created_at: new Date(Date.now() - 3600000).toISOString(), details: 'Admin connecté', resource_type: 'auth' },
+      { id: 'log-2', action: 'Modification', user_email: 'karim.hamdi@donbosco.tn', created_at: new Date(Date.now() - 7200000).toISOString(), details: 'Note ajoutée', resource_type: 'grade' },
+      { id: 'log-3', action: 'Création', user_email: 'admin@donbosco.tn', created_at: new Date(Date.now() - 10800000).toISOString(), details: 'Compte enseignant créé', resource_type: 'user' },
+    ];
+  },
+  async getCourses() {
+    return [
+      { id: 'course-1', title: 'Mathématiques - Algèbre', name: 'Mathématiques - Algèbre', chapter_number: 3, teacher_id: 'teacher-uuid-001', class_id: 'class-1', description: 'Étude des équations du second degré', is_published: true, tags: ['algèbre', 'équations'] },
+      { id: 'course-2', title: 'Physique - Mécanique', name: 'Physique - Mécanique', chapter_number: 2, teacher_id: 'teacher-uuid-002', class_id: 'class-2', description: 'Les lois du mouvement', is_published: true, tags: ['mécanique', 'mouvement'] },
+      { id: 'course-3', title: 'Mathématiques - Géométrie', name: 'Mathématiques - Géométrie', chapter_number: 4, teacher_id: 'teacher-uuid-001', class_id: 'class-1', description: 'Théorème de Pythagore', is_published: false, tags: ['géométrie'] },
+    ];
+  },
+  async getEvaluations() {
+    return [
+      { id: 'eval-1', title: 'Contrôle continu Math', course_id: 'course-1', subject_name: 'Mathématiques', date: '2025-05-10', coefficient: 2, type: 'devoir', max_score: 20, is_published: true },
+      { id: 'eval-2', title: 'Devoir maison Physique', course_id: 'course-2', subject_name: 'Physique', date: '2025-05-08', coefficient: 1, type: 'devoir', max_score: 20, is_published: true },
+      { id: 'eval-3', title: 'Test oral Anglais', course_id: 'course-3', subject_name: 'Anglais', date: '2025-05-12', coefficient: 1, type: 'oral', max_score: 20, is_published: false },
+    ];
+  },
+  async getChildren() {
+    return [
+      { id: 'student-uuid-001', first_name: 'Adam', last_name: 'Slim', class_id: 'class-1', email: 'adam.slim@donbosco.tn' },
+      { id: 'student-uuid-002', first_name: 'Mariem', last_name: 'Beldi', class_id: 'class-1', email: 'mariem.beldi@donbosco.tn' },
+    ];
+  },
+  async getGradesForEvaluation(evaluationId: string) {
+    return [
+      { id: 'g1', student_name: 'Adam Slim', score: 16, max_score: 20 },
+      { id: 'g2', student_name: 'Mariem Beldi', score: 14, max_score: 20 },
+      { id: 'g3', student_name: 'Youssef Mansour', score: 12, max_score: 20 },
+    ];
+  },
+  async getAbsencesForTeacher() {
+    return [
+      { id: 'a1', student_name: 'Adam Slim', date: '2025-05-12', justification_status: 'justified', type: 'absence', subject_name: 'Mathématiques' },
+      { id: 'a2', student_name: 'Mariem Beldi', date: '2025-05-08', justification_status: 'pending', type: 'absence', subject_name: 'Physique' },
+      { id: 'a3', student_name: 'Youssef Mansour', date: '2025-05-02', justification_status: 'unjustified', type: 'retard', subject_name: 'Français' },
     ];
   },
 };

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import Button from '../components/Button';
-import Card from '../components/Card';
 
 export default function AIChatScreen() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([

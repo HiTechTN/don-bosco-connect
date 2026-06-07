@@ -1,23 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import api from '../services/api';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { mockApi } from '../services/api';
+import { RootStackParamList, Absence } from '../types';
 import LoadingScreen from '../components/LoadingScreen';
 
-interface Props { route: any }
+type ParentAbsencesRouteProp = RouteProp<RootStackParamList, 'ParentAbsences'>;
 
-export default function ParentAbsencesScreen({ route }: Props) {
+export default function ParentAbsencesScreen() {
+  const route = useRoute<ParentAbsencesRouteProp>();
   const { child } = route.params;
-  const [absences, setAbsences] = useState<any[]>([]);
+  const [absences, setAbsences] = useState<Absence[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
       try {
-        const res = await api.get(`/students/${child.id}/absences`);
-        setAbsences(res.data || []);
-      } catch { } finally { setLoading(false); }
+        const data = await mockApi.getAbsences(child.id) as Absence[];
+        if (mounted.current) setAbsences(data);
+      } catch (e) { console.error('Failed to load absences:', e); } finally { if (mounted.current) setLoading(false); }
     })();
-  }, []);
+    return () => { mounted.current = false; };
+  }, [child.id]);
 
   if (loading) return <LoadingScreen />;
 
