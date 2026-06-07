@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-build dev-logs dev-stop dev-restart dev-status up build build-no-cache down restart restart-api logs logs-api status health health-check-all migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup backup-dev validate clean clean-all reset release release-apk push pull
+.PHONY: help install dev dev-build dev-logs dev-stop dev-restart dev-status up build build-no-cache down restart restart-api logs logs-api status health health-check-all migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast test-e2e test-integration test-all lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup backup-dev validate clean clean-all reset release release-apk push pull
 
 # Default target
 .DEFAULT_GOAL := help
@@ -156,6 +156,47 @@ test-cov: ## Run backend tests with coverage
 
 test-fast: ## Run backend tests (quiet mode)
 	$(COMPOSE) exec api pytest app/tests/ -p no:xdist -q
+
+test-e2e: ## Run Playwright E2E tests (starts Vite dev server)
+	@echo "" && \
+	echo "\033[1;36m═══ E2E Tests (Playwright) ═══\033[0m" && \
+	echo "" && \
+	cd frontend && npx vite --port 5173 &>/tmp/vite-dev.log & \
+	VITE_PID=$$! && \
+	echo "  ⏳ Waiting for Vite dev server (port 5173)..." && \
+	i=0; while [ $$i -lt 15 ] && ! curl -s -o /dev/null http://localhost:5173 2>/dev/null; do i=$$((i+1)); sleep 1; done && \
+	echo "  🧪 Running Playwright tests..." && \
+	(cd frontend && npx playwright test --reporter=list); \
+	EXIT=$$?; \
+	kill $$VITE_PID 2>/dev/null || true; \
+	if [ $$EXIT -ne 0 ]; then echo "\033[1;31m❌ E2E tests failed (exit $$EXIT)\033[0m"; exit $$EXIT; fi; \
+	echo "\033[1;32m✅ E2E tests passed\033[0m"
+
+test-integration: ## Run all integration tests (backend + frontend typecheck + E2E)
+	@FAILED=0; \
+	echo "" && \
+	echo "\033[1;36m═══ Integration Test Suite ═══\033[0m" && \
+	echo "" && \
+	echo "\033[1;36m[1/3] Backend Tests\033[0m" && \
+	echo "─────────────────────────────────" && \
+	($(COMPOSE) exec api pytest app/tests/ -p no:xdist -v) || FAILED=1; \
+	echo "" && \
+	echo "\033[1;36m[2/3] Frontend Typecheck\033[0m" && \
+	echo "─────────────────────────────────" && \
+	(cd frontend && npx tsc --noEmit) || FAILED=1; \
+	echo "" && \
+	echo "\033[1;36m[3/3] E2E Tests (Playwright)\033[0m" && \
+	echo "─────────────────────────────────" && \
+	cd frontend && npx vite --port 5173 &>/tmp/vite-dev.log & \
+	VITE_PID=$$! && \
+	i=0; while [ $$i -lt 15 ] && ! curl -s -o /dev/null http://localhost:5173 2>/dev/null; do i=$$((i+1)); sleep 1; done && \
+	(cd frontend && npx playwright test --reporter=list) || FAILED=1; \
+	kill $$VITE_PID 2>/dev/null || true; \
+	echo ""; \
+	if [ $$FAILED -ne 0 ]; then echo "\033[1;31m❌ Integration tests FAILED\033[0m"; exit 1; fi; \
+	echo "\033[1;32m✅ All integration tests passed\033[0m"
+
+test-all: test-integration ## Run all tests (alias for test-integration)
 
 lint: ## Lint backend code with ruff
 	cd backend && python3 -m ruff check app/
