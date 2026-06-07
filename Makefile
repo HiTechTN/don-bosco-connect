@@ -147,11 +147,22 @@ clean-all: ## Remove ALL Docker resources for this project (WARNING: destroys da
 	docker system prune -f
 
 reset: ## Full reset (WARNING: destroys all data)
-	@echo "⚠️  This will destroy ALL data (DB, Redis, MinIO, Ollama)"
-	@read -p "Type RESET to confirm: " confirm && [ "$$confirm" = "RESET" ] && \
-		$(COMPOSE) down -v --remove-orphans && \
-		docker volume rm don-bosco-connect_redis_data don-bosco-connect_postgres_data don-bosco-connect_minio_data don-bosco-connect_ollama_data 2>/dev/null; \
-		echo "✅ Reset complete"
+	@echo ""
+	@echo "\033[1;31m⚠️  WARNING: This will destroy ALL data:\033[0m"
+	@echo "    - PostgreSQL database (donbosco)"
+	@echo "    - Redis cache and data"
+	@echo "    - MinIO storage"
+	@echo "    - Ollama models"
+	@echo ""
+	@read -p "Type 'RESET' to confirm: " confirm; \
+		if [ "$$confirm" != "RESET" ]; then \
+			echo "\033[1;31m❌ Aborted. You typed '$$confirm' instead of 'RESET'.\033[0m"; \
+			exit 1; \
+		fi; \
+		echo "\033[1;33m🗑️  Stopping containers and removing volumes...\033[0m"; \
+		$(COMPOSE) down -v --remove-orphans; \
+		docker volume rm don-bosco-connect_redis_data don-bosco-connect_postgres_data don-bosco-connect_minio_data don-bosco-connect_ollama_data 2>/dev/null || true; \
+		echo "\033[1;32m✅ Reset complete. All data destroyed.\033[0m"
 
 # ─── Releases ───────────────────────────────────────────────────────────────────
 
