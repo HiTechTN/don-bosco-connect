@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     MAX_LOGIN_ATTEMPTS: int = 5
     LOGIN_LOCKOUT_MINUTES: int = 15
-    CORS_ORIGINS: str = "http://localhost:5173,https://donbosco.local"
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost,https://donbosco.local"
     ENCRYPTION_KEY: str = ""
 
     MAX_UPLOAD_SIZE_MB: int = 200
