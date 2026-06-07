@@ -1,4 +1,4 @@
-.PHONY: help dev dev-build dev-logs dev-stop dev-status up build build-no-cache down restart restart-api logs logs-api status health migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup validate clean clean-all reset release release-apk push pull
+.PHONY: help install dev dev-build dev-logs dev-stop dev-status up build build-no-cache down restart restart-api logs logs-api status health migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup validate clean clean-all reset release release-apk push pull
 
 # Default target
 .DEFAULT_GOAL := help
@@ -17,6 +17,25 @@ help: ## Show this help message
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+
+install: ## Initialize project for new developers (creates .env, starts services)
+	@echo ""
+	@echo "\033[1;36m═══ Don Bosco Connect — Project Setup ═══\033[0m"
+	@echo ""
+	@test -f .env && echo "\033[1;33m⚠️  .env already exists, skipping setup\033[0m" || \
+		(bash scripts/setup.sh)
+	@echo ""
+	@echo "\033[1;36m═══ Starting Development Environment ═══\033[0m"
+	@echo ""
+	@$(DEV_COMPOSE) up -d
+	@echo ""
+	@echo "\033[1;32m✅ Project initialized and running!\033[0m"
+	@echo "   API:     http://localhost:8000/docs"
+	@echo "   Nginx:   http://localhost:80"
+	@echo "   HTTPS:   https://localhost:8443"
+	@echo "   Flower:  http://localhost:5555"
+	@echo "   Grafana: http://localhost:3000"
 	@echo ""
 
 dev: ## Start in development mode (hot-reload)
