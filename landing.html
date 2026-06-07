@@ -42,6 +42,7 @@
         .install-code .comment { color: #4ec9b0; }
         .nav-links { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
         .nav-link { padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s; }
+        .version-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -56,6 +57,7 @@
             <h1>🎓 <span data-i18n="title">Don Bosco Connect</span></h1>
             <p data-i18n="subtitle">La plateforme éducative intelligente propulsée par l'IA</p>
             <p style="font-size: 1rem; margin-top: 10px;" data-i18n="features_badge">Multilingue • Adaptive Learning • Open Source</p>
+            <div class="version-badge">v2.3.0 — Juin 2025</div>
             <div class="cta-buttons">
                 <a href="#demo" class="btn btn-primary" data-i18n="btn_demo">🚀 Voir la Démo</a>
                 <a href="https://github.com/HiTechTN/don-bosco-connect" class="btn btn-secondary" data-i18n="btn_github">📦 GitHub</a>
@@ -86,7 +88,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">📱</div>
                     <h3 data-i18n="feature_multiplatform_title">Multi-Plateforme</h3>
-                    <p data-i18n="feature_multiplatform_desc">Web (React), Mobile (React Native), Desktop (Electron) - Une expérience unifiée partout.</p>
+                    <p data-i18n="feature_multiplatform_desc">Web (React), Mobile (React Native) - Une expérience unifiée partout.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
@@ -110,7 +112,7 @@
             </p>
             <div class="demo-links">
                 <a href="http://localhost:3000" class="demo-link" data-i18n="demo_web">🌐 Version Web</a>
-                <a href="https://github.com/HiTechTN/don-bosco-connect/releases" class="demo-link" data-i18n="demo_download">📦 Télécharger</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect/releases/tag/v2.3.0" class="demo-link" data-i18n="demo_download">📦 Télécharger v2.3.0</a>
                 <a href="https://github.com/HiTechTN/don-bosco-connect" class="demo-link" data-i18n="demo_source">💻 Code Source</a>
             </div>
             <div class="demo-accounts">
@@ -148,21 +150,21 @@
                 <p class="comment"># Cloner et installer avec Docker (recommandé)</p>
                 <p>git clone https://github.com/HiTechTN/don-bosco-connect.git</p>
                 <p>cd don-bosco-connect</p>
-                <p>docker-compose up -d</p>
+                <p>make install</p>
                 <br>
                 <p class="comment"># Ou avec gh CLI</p>
                 <p>gh repo clone HiTechTN/don-bosco-connect</p>
-                <p>cd don-bosco-connect && ./install.sh</p>
+                <p>cd don-bosco-connect && make install</p>
             </div>
             <div class="nav-links">
-                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/INTEGRATION.md" class="btn btn-primary" style="color: #667eea;" data-i18n="guide_integrator">📖 Guide Intégrateur</a>
-                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/master/USER_GUIDE.md" class="btn btn-secondary" data-i18n="guide_user">📘 Guide Utilisateur</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/main/INTEGRATION.md" class="btn btn-primary" style="color: #667eea;" data-i18n="guide_integrator">📖 Guide Intégrateur</a>
+                <a href="https://github.com/HiTechTN/don-bosco-connect/blob/main/USER_GUIDE.md" class="btn btn-secondary" data-i18n="guide_user">📘 Guide Utilisateur</a>
             </div>
         </div>
     </section>
 
     <footer>
-        <p>Don Bosco Connect © 2026 - <span data-i18n="footeropensource">Propulsé par Open Source</span></p>
+        <p>Don Bosco Connect © 2025 - v2.3.0 - <span data-i18n="footeropensource">Propulsé par Open Source</span></p>
         <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">
             <a href="https://github.com/HiTechTN/don-bosco-connect" style="color: #667eea;">GitHub</a> | 
             <a href="https://github.com/HiTechTN/don-bosco-connect/issues" style="color: #667eea;" data-i18n="report_bug">Signaler un bug</a> | 
@@ -187,7 +189,7 @@
                 feature_roles_title: "Gestion des Rôles",
                 feature_roles_desc: "Admin, Professeur, Élève, Parent - Chaque rôle a son espace dédié et ses fonctionnalités.",
                 feature_multiplatform_title: "Multi-Plateforme",
-                feature_multiplatform_desc: "Web (React), Mobile (React Native), Desktop (Electron) - Une expérience unifiée partout.",
+                feature_multiplatform_desc: "Web (React), Mobile (React Native) - Une expérience unifiée partout.",
                 feature_realtime_title: "Suivi en Temps Réel",
                 feature_realtime_desc: "Tableaux de bord, statistiques, quiz interactifs et suivi de progression pour tous les utilisateurs.",
                 feature_opensource_title: "Open Source",
@@ -226,7 +228,7 @@
                 feature_roles_title: "Role Management",
                 feature_roles_desc: "Admin, Teacher, Student, Parent - Each role has its dedicated space and features.",
                 feature_multiplatform_title: "Cross-Platform",
-                feature_multiplatform_desc: "Web (React), Mobile (React Native), Desktop (Electron) - A unified experience everywhere.",
+                feature_multiplatform_desc: "Web (React), Mobile (React Native) - A unified experience everywhere.",
                 feature_realtime_title: "Real-Time Tracking",
                 feature_realtime_desc: "Dashboards, statistics, interactive quizzes and progress tracking for all users.",
                 feature_opensource_title: "Open Source",
@@ -265,7 +267,7 @@
                 feature_roles_title: "إدارة الأدوار",
                 feature_roles_desc: "مدير، معلم، طالب، ولي أمر - لكل دور مساحته الخاصة وميزاته.",
                 feature_multiplatform_title: "متعدد المنصات",
-                feature_multiplatform_desc: "ويب (React)، موبايل (React Native)، سطح المكتب (Electron) - تجربة موحدة في كل مكان.",
+                feature_multiplatform_desc: "ويب (React)، موبايل (React Native) - تجربة موحدة في كل مكان.",
                 feature_realtime_title: "تتبع في الوقت الفعلي",
                 feature_realtime_desc: "لوحات معلومات، إحصائيات، اختبارات تفاعلية وتتبع التقدم لجميع المستخدمين.",
                 feature_opensource_title: "مفتوح المصدر",
