@@ -1,4 +1,4 @@
-.PHONY: help dev dev-build dev-logs dev-stop up build build-no-cache down restart restart-api logs logs-api status health migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup validate clean clean-all reset release release-apk push pull
+.PHONY: help dev dev-build dev-logs dev-stop dev-status up build build-no-cache down restart restart-api logs logs-api status health migrate migrate-new migrate-down migrate-check seed psql test test-cov test-fast lint lint-fix format typecheck lint-frontend shell-api shell-db redis-cli backup validate clean clean-all reset release release-apk push pull
 
 # Default target
 .DEFAULT_GOAL := help
@@ -34,6 +34,22 @@ dev-logs: ## Tail development logs
 
 dev-stop: ## Stop development services
 	$(DEV_COMPOSE) down
+
+dev-status: ## Show dev container status and check all health endpoints
+	@echo ""
+	@echo "\033[1;36m═══ Dev Container Status ═══\033[0m"
+	@echo ""
+	@$(DEV_COMPOSE) ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}'
+	@echo ""
+	@echo "\033[1;36m═══ Health Checks ═══\033[0m"
+	@echo ""
+	@printf "  API (localhost:8000)     "; curl -s -o /dev/null -w "\033[1;32mHTTP %{http_code}\033[0m" http://localhost:8000/health || printf "\033[1;31mUNREACHABLE\033[0m"; echo ""
+	@printf "  Nginx (localhost:80)     "; curl -s -o /dev/null -w "\033[1;32mHTTP %{http_code}\033[0m" http://localhost:80 || printf "\033[1;31mUNREACHABLE\033[0m"; echo ""
+	@printf "  HTTPS (localhost:8443)   "; curl -s -o /dev/null -w "\033[1;32mHTTP %{http_code}\033[0m" -k https://localhost:8443 || printf "\033[1;31mUNREACHABLE\033[0m"; echo ""
+	@printf "  Redis                   "; $(DEV_COMPOSE) exec -T redis redis-cli -a "$${REDIS_PASSWORD}" ping 2>/dev/null | grep -q PONG && printf "\033[1;32mPONG\033[0m" || printf "\033[1;31mNOT RESPONDING\033[0m"; echo ""
+	@printf "  PostgreSQL              "; $(DEV_COMPOSE) exec -T db pg_isready -U donbosco_user -d donbosco 2>/dev/null | grep -q accepting && printf "\033[1;32mREADY\033[0m" || printf "\033[1;31mNOT READY\033[0m"; echo ""
+	@printf "  MinIO (localhost:9000)  "; curl -s -o /dev/null -w "\033[1;32mHTTP %{http_code}\033[0m" http://localhost:9000/minio/health/live || printf "\033[1;31mUNREACHABLE\033[0m"; echo ""
+	@echo ""
 
 # ─── Production ─────────────────────────────────────────────────────────────────
 
