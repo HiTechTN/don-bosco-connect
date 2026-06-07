@@ -89,7 +89,8 @@ async def health():
     except Exception:
         pass
 
-    all_ok = db_ok and redis_ok and minio_ok and ollama_ok
+    # Core services determine health; Ollama is optional (AI features)
+    all_ok = db_ok and redis_ok and minio_ok
     status_code = 200 if all_ok else 503
 
     return JSONResponse(
