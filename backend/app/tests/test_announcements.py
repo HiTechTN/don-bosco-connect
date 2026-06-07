@@ -289,7 +289,7 @@ class TestAnnouncementReactions:
         resp = await client.get(f"/api/v1/announcements/{ann_id}/reactions")
         assert resp.status_code == 200
         data = resp.json()
-        assert isinstance(data, (dict, list))
+        assert isinstance(data, dict | list)
 
     async def test_remove_reaction(self, client: AsyncClient, admin_token: str) -> None:
         headers = {"Authorization": f"Bearer {admin_token}"}
