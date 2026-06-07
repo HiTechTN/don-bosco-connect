@@ -67,7 +67,7 @@ fi
 echo "6/6 Démarrage de la stack..."
 docker compose up -d --wait 2>/dev/null || docker compose up -d
 sleep 5
-if curl -sf http://localhost:8002/health > /dev/null 2>&1; then
+if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
   echo "✅ API accessible"
 else
   echo "❌ API inaccessible"

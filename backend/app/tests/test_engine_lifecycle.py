@@ -218,7 +218,8 @@ async def test_absences_batch(db_session: AsyncSession) -> None:
     await db_session.commit()
 
     result = await db_session.execute(
-        text(f"SELECT count(*) FROM absences WHERE student_id = '{student.id}'")
+        text("SELECT count(*) FROM absences WHERE student_id = :sid"),
+        {"sid": student.id},
     )
     assert result.scalar() == 20
 

@@ -4,8 +4,8 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from authlib.jose import jwt
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from passlib.context import CryptContext
 
 from app.config import settings

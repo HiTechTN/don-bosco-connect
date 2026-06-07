@@ -100,12 +100,17 @@ def _extract_pdf_text(raw: bytes) -> str:
 def _extract_docx_text(raw: bytes) -> str:
     try:
         import io
-        import xml.etree.ElementTree as ET
         import zipfile
+
+        try:
+            from defusedxml.ElementTree import parse as parse_xml
+        except ImportError:
+            import xml.etree.ElementTree as ET
+            parse_xml = ET.parse
 
         with zipfile.ZipFile(io.BytesIO(raw)) as z:
             with z.open("word/document.xml") as f:
-                tree = ET.parse(f)
+                tree = parse_xml(f)
                 root = tree.getroot()
                 texts = []
                 for t in root.iter(

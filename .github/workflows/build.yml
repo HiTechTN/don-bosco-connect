@@ -7,6 +7,7 @@ on:
       - 'v*'
 
 env:
+  PYTHON_VERSION: '3.12'
 
 jobs:
   build-backend:
@@ -42,16 +43,18 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: backend/requirements.txt
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
       - name: Installer dépendances
         run: |
           cd backend
-          pip install -r requirements.txt
+          pip install -r requirements.txt -r requirements-dev.txt
       - name: Vérifier lint
         run: |
           cd backend
-          pip install ruff
-          ruff check app/ --output-format=github || echo "Ruff warnings ignored (pre-existing)"
+          pip install ruff==0.6.9
+          ruff check app/ --output-format=github
       - name: Vérifier import FastAPI
         run: |
           cd backend
@@ -97,7 +100,7 @@ jobs:
         continue-on-error: true
         run: |
           cd mobile
-          npx expo export --platform web 2>&1 || echo "Expo export skipped"
+          npx expo export --platform web 2>&1 || echo "⚠️ Expo export skipped (non-bloquant)"
       - uses: actions/upload-artifact@v4
         with:
           name: mobile-build

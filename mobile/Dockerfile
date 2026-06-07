@@ -6,12 +6,12 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run export --platform web
+RUN npx expo export --platform web
 
-FROM nginx:alpine
+FROM nginx:1.25-alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-EXPOSE 19000
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

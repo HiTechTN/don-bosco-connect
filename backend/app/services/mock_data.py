@@ -2,9 +2,18 @@
 from typing import Any
 
 MOCK_USERS = [
-    {"id": "admin-uuid-0001", "email": "admin@donbosco.tn", "role": "admin", "first_name": "Admin", "last_name": "Principal"},
-    {"id": "teacher-uuid-001", "email": "karim.hamdi@donbosco.tn", "role": "teacher", "first_name": "Karim", "last_name": "Hamdi"},
-    {"id": "student-uuid-001", "email": "adam.slim@donbosco.tn", "role": "student", "first_name": "Adam", "last_name": "Slim"},
+    {
+        "id": "admin-uuid-0001", "email": "admin@donbosco.tn",
+        "role": "admin", "first_name": "Admin", "last_name": "Principal",
+    },
+    {
+        "id": "teacher-uuid-001", "email": "karim.hamdi@donbosco.tn",
+        "role": "teacher", "first_name": "Karim", "last_name": "Hamdi",
+    },
+    {
+        "id": "student-uuid-001", "email": "adam.slim@donbosco.tn",
+        "role": "student", "first_name": "Adam", "last_name": "Slim",
+    },
 ]
 
 MOCK_CLASSES = [
