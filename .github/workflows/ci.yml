@@ -30,9 +30,13 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
       - run: pip install ruff
       - run: ruff check app/
 
@@ -66,9 +70,13 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
       - run: pip install "pytest>=8.3,<9" "pytest-asyncio>=0.23,<0.24" pytest-cov httpx anyio
       - name: Vérifier migrations Alembic
@@ -99,9 +107,13 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx eslint src/ --ext .ts,.tsx --max-warnings 100 || echo "ESLint warnings ignored (pre-existing)"
@@ -111,25 +123,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Bandit (vulnérabilités Python)
         run: |
           pip install bandit
-          bandit -r backend/app -ll || echo "Bandit warnings ignored"
-      - name: Vérifier absence de secrets dans le repo
+          bandit -r backend/app -ll
+      - name: Check for secrets
         run: |
           pip install detect-secrets
-          detect-secrets scan --base64-limit 4.5 > /tmp/secrets.json || true
-          if grep -q "True" /tmp/secrets.json 2>/dev/null; then
-            echo "⚠️  Potentiels secrets détectés — vérifier /tmp/secrets.json"
-          else
-            echo "✅ Aucun secret détecté"
+          detect-secrets scan --all-files --disable-plugin HexHighEntropyString > /tmp/secrets.json
+          if jq -e '.results | length > 0' /tmp/secrets.json > /dev/null; then
+            echo "SECRETS FOUND:"
+            jq -r '.results | to_entries[] | .key as $file | .value[] | "\($file):\(.line_number) - \(.type)"' /tmp/secrets.json
+            exit 1
           fi
+          echo "No secrets found."
 
   build-docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - run: docker compose build
