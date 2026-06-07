@@ -1,0 +1,16 @@
+# Docker
+Dockerfile
+.dockerignore
+
+# SSL certs (generated locally, not for build)
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+
+# Git
+.git/
+.gitignore
+
+# OS
+.DS_Store
+Thumbs.db

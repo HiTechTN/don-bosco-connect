@@ -1,0 +1,46 @@
+# Root .dockerignore — safety net for `docker build .` from project root
+
+# Git
+.git/
+.gitignore
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+
+# Testing
+test-results/
+playwright-report/
+htmlcov/
+.pytest_cache/
+coverage/
+
+# Docker
+docker-compose*.yml
+.dockerignore
