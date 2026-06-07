@@ -85,7 +85,7 @@ async def mark_all_read(
         sa_update(Notification)
         .where(
             Notification.user_id == current_user.id,
-            not Notification.is_read,
+            ~Notification.is_read,
         )
         .values(is_read=True)
     )

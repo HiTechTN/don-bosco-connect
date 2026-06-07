@@ -48,8 +48,10 @@ def decode_token(token: str) -> dict | None:
 def _get_encryption_key() -> bytes:
     key = settings.ENCRYPTION_KEY
     if not key:
-        key = os.urandom(32).hex()
-        settings.ENCRYPTION_KEY = key
+        raise RuntimeError(
+            "ENCRYPTION_KEY is not set. Set it in .env or environment variables. "
+            "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
+        )
     if len(key) == 32:
         return key.encode() if isinstance(key, str) else key
     key_bytes = bytes.fromhex(key) if len(key) == 64 else key.encode()

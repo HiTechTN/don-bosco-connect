@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
@@ -7,6 +8,8 @@ from app.core.security import decode_token
 from app.redis_client import get_redis
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 async def get_user_from_token(token: str) -> dict | None:
@@ -42,7 +45,7 @@ async def websocket_notifications(
                         text = text.decode()
                     await websocket.send_text(text)
                 except Exception:
-                    pass
+                    logger.exception("WebSocket send error for user %s", user_id)
 
     listen_task = asyncio.create_task(listen())
 
@@ -82,4 +85,4 @@ async def send_notification_to_user(user_id: str, message: dict) -> None:
         redis = await get_redis()
         await redis.publish(f"user:{user_id}", json.dumps(message))
     except Exception:
-        pass
+        logger.warning("Redis publish failed for user %s", user_id)

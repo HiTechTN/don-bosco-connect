@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -26,6 +27,8 @@ from app.models.base import (
 )
 from app.redis_client import get_redis
 from app.schemas.timetable import TimetableSlotCreate, TimetableSlotResponse, TimetableSlotUpdate
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/timetable", tags=["timetable"])
 
@@ -98,7 +101,7 @@ async def list_timetable(
         if cached:
             return json.loads(cached)
     except Exception:
-        pass
+        logger.warning("Redis cache get failed for key: %s", cache_key)
 
     query = select(TimetableSlot)
     if class_id:
@@ -113,7 +116,7 @@ async def list_timetable(
         redis = await get_redis()
         await redis.setex(cache_key, 3600, json.dumps(data, default=str))
     except Exception:
-        pass
+        logger.warning("Redis cache set failed for key: %s", cache_key)
 
     return data
 

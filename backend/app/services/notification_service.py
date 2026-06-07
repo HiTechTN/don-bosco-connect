@@ -1,9 +1,12 @@
+import logging
 from uuid import UUID, uuid4
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.base import Absence, Notification, NotificationType, User
+
+logger = logging.getLogger(__name__)
 
 
 async def create_notification(
@@ -46,7 +49,7 @@ async def create_notification(
             },
         )
     except Exception:
-        pass  # WebSocket unavailable — notification is still in DB
+        logger.warning("WebSocket push failed for user %s — notification saved in DB", uid)
 
     return notification
 

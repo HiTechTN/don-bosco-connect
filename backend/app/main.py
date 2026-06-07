@@ -1,3 +1,4 @@
+import logging
 import time
 from contextlib import asynccontextmanager
 from datetime import timezone
@@ -10,6 +11,8 @@ from prometheus_client import Counter, Histogram
 from app.api.v1.router import v1_router
 from app.api.v1.websocket import router as websocket_router
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 # ── Prometheus custom metrics for announcements ──────────────
 announcements_published_total = Counter(
@@ -87,7 +90,7 @@ async def health():
             r = await client.get(f"{settings.OLLAMA_BASE_URL}/api/tags")
             ollama_ok = r.status_code == 200
     except Exception:
-        pass
+        logger.warning("Ollama health check failed")
 
     # Core services determine health; Ollama is optional (AI features)
     all_ok = db_ok and redis_ok and minio_ok

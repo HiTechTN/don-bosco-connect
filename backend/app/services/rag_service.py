@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 from collections.abc import AsyncGenerator
 
 import httpx
@@ -9,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.models import DocumentChunk
 from app.redis_client import get_redis
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """Tu es le tuteur IA de {subject_name} au collège Don Bosco Tunis.
 Tu aides les élèves à comprendre leur programme de cours.
@@ -34,7 +37,7 @@ async def embed_text(text: str) -> list[float]:
         if cached:
             return json.loads(cached)
     except Exception:
-        pass
+        logger.warning("Embedding cache get failed")
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(
@@ -49,7 +52,7 @@ async def embed_text(text: str) -> list[float]:
         redis = await get_redis()
         await redis.setex(cache_key, 86400, json.dumps(embedding))
     except Exception:
-        pass
+        logger.warning("Embedding cache set failed")
 
     return embedding
 

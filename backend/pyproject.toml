@@ -28,6 +28,15 @@ asyncio_mode = "auto"
 source = ["app"]
 omit = ["app/migrations/*", "tests/*"]
 
+[tool.mypy]
+python_version = "3.12"
+strict = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+
 [tool.coverage.report]
 fail_under = 10
 show_missing = true
