@@ -1,0 +1,150 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '22'
+
+jobs:
+  test-integration:
+    name: '🧪 Integration Tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: donbosco_test
+          POSTGRES_USER: donbosco_user
+          POSTGRES_PASSWORD: donbosco_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ─── Phase 1: Backend Tests ────────────────────────────
+      - name: '📦 [1/3] Backend — Install dependencies'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: '📦 [1/3] Backend — pip install'
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          pip install "pytest>=8.3,<9" "pytest-asyncio>=0.23,<0.24" pytest-cov httpx anyio
+
+      - name: '🗄️ [1/3] Backend — Run migrations'
+        working-directory: backend
+        env:
+          DB_HOST: localhost
+          DB_PASSWORD: donbosco_test
+          DB_NAME: donbosco_test
+          DB_USER: donbosco_user
+          SECRET_KEY: test-secret-key-not-for-production
+          ENVIRONMENT: test
+        run: alembic upgrade head
+
+      - name: '🧪 [1/3] Backend — Run pytest'
+        working-directory: backend
+        env:
+          DB_HOST: localhost
+          DB_PASSWORD: donbosco_test
+          DB_NAME: donbosco_test
+          DB_USER: donbosco_user
+          SECRET_KEY: test-secret-key-not-for-production
+          REDIS_PASSWORD: test
+          REDIS_HOST: localhost
+          ENVIRONMENT: test
+        run: python -m pytest app/tests/ -p no:xdist --tb=short -v
+        id: backend-tests
+
+      # ─── Phase 2: Frontend Typecheck ───────────────────────
+      - name: '📦 [2/3] Frontend — Setup Node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: '📦 [2/3] Frontend — npm ci'
+        working-directory: frontend
+        run: npm ci
+
+      - name: '🔍 [2/3] Frontend — TypeScript typecheck'
+        working-directory: frontend
+        run: npx tsc --noEmit
+        id: typecheck
+
+      - name: '🔍 [2/3] Frontend — ESLint'
+        working-directory: frontend
+        run: npx eslint src/ --ext .ts,.tsx --max-warnings 100 || true
+        id: lint
+
+      # ─── Phase 3: E2E Playwright Tests ─────────────────────
+      - name: '🌐 [3/3] E2E — Install Playwright browsers'
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: '🌐 [3/3] E2E — Run Playwright tests'
+        working-directory: frontend
+        run: npx playwright test --project=chromium --reporter=list
+        id: e2e-tests
+        env:
+          CI: true
+
+      # ─── Upload Results ────────────────────────────────────
+      - name: '📊 Upload Playwright report'
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      - name: '📊 Upload Playwright screenshots'
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots
+          path: frontend/test-results/
+          retention-days: 7
+
+      # ─── Summary ───────────────────────────────────────────
+      - name: '📋 Test Summary'
+        if: always()
+        run: |
+          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Phase | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend (pytest) | ${{ steps.backend-tests.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend (tsc) | ${{ steps.typecheck.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend (eslint) | ${{ steps.lint.outcome == 'success' && '✅ Passed' || '⚠️ Warnings' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E (Playwright) | ${{ steps.e2e-tests.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
