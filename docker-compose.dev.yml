@@ -11,6 +11,11 @@ services:
     volumes:
       - ./backend:/app
 
+  beat:
+    command: celery -A app.workers.celery_app beat --loglevel=debug
+    volumes:
+      - ./backend:/app
+
   frontend:
     build:
       context: ./frontend
