@@ -1,8 +1,5 @@
 name: Build
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   push:
     branches: [main]
@@ -10,6 +7,7 @@ on:
       - 'v*'
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PYTHON_VERSION: '3.12'
 
 jobs:

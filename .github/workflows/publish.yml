@@ -1,8 +1,5 @@
 name: Publish Docker images to GitHub Container Registry
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   push:
     branches: [main]
@@ -10,6 +7,7 @@ on:
   workflow_dispatch:
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY: ghcr.io
   OWNER: ${{ github.repository_owner }}
 
