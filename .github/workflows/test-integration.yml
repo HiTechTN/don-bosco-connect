@@ -110,6 +110,8 @@ jobs:
         id: lint
 
       # ─── Phase 3: E2E Playwright Tests ─────────────────────
+      - name: '🌐 [3/3] E2E — Install system fonts'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto fonts-noto-color-emoji fonts-noto-cjk fonts-freefont-ttf fonts-liberation
       - name: '🌐 [3/3] E2E — Install Playwright browsers'
         working-directory: frontend
         run: npx playwright install --with-deps chromium
