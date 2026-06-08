@@ -79,6 +79,7 @@ async function waitForPageReady(page: Page, url: string) {
 
 test.describe('Visual regression: HomePage FR vs AR', () => {
   test.beforeEach(async ({ page }) => {
+    await mockExternalImages(page);
     await mockAnnouncementsListAPI(page);
     await mockAnnouncementDetailAPI(page);
   });
@@ -203,6 +204,9 @@ test.describe('Visual regression: PolitiqueRGPDPage FR vs AR', () => {
    ═══════════════════════════════════════════════════════════ */
 
 test.describe('Visual regression: ContactPage FR vs AR', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockExternalImages(page);
+  });
   test('contact page French LTR screenshot', async ({ page }) => {
     await setLanguage(page, 'fr');
     await waitForPageReady(page, '/contact');
@@ -225,6 +229,9 @@ test.describe('Visual regression: ContactPage FR vs AR', () => {
    ═══════════════════════════════════════════════════════════ */
 
 test.describe('Visual regression: LoginPage FR vs AR', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockExternalImages(page);
+  });
   test('login page French LTR screenshot', async ({ page }) => {
     await setLanguage(page, 'fr');
     await waitForPageReady(page, '/login');
@@ -248,6 +255,7 @@ test.describe('Visual regression: LoginPage FR vs AR', () => {
 
 test.describe('Visual regression: HomePage hero viewport', () => {
   test.beforeEach(async ({ page }) => {
+    await mockExternalImages(page);
     await mockAnnouncementsListAPI(page);
     await mockAnnouncementDetailAPI(page);
   });

@@ -305,9 +305,8 @@ test.describe('Dashboard — Authentification', () => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ detail: 'Not authenticated' }) });
     });
 
-    await page.goto('/admin/dashboard', { waitUntil: 'commit' });
-    await page.waitForURL('**/login', { timeout: 15000 }).catch(() => {});
-    expect(page.url()).toContain('/login');
+    await page.goto('/admin/dashboard').catch(() => {});
+    await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
   });
 
   test('redirige vers /login si non authentifié (student)', async ({ page }) => {
@@ -316,8 +315,7 @@ test.describe('Dashboard — Authentification', () => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ detail: 'Not authenticated' }) });
     });
 
-    await page.goto('/student/dashboard', { waitUntil: 'commit' });
-    await page.waitForURL('**/login', { timeout: 15000 }).catch(() => {});
-    expect(page.url()).toContain('/login');
+    await page.goto('/student/dashboard').catch(() => {});
+    await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
   });
 });
