@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://hitechtn.github.io/don-bosco-connect">🌐 Démo en ligne</a> ·
-  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk">📱 APK Mobile</a> ·
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.2.0/DonBoscoConnect-v2.2.0.apk">📱 APK Mobile</a> ·
   <a href="CHANGELOG.md">📋 CHANGELOG</a> ·
   <a href="README.fr.md">🇫🇷 Français</a> &#124;
   <a href="README.ar.md">🇦🇪 العربية</a>
@@ -35,7 +35,7 @@
   <a href="https://hitechtn.github.io/don-bosco-connect/demo.html">
     <img src="https://img.shields.io/badge/🎬_Démo_interactive-Vidéo_+_Carousel-c96442?style=for-the-badge" alt="Démo interactive"/>
   </a>
-  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk">
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.2.0/DonBoscoConnect-v2.2.0.apk">
     <img src="https://img.shields.io/badge/📱_APK_Mobile-7C3AED?style=for-the-badge" alt="APK"/>
   </a>
 </p>
@@ -91,24 +91,23 @@
 | **Assistant IA** | DeepSeek R1 14B + nomic-embed-text via Ollama |
 | **Cache embeddings** | SHA256 + Redis (TTL 24h) pour vectorisation rapide |
 
-### ⚡ Nouveautés v2.1.0
+### ⚡ Nouveautés v2.2.0
 
 | Feature | Description |
 |---------|-------------|
-| **TanStack Query** | 15 hooks typés (useAuth, useGrades, useAbsences, useSchedule, etc.) |
-| **SSE streaming** | Réponses IA temps réel via `POST /chat/stream` |
-| **WebSocket Redis** | Pub/Sub pour notifications en temps réel scalables |
-| **Cache Redis** | Embeddings IA (24h) + emplois du temps (1h) |
-| **CI/CD complet** | 5 jobs — ruff, pytest + coverage 50%, tsc, eslint, Docker build, Bandit |
-| **Migration DB** | `0002` — colonnes Absence rendues nullables |
-| **Sécurité** | Secrets auto-générés, `.env.production` purgé de l'historique git |
+| **CICD renforcé** | 6 workflows — ruff 0.15.16, Node 24, Bandit, detect-secrets, buildx, cache multi-chemins |
+| **Migration Node 24** | `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` sur tous les workflows |
+| **Sécurité** | Fix migration email (unique index), defusedxml (B314), requêtes paramétrées (B608) |
+| **Tests E2E** | 120/120 — mock API déterministe, visual regression CI-compatible, plus de flaky |
+| **Docker** | BuildKit, cache layers, versions épinglées (nginx, minio, ollama, grafana) |
+| **Secrets** | `.env.production` purgé, détection étendue à tous les `.env.*` |
 
 ### 📱 Application Mobile
 
 React Native / Expo — iOS & Android avec notifications push, biométrie, et mode hors-ligne.
 
 <p align="center">
-  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.1.1/DonBoscoConnect-v2.1.1.apk">
+  <a href="https://github.com/HiTechTN/don-bosco-connect/releases/download/v2.2.0/DonBoscoConnect-v2.2.0.apk">
     <img src="https://img.shields.io/badge/📥_Télécharger_l'APK-c96442?style=for-the-badge" alt="APK Download"/>
   </a>
 </p>
