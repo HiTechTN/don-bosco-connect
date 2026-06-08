@@ -29,6 +29,8 @@ const MOCK_SINGLE_ANNOUNCEMENT = MOCK_ANNOUNCEMENTS.items[0];
 
 /* ─── Helpers ───────────────────────────────────────────── */
 
+const PLACEHOLDER_SVG = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect fill="%231B4F72" width="800" height="400"/><text fill="white" font-size="24" x="400" y="200" text-anchor="middle" dominant-baseline="middle">Placeholder</text></svg>';
+
 async function setLanguage(page: Page, lang: 'fr' | 'ar') {
   await page.addInitScript((lng) => {
     localStorage.setItem('language', lng);
@@ -51,6 +53,16 @@ async function mockAnnouncementDetailAPI(page: Page, slug = 'rentree-scolaire-20
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(MOCK_SINGLE_ANNOUNCEMENT),
+    });
+  });
+}
+
+async function mockExternalImages(page: Page) {
+  await page.route('**/picsum.photos/**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect fill="#1B4F72" width="800" height="400"/></svg>',
     });
   });
 }
@@ -94,6 +106,7 @@ test.describe('Visual regression: HomePage FR vs AR', () => {
 
 test.describe('Visual regression: AnnouncesPage FR vs AR', () => {
   test.beforeEach(async ({ page }) => {
+    await mockExternalImages(page);
     await mockAnnouncementsListAPI(page);
   });
 
@@ -120,6 +133,7 @@ test.describe('Visual regression: AnnouncesPage FR vs AR', () => {
 
 test.describe('Visual regression: AnnounceDetailPage FR vs AR', () => {
   test.beforeEach(async ({ page }) => {
+    await mockExternalImages(page);
     await mockAnnouncementDetailAPI(page);
   });
 

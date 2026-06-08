@@ -234,22 +234,22 @@ test.describe('Flow complet : Création → Publication → Affichage public', (
       });
     });
 
-    // Mock public announcement endpoint (public portal uses /public/announcements)
-    await page.route('**/api/v1/public/announcements/sortie-scolaire-au-musee', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(newAnnouncement),
-      });
-    });
-
-    // Also mock the public list endpoint
+    // Mock public endpoints — list FIRST, then specific detail (last registered wins)
     await page.route('**/api/v1/public/announcements**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ items: [newAnnouncement], total: 1, page: 1, per_page: 50, pages: 1 }),
-      });
+      const url = route.request().url();
+      if (url.includes('/sortie-scolaire-au-musee')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(newAnnouncement),
+        });
+      } else {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [newAnnouncement], total: 1, page: 1, per_page: 50, pages: 1 }),
+        });
+      }
     });
 
     // Step 2: Navigate to public portal detail page directly
