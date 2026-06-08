@@ -1,5 +1,8 @@
 name: Build
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches: [main]
@@ -53,7 +56,7 @@ jobs:
       - name: Vérifier lint
         run: |
           cd backend
-          pip install ruff==0.6.9
+          pip install ruff==0.15.16
           ruff check app/ --output-format=github
       - name: Vérifier import FastAPI
         run: |

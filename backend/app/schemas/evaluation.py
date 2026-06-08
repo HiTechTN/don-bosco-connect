@@ -22,7 +22,7 @@ class EvaluationUpdate(BaseModel):
     description: str | None = None
     max_score: float | None = None
     coefficient: float | None = None
-    date: Optional[date] = None  # noqa: UP007 (field name shadows type name)
+    date: Optional[date] = None  # noqa: UP007,UP045 (field name shadows type name)
     is_published: bool | None = None
 
 
